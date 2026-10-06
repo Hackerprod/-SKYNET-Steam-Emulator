@@ -1,0 +1,14 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworking001.h (class ISteamNetworking001)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteamnetworking.h
+0|CreateListenSocket|3|SNetListenSocket_t|int nVirtualP2PPort, uint32 nIP, uint16 nPort
+1|CreateP2PConnectionSocket|3|SNetSocket_t|CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec
+2|CreateConnectionSocket|3|SNetSocket_t|uint32 nIP, uint16 nPort, int nTimeoutSec
+3|DestroySocket|2|bool|SNetSocket_t hSocket, bool bNotifyRemoteEnd
+4|DestroyListenSocket|2|bool|SNetListenSocket_t hSocket, bool bNotifyRemoteEnd
+5|SendDataOnSocket|4|bool|SNetSocket_t hSocket, void *pubData, uint32 cubData, bool bReliable
+6|IsDataAvailableOnSocket|2|bool|SNetSocket_t hSocket, uint32 *pcubMsgSize
+7|RetrieveDataFromSocket|4|bool|SNetSocket_t hSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize
+8|IsDataAvailable|3|bool|SNetListenSocket_t hListenSocket, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+9|RetrieveData|5|bool|SNetListenSocket_t hListenSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+10|GetSocketInfo|5|bool|SNetSocket_t hSocket, CSteamID *pSteamIDRemote, int *peSocketStatus, uint32 *punIPRemote, uint16 *punPortRemote
+11|GetListenSocketInfo|3|bool|SNetListenSocket_t hListenSocket, uint32 *pnIP, uint16 *pnPort

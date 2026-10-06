@@ -1,0 +1,18 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteammatchmaking007.h (class ISteamMatchmakingServers001)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/104/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteammatchmaking.h
+0|RequestInternetServerList|4|void|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+1|RequestLANServerList|2|void|AppId_t iApp, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+2|RequestFriendsServerList|4|void|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+3|RequestFavoritesServerList|4|void|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+4|RequestHistoryServerList|4|void|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+5|RequestSpectatorServerList|4|void|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse001 *pRequestServersResponse
+6|GetServerDetails|2|gameserveritem_t *|EMatchMakingType eType, int iServer
+7|CancelQuery|1|void|EMatchMakingType eType
+8|RefreshQuery|1|void|EMatchMakingType eType
+9|IsRefreshing|1|bool|EMatchMakingType eType
+10|GetServerCount|1|int|EMatchMakingType eType
+11|RefreshServer|2|void|EMatchMakingType eType, int iServer
+12|PingServer|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingPingResponse *pRequestServersResponse
+13|PlayerDetails|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingPlayersResponse *pRequestServersResponse
+14|ServerRules|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingRulesResponse *pRequestServersResponse
+15|CancelServerQuery|1|void|HServerQuery hServerQuery

@@ -1,0 +1,9 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps002.h (class ISteamApps002)
+# also: .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteamapps.h
+0|BIsSubscribed|0|bool|
+1|BIsLowViolence|0|bool|
+2|BIsCybercafe|0|bool|
+3|BIsVACBanned|0|bool|
+4|GetCurrentGameLanguage|0|const char *|
+5|GetAvailableGameLanguages|0|const char *|
+6|BIsSubscribedApp|1|bool|AppId_t appID

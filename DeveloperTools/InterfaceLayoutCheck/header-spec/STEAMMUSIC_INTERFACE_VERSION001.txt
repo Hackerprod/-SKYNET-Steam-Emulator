@@ -1,0 +1,11 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteammusic.h (class ISteamMusic)
+# also: .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteammusic.h, .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteammusic.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteammusic.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteammusic.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteammusic.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteammusic.h (+31 more)
+0|BIsEnabled|0|bool|
+1|BIsPlaying|0|bool|
+2|GetPlaybackStatus|0|AudioPlayback_Status|
+3|Play|0|void|
+4|Pause|0|void|
+5|PlayPrevious|0|void|
+6|PlayNext|0|void|
+7|SetVolume|1|void|float flVolume
+8|GetVolume|0|float|

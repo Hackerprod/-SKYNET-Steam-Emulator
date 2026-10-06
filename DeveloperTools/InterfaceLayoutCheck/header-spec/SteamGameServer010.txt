@@ -1,0 +1,26 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamgameserver010.h (class ISteamGameServer010)
+# also: .tmp/SmokeAPI/res/steamworks/108/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/109/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/110/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamgameserver.h (+3 more)
+# WARNING sources disagree: CONFLICT other-sources=[sdk108] n=19 (chosen n=23) first-diff@12 other=setgametype chosen=setgametags
+0|LogOn|0|void|
+1|LogOff|0|void|
+2|BLoggedOn|0|bool|
+3|BSecure|0|bool|
+4|GetSteamID|0|CSteamID|
+5|SendUserConnectAndAuthenticate|4|bool|uint32 unIPClient, const void *pvAuthBlob, uint32 cubAuthBlobSize, CSteamID *pSteamIDUser
+6|CreateUnauthenticatedUserConnection|0|CSteamID|
+7|SendUserDisconnect|1|void|CSteamID steamIDUser
+8|BUpdateUserData|3|bool|CSteamID steamIDUser, const char *pchPlayerName, uint32 uScore
+9|BSetServerType|8|bool|uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, uint16 unSpectatorPort, uint16 usQueryPort, const char *pchGameDir, const char *pchVersion, bool bLANMode
+10|UpdateServerStatus|6|void|int cPlayers, int cPlayersMax, int cBotPlayers, const char *pchServerName, const char *pSpectatorServerName, const char *pchMapName
+11|UpdateSpectatorPort|1|void|uint16 unSpectatorPort
+12|SetGameTags|1|void|const char *pchGameTags
+13|GetGameplayStats|0|void|
+14|GetServerReputation|0|SteamAPICall_t|
+15|RequestUserGroupStatus|2|bool|CSteamID steamIDUser, CSteamID steamIDGroup
+16|GetPublicIP_old|0|uint32|
+17|SetGameData|1|void|const char *pchGameData
+18|UserHasLicenseForApp|2|EUserHasLicenseForAppResult|CSteamID steamID, AppId_t appID
+19|GetAuthSessionTicket|3|HAuthTicket|void *pTicket, int cbMaxTicket, uint32 *pcbTicket
+20|BeginAuthSession|3|EBeginAuthSessionResult|const void *pAuthTicket, int cbAuthTicket, CSteamID steamID
+21|EndAuthSession|1|void|CSteamID steamID
+22|CancelAuthTicket|1|void|HAuthTicket hAuthTicket

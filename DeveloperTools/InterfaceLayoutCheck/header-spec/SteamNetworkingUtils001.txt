@@ -1,0 +1,23 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworkingutils001.h (class ISteamNetworkingUtils001)
+# also: .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteamnetworkingutils.h
+0|GetLocalPingLocation|1|float|SteamNetworkPingLocation_t &result
+1|EstimatePingTimeBetweenTwoLocations|2|int|const SteamNetworkPingLocation_t &location1, const SteamNetworkPingLocation_t &location2
+2|EstimatePingTimeFromLocalHost|1|int|const SteamNetworkPingLocation_t &remoteLocation
+3|ConvertPingLocationToString|3|void|const SteamNetworkPingLocation_t &location, char *pszBuf, int cchBufSize
+4|ParsePingLocationString|2|bool|const char *pszString, SteamNetworkPingLocation_t &result
+5|CheckPingDataUpToDate|1|bool|float flMaxAgeSeconds
+6|IsPingMeasurementInProgress|0|bool|
+7|GetPingToDataCenter|2|int|SteamNetworkingPOPID popID, SteamNetworkingPOPID *pViaRelayPoP
+8|GetDirectPingToPOP|1|int|SteamNetworkingPOPID popID
+9|GetPOPCount|0|int|
+10|GetPOPList|2|int|SteamNetworkingPOPID *list, int nListSz
+11|GetLocalTimestamp|0|SteamNetworkingMicroseconds|
+12|SetDebugOutputFunction|2|void|ESteamNetworkingSocketsDebugOutputType eDetailLevel, FSteamNetworkingSocketsDebugOutput pfnFunc
+13|SetConfigValue|5|bool|ESteamNetworkingConfigValue eValue, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj, ESteamNetworkingConfigDataType eDataType, const void *pArg
+14|GetConfigValue|6|ESteamNetworkingGetConfigValueResult|ESteamNetworkingConfigValue eValue, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj, ESteamNetworkingConfigDataType *pOutDataType, void *pResult, size_t *cbResult
+15|GetConfigValueInfo|5|bool|ESteamNetworkingConfigValue eValue, const char **pOutName, ESteamNetworkingConfigDataType *pOutDataType, ESteamNetworkingConfigScope *pOutScope, ESteamNetworkingConfigValue *pOutNextValue
+16|GetFirstConfigValue|0|ESteamNetworkingConfigValue|
+17|SteamNetworkingIPAddr_ToString|4|void|const SteamNetworkingIPAddr &addr, char *buf, size_t cbBuf, bool bWithPort
+18|SteamNetworkingIPAddr_ParseString|2|bool|SteamNetworkingIPAddr *pAddr, const char *pszStr
+19|SteamNetworkingIdentity_ToString|3|void|const SteamNetworkingIdentity &identity, char *buf, size_t cbBuf
+20|SteamNetworkingIdentity_ParseString|2|bool|SteamNetworkingIdentity *pIdentity, const char *pszStr

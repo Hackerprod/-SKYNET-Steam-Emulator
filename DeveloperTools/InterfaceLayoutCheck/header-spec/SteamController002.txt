@@ -1,0 +1,10 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamcontroller002.h (class ISteamController002)
+0|Init|0|bool|
+1|Shutdown|0|bool|
+2|RunFrame|0|void|
+3|GetConnectedControllers|1|int|uint64 *
+4|TriggerHapticPulse|3|void|uint32 unControllerIndex, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+5|ActivateMode|2|unknown_ret|uint64, int32
+6|GetJoystickForHandle|1|int32|uint64
+7|GetHandleForJoystick|1|uint64|int32
+8|GetModeAnalogOutputData|2|unknown_ret|uint64, int32

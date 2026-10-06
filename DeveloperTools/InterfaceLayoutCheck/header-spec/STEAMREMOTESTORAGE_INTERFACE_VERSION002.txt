@@ -1,0 +1,9 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamremotestorage002.h (class ISteamRemoteStorage002)
+# also: .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/104/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/106/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/107/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/108/headers/steam/isteamremotestorage.h (+3 more)
+0|FileWrite|3|bool|const char *pchFile, const void *pvData, int32 cubData
+1|GetFileSize|1|int32|const char *pchFile
+2|FileRead|3|int32|const char *pchFile, void *pvData, int32 cubDataToRead
+3|FileExists|1|bool|const char *pchFile
+4|GetFileCount|0|int32|
+5|GetFileNameAndSize|2|const char *|int iFile, int32 *pnFileSizeInBytes
+6|GetQuota|2|bool|int32 *pnTotalBytes, int32 *puAvailableBytes

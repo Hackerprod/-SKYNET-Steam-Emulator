@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworking004.h (class ISteamNetworking004)
+# also: .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamnetworking.h
+0|SendP2PPacket|5|bool|CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType, int nVirtualPort
+1|IsP2PPacketAvailable|2|bool|uint32 *pcubMsgSize, int nVirtualPort
+2|ReadP2PPacket|5|bool|void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote, int nVirtualPort
+3|AcceptP2PSessionWithUser|1|bool|CSteamID steamIDRemote
+4|CloseP2PSessionWithUser|1|bool|CSteamID steamIDRemote
+5|GetP2PSessionState|2|bool|CSteamID steamIDRemote, P2PSessionState_t *pConnectionState
+6|CreateListenSocket|4|SNetListenSocket_t|int nVirtualP2PPort, uint32 nIP, uint16 nPort, bool bAllowUseOfPacketRelay
+7|CreateP2PConnectionSocket|4|SNetSocket_t|CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay
+8|CreateConnectionSocket|3|SNetSocket_t|uint32 nIP, uint16 nPort, int nTimeoutSec
+9|DestroySocket|2|bool|SNetSocket_t hSocket, bool bNotifyRemoteEnd
+10|DestroyListenSocket|2|bool|SNetListenSocket_t hSocket, bool bNotifyRemoteEnd
+11|SendDataOnSocket|4|bool|SNetSocket_t hSocket, void *pubData, uint32 cubData, bool bReliable
+12|IsDataAvailableOnSocket|2|bool|SNetSocket_t hSocket, uint32 *pcubMsgSize
+13|RetrieveDataFromSocket|4|bool|SNetSocket_t hSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize
+14|IsDataAvailable|3|bool|SNetListenSocket_t hListenSocket, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+15|RetrieveData|5|bool|SNetListenSocket_t hListenSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+16|GetSocketInfo|5|bool|SNetSocket_t hSocket, CSteamID *pSteamIDRemote, int *peSocketStatus, uint32 *punIPRemote, uint16 *punPortRemote
+17|GetListenSocketInfo|3|bool|SNetListenSocket_t hListenSocket, uint32 *pnIP, uint16 *pnPort
+18|GetSocketConnectionType|1|ESNetSocketConnectionType|SNetSocket_t hSocket
+19|GetMaxPacketSize|1|int|SNetSocket_t hSocket

@@ -1,0 +1,18 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuser012.h (class ISteamUser012)
+# also: .tmp/SmokeAPI/res/steamworks/104/headers/steam/isteamuser.h, .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteamuser.h
+0|GetHSteamUser|0|HSteamUser|
+1|BLoggedOn|0|bool|
+2|GetSteamID|0|CSteamID|
+3|InitiateGameConnection|6|int|void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure
+4|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+5|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo
+6|GetUserDataFolder|2|bool|char *pchBuffer, int cubBuffer
+7|StartVoiceRecording|0|void|
+8|StopVoiceRecording|0|void|
+9|GetCompressedVoice|3|EVoiceResult|void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten
+10|DecompressVoice|5|EVoiceResult|void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten
+11|GetAuthSessionTicket|3|HAuthTicket|void *pTicket, int cbMaxTicket, uint32 *pcbTicket
+12|BeginAuthSession|3|EBeginAuthSessionResult|const void *pAuthTicket, int cbAuthTicket, CSteamID steamID
+13|EndAuthSession|1|void|CSteamID steamID
+14|CancelAuthTicket|1|void|HAuthTicket hAuthTicket
+15|UserHasLicenseForApp|2|EUserHasLicenseForAppResult|CSteamID steamID, AppId_t appID

@@ -1,0 +1,3 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps001.h (class ISteamApps001)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteamapps.h
+0|GetAppData|4|int|AppId_t nAppID, const char *pchKey, char *pchValue, int cchValueMax

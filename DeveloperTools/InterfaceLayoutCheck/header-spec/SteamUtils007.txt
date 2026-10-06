@@ -1,0 +1,28 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamutils007.h (class ISteamUtils007)
+# also: .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamutils.h (+3 more)
+0|GetSecondsSinceAppActive|0|uint32|
+1|GetSecondsSinceComputerActive|0|uint32|
+2|GetConnectedUniverse|0|EUniverse|
+3|GetServerRealTime|0|uint32|
+4|GetIPCountry|0|const char *|
+5|GetImageSize|3|bool|int iImage, uint32 *pnWidth, uint32 *pnHeight
+6|GetImageRGBA|3|bool|int iImage, uint8 *pubDest, int nDestBufferSize
+7|GetCSERIPPort|2|bool|uint32 *unIP, uint16 *usPort
+8|GetCurrentBatteryPower|0|uint8|
+9|GetAppID|0|uint32|
+10|SetOverlayNotificationPosition|1|void|ENotificationPosition eNotificationPosition
+11|IsAPICallCompleted|2|bool|SteamAPICall_t hSteamAPICall, bool *pbFailed
+12|GetAPICallFailureReason|1|ESteamAPICallFailure|SteamAPICall_t hSteamAPICall
+13|GetAPICallResult|5|bool|SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed
+14|RunFrame|0|void|
+15|GetIPCCallCount|0|uint32|
+16|SetWarningMessageHook|1|void|SteamAPIWarningMessageHook_t pFunction
+17|IsOverlayEnabled|0|bool|
+18|BOverlayNeedsPresent|0|bool|
+19|CheckFileSignature|1|SteamAPICall_t|const char *szFileName
+20|ShowGamepadTextInput|5|bool|EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, const char *pchDescription, uint32 unCharMax, const char *pchExistingText
+21|GetEnteredGamepadTextLength|0|uint32|
+22|GetEnteredGamepadTextInput|2|bool|char *pchText, uint32 cchText
+23|GetSteamUILanguage|0|const char *|
+24|IsSteamRunningInVR|0|bool|
+25|SetOverlayNotificationInset|2|void|int nHorizontalInset, int nVerticalInset

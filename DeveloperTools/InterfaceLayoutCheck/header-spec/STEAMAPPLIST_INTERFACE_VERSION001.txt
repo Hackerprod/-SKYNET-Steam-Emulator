@@ -1,0 +1,7 @@
+# source: .tmp/SmokeAPI/res/steamworks/158a/headers/steam/isteamapplist.h (class ISteamAppList)
+# also: .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamapplist.h, .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteamapplist.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteamapplist.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamapplist.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamapplist.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamapplist.h (+25 more)
+0|GetNumInstalledApps|0|uint32|
+1|GetInstalledApps|2|uint32|AppId_t *pvecAppID, uint32 unMaxAppIDs
+2|GetAppName|3|int|AppId_t nAppID, char *pchName, int cchNameMax
+3|GetAppInstallDir|3|int|AppId_t nAppID, char *pchDirectory, int cchNameMax
+4|GetAppBuildId|1|int|AppId_t nAppID

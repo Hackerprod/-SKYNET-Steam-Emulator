@@ -1,0 +1,11 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworkingsocketsserialized.h (class ISteamNetworkingSocketsSerialized004)
+0|SendP2PRendezvous|4|void|CSteamID steamIDRemote, uint32 unConnectionIDSrc, const void *pMsgRendezvous, uint32 cbRendezvous
+1|SendP2PConnectionFailure|4|void|CSteamID steamIDRemote, uint32 unConnectionIDDest, uint32 nReason, const char *pszReason
+2|GetCertAsync|0|SteamAPICall_t|
+3|GetNetworkConfigJSON|3|int|void *buf, uint32 cbBuf, const char *pszLauncherPartner
+4|CacheRelayTicket|2|void|const void *pTicket, uint32 cbTicket
+5|GetCachedRelayTicketCount|0|uint32|
+6|GetCachedRelayTicket|3|int|uint32 idxTicket, void *buf, uint32 cbBuf
+7|PostConnectionStateMsg|2|void|const void *pMsg, uint32 cbMsg
+8|GetSTUNServer|3|bool|int dont_know, char *buf, unsigned int len
+9|BAllowDirectConnectToPeer|1|bool|SteamNetworkingIdentity const &identity

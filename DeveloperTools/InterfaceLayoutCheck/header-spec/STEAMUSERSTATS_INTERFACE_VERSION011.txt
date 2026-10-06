@@ -1,0 +1,50 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuserstats011.h (class ISteamUserStats011)
+# also: .tmp/SmokeAPI/res/steamworks/120/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/121/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/122/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/123a/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/125/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/126a/headers/steam/isteamuserstats.h (+23 more)
+# overload GetStat slots 1,2
+# overload SetStat slots 3,4
+# overload GetUserStat slots 17,18
+# overload GetGlobalStat slots 39,40
+# overload GetGlobalStatHistory slots 41,42
+0|RequestCurrentStats|0|bool|
+1|GetStatFloat|2|bool|const char *pchName, float *pData
+2|GetStatInt32|2|bool|const char *pchName, int32 *pData
+3|SetStatFloat|2|bool|const char *pchName, float fData
+4|SetStatInt32|2|bool|const char *pchName, int32 nData
+5|UpdateAvgRateStat|3|bool|const char *pchName, float flCountThisSession, double dSessionLength
+6|GetAchievement|2|bool|const char *pchName, bool *pbAchieved
+7|SetAchievement|1|bool|const char *pchName
+8|ClearAchievement|1|bool|const char *pchName
+9|GetAchievementAndUnlockTime|3|bool|const char *pchName, bool *pbAchieved, uint32 *punUnlockTime
+10|StoreStats|0|bool|
+11|GetAchievementIcon|1|int|const char *pchName
+12|GetAchievementDisplayAttribute|2|const char *|const char *pchName, const char *pchKey
+13|IndicateAchievementProgress|3|bool|const char *pchName, uint32 nCurProgress, uint32 nMaxProgress
+14|GetNumAchievements|0|uint32|
+15|GetAchievementName|1|const char *|uint32 iAchievement
+16|RequestUserStats|1|SteamAPICall_t|CSteamID steamIDUser
+17|GetUserStatFloat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
+18|GetUserStatInt32|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
+19|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved
+20|GetUserAchievementAndUnlockTime|4|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved, uint32 *punUnlockTime
+21|ResetAllStats|1|bool|bool bAchievementsToo
+22|FindOrCreateLeaderboard|3|SteamAPICall_t|const char *pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType
+23|FindLeaderboard|1|SteamAPICall_t|const char *pchLeaderboardName
+24|GetLeaderboardName|1|const char *|SteamLeaderboard_t hSteamLeaderboard
+25|GetLeaderboardEntryCount|1|int|SteamLeaderboard_t hSteamLeaderboard
+26|GetLeaderboardSortMethod|1|ELeaderboardSortMethod|SteamLeaderboard_t hSteamLeaderboard
+27|GetLeaderboardDisplayType|1|ELeaderboardDisplayType|SteamLeaderboard_t hSteamLeaderboard
+28|DownloadLeaderboardEntries|4|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd
+29|DownloadLeaderboardEntriesForUsers|3|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, CSteamID *prgUsers, int cUsers
+30|GetDownloadedLeaderboardEntry|5|bool|SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index, LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails, int cDetailsMax
+31|UploadLeaderboardScore|5|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32 *pScoreDetails, int cScoreDetailsCount
+32|AttachLeaderboardUGC|2|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, UGCHandle_t hUGC
+33|GetNumberOfCurrentPlayers|0|SteamAPICall_t|
+34|RequestGlobalAchievementPercentages|0|SteamAPICall_t|
+35|GetMostAchievedAchievementInfo|4|int|char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved
+36|GetNextMostAchievedAchievementInfo|5|int|int iIteratorPrevious, char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved
+37|GetAchievementAchievedPercent|2|bool|const char *pchName, float *pflPercent
+38|RequestGlobalStats|1|SteamAPICall_t|int nHistoryDays
+39|GetGlobalStatDouble|2|bool|const char *pchStatName, double *pData
+40|GetGlobalStatInt64|2|bool|const char *pchStatName, int64 *pData
+41|GetGlobalStatHistoryDouble|3|int32|const char *pchStatName, double *pData, uint32 cubData
+42|GetGlobalStatHistoryInt64|3|int32|const char *pchStatName, int64 *pData, uint32 cubData

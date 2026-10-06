@@ -1,0 +1,10 @@
+# source: .tmp/SmokeAPI/res/steamworks/161/headers/steam/isteamremoteplay.h (class ISteamRemotePlay)
+# also: .tmp/SmokeAPI/res/steamworks/158a/headers/steam/isteamremoteplay.h, .tmp/SmokeAPI/res/steamworks/159/headers/steam/isteamremoteplay.h, .tmp/SmokeAPI/res/steamworks/160/headers/steam/isteamremoteplay.h
+0|GetSessionCount|0|uint32|
+1|GetSessionID|1|RemotePlaySessionID_t|int iSessionIndex
+2|GetSessionSteamID|1|CSteamID|RemotePlaySessionID_t unSessionID
+3|GetSessionClientName|1|const char *|RemotePlaySessionID_t unSessionID
+4|GetSessionClientFormFactor|1|ESteamDeviceFormFactor|RemotePlaySessionID_t unSessionID
+5|BGetSessionClientResolution|3|bool|RemotePlaySessionID_t unSessionID, int *pnResolutionX, int *pnResolutionY
+6|BStartRemotePlayTogether|1|bool|bool bShowOverlay
+7|BSendRemotePlayTogetherInvite|1|bool|CSteamID steamIDFriend

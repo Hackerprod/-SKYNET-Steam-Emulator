@@ -1,0 +1,3 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamappticket.h (class ISteamAppTicket)
+# also: .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamappticket.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamappticket.h, .tmp/SmokeAPI/res/steamworks/114/headers/steam/isteamappticket.h, .tmp/SmokeAPI/res/steamworks/115/headers/steam/isteamappticket.h, .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteamappticket.h, .tmp/SmokeAPI/res/steamworks/117/headers/steam/isteamappticket.h (+47 more)
+0|GetAppOwnershipTicketData|7|uint32|uint32 nAppID, void *pvBuffer, uint32 cbBufferLength, uint32 *piAppId, uint32 *piSteamId, uint32 *piSignature, uint32 *pcbSignature

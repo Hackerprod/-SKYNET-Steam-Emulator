@@ -1,0 +1,31 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamclient014.h (class ISteamClient014)
+# also: .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamclient.h
+0|CreateSteamPipe|0|HSteamPipe|
+1|BReleaseSteamPipe|1|bool|HSteamPipe hSteamPipe
+2|ConnectToGlobalUser|1|HSteamUser|HSteamPipe hSteamPipe
+3|CreateLocalUser|2|HSteamUser|HSteamPipe *phSteamPipe, EAccountType eAccountType
+4|ReleaseUser|2|void|HSteamPipe hSteamPipe, HSteamUser hUser
+5|GetISteamUser|3|ISteamUser *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+6|GetISteamGameServer|3|ISteamGameServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+7|SetLocalIPBinding|2|void|uint32 unIP, uint16 usPort
+8|GetISteamFriends|3|ISteamFriends *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+9|GetISteamUtils|2|ISteamUtils *|HSteamPipe hSteamPipe, const char *pchVersion
+10|GetISteamMatchmaking|3|ISteamMatchmaking *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+11|GetISteamMatchmakingServers|3|ISteamMatchmakingServers *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+12|GetISteamGenericInterface|3|void *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+13|GetISteamUserStats|3|ISteamUserStats *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+14|GetISteamGameServerStats|3|ISteamGameServerStats *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion
+15|GetISteamApps|3|ISteamApps *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+16|GetISteamNetworking|3|ISteamNetworking *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+17|GetISteamRemoteStorage|3|ISteamRemoteStorage *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion
+18|GetISteamScreenshots|3|ISteamScreenshots *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion
+19|RunFrame|0|void|
+20|GetIPCCallCount|0|uint32|
+21|SetWarningMessageHook|1|void|SteamAPIWarningMessageHook_t pFunction
+22|BShutdownIfAllPipesClosed|0|bool|
+23|GetISteamHTTP|3|ISteamHTTP *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion
+24|GetISteamUnifiedMessages|3|ISteamUnifiedMessages *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion
+25|GetISteamController|3|ISteamController *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+26|GetISteamUGC|3|ISteamUGC *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+27|GetISteamAppList|3|ISteamAppList *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+28|GetISteamMusic|3|ISteamMusic *|HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion

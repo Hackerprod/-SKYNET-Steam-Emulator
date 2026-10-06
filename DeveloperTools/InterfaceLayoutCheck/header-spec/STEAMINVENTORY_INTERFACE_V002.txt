@@ -1,0 +1,40 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteaminventory002.h (class ISteamInventory002)
+# also: .tmp/SmokeAPI/res/steamworks/140/headers/steam/isteaminventory.h, .tmp/SmokeAPI/res/steamworks/141/headers/steam/isteaminventory.h, .tmp/SmokeAPI/res/steamworks/142/headers/steam/isteaminventory.h
+# overload SetProperty slots 32,33,34,35
+0|GetResultStatus|1|EResult|SteamInventoryResult_t resultHandle
+1|GetResultItems|3|bool|SteamInventoryResult_t resultHandle, SteamItemDetails_t *pOutItemsArray, uint32 *punOutItemsArraySize
+2|GetResultItemProperty|5|bool|SteamInventoryResult_t resultHandle, uint32 unItemIndex, const char *pchPropertyName, char *pchValueBuffer, uint32 *punValueBufferSizeOut
+3|GetResultTimestamp|1|uint32|SteamInventoryResult_t resultHandle
+4|CheckResultSteamID|2|bool|SteamInventoryResult_t resultHandle, CSteamID steamIDExpected
+5|DestroyResult|1|void|SteamInventoryResult_t resultHandle
+6|GetAllItems|1|bool|SteamInventoryResult_t *pResultHandle
+7|GetItemsByID|3|bool|SteamInventoryResult_t *pResultHandle, const SteamItemInstanceID_t *pInstanceIDs, uint32 unCountInstanceIDs
+8|SerializeResult|3|bool|SteamInventoryResult_t resultHandle, void *pOutBuffer, uint32 *punOutBufferSize
+9|DeserializeResult|4|bool|SteamInventoryResult_t *pOutResultHandle, const void *pBuffer, uint32 unBufferSize, bool bRESERVED_MUST_BE_FALSE
+10|GenerateItems|4|bool|SteamInventoryResult_t *pResultHandle, const SteamItemDef_t *pArrayItemDefs, const uint32 *punArrayQuantity, uint32 unArrayLength
+11|GrantPromoItems|1|bool|SteamInventoryResult_t *pResultHandle
+12|AddPromoItem|2|bool|SteamInventoryResult_t *pResultHandle, SteamItemDef_t itemDef
+13|AddPromoItems|3|bool|SteamInventoryResult_t *pResultHandle, const SteamItemDef_t *pArrayItemDefs, uint32 unArrayLength
+14|ConsumeItem|3|bool|SteamInventoryResult_t *pResultHandle, SteamItemInstanceID_t itemConsume, uint32 unQuantity
+15|ExchangeItems|7|bool|SteamInventoryResult_t *pResultHandle, const SteamItemDef_t *pArrayGenerate, const uint32 *punArrayGenerateQuantity, uint32 unArrayGenerateLength, const SteamItemInstanceID_t *pArrayDestroy, const uint32 *punArrayDestroyQuantity, uint32 unArrayDestroyLength
+16|TransferItemQuantity|4|bool|SteamInventoryResult_t *pResultHandle, SteamItemInstanceID_t itemIdSource, uint32 unQuantity, SteamItemInstanceID_t itemIdDest
+17|SendItemDropHeartbeat|0|void|
+18|TriggerItemDrop|2|bool|SteamInventoryResult_t *pResultHandle, SteamItemDef_t dropListDefinition
+19|TradeItems|8|bool|SteamInventoryResult_t *pResultHandle, CSteamID steamIDTradePartner, const SteamItemInstanceID_t *pArrayGive, const uint32 *pArrayGiveQuantity, uint32 nArrayGiveLength, const SteamItemInstanceID_t *pArrayGet, const uint32 *pArrayGetQuantity, uint32 nArrayGetLength
+20|LoadItemDefinitions|0|bool|
+21|GetItemDefinitionIDs|2|bool|SteamItemDef_t *pItemDefIDs, uint32 *punItemDefIDsArraySize
+22|GetItemDefinitionProperty|4|bool|SteamItemDef_t iDefinition, const char *pchPropertyName, char *pchValueBuffer, uint32 *punValueBufferSizeOut
+23|RequestEligiblePromoItemDefinitionsIDs|1|SteamAPICall_t|CSteamID steamID
+24|GetEligiblePromoItemDefinitionIDs|3|bool|CSteamID steamID, SteamItemDef_t *pItemDefIDs, uint32 *punItemDefIDsArraySize
+25|StartPurchase|3|SteamAPICall_t|const SteamItemDef_t *pArrayItemDefs, const uint32 *punArrayQuantity, uint32 unArrayLength
+26|RequestPrices|0|SteamAPICall_t|
+27|GetNumItemsWithPrices|0|uint32|
+28|GetItemsWithPrices|3|bool|SteamItemDef_t *pArrayItemDefs, uint64 *pPrices, uint32 unArrayLength
+29|GetItemPrice|2|bool|SteamItemDef_t iDefinition, uint64 *pPrice
+30|StartUpdateProperties|0|SteamInventoryUpdateHandle_t|
+31|RemoveProperty|3|bool|SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, const char *pchPropertyName
+32|SetProperty|4|bool|SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, const char *pchPropertyName, float flValue
+33|SetProperty|4|bool|SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, const char *pchPropertyName, int64 nValue
+34|SetProperty|4|bool|SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, const char *pchPropertyName, bool bValue
+35|SetProperty|4|bool|SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, const char *pchPropertyName, const char *pchPropertyValue
+36|SubmitUpdateProperties|2|bool|SteamInventoryUpdateHandle_t handle, SteamInventoryResult_t * pResultHandle

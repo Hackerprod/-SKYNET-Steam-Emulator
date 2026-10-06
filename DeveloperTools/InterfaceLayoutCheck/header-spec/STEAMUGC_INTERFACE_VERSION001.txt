@@ -1,0 +1,16 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamugc001.h (class ISteamUGC001)
+# also: .tmp/SmokeAPI/res/steamworks/126a/headers/steam/isteamugc.h, .tmp/SmokeAPI/res/steamworks/127/headers/steam/isteamugc.h, .tmp/SmokeAPI/res/steamworks/128/headers/steam/isteamugc.h
+0|CreateQueryUserUGCRequest|7|UGCQueryHandle_t|AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+1|CreateQueryAllUGCRequest|5|UGCQueryHandle_t|EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+2|SendQueryUGCRequest|1|SteamAPICall_t|UGCQueryHandle_t handle
+3|GetQueryUGCResult|3|bool|UGCQueryHandle_t handle, uint32 index, SteamUGCDetails_t *pDetails
+4|ReleaseQueryUGCRequest|1|bool|UGCQueryHandle_t handle
+5|AddRequiredTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+6|AddExcludedTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+7|SetReturnLongDescription|2|bool|UGCQueryHandle_t handle, bool bReturnLongDescription
+8|SetReturnTotalOnly|2|bool|UGCQueryHandle_t handle, bool bReturnTotalOnly
+9|SetCloudFileNameFilter|2|bool|UGCQueryHandle_t handle, const char *pMatchCloudFileName
+10|SetMatchAnyTag|2|bool|UGCQueryHandle_t handle, bool bMatchAnyTag
+11|SetSearchText|2|bool|UGCQueryHandle_t handle, const char *pSearchText
+12|SetRankedByTrendDays|2|bool|UGCQueryHandle_t handle, uint32 unDays
+13|RequestUGCDetails|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID

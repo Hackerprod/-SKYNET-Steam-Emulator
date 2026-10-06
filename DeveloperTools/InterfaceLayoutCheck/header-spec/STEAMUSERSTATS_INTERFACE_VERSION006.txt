@@ -1,0 +1,33 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuserstats006.h (class ISteamUserStats006)
+# also: .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/106/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/107/headers/steam/isteamuserstats.h
+# overload GetStat slots 1,2
+# overload SetStat slots 3,4
+# overload GetUserStat slots 14,15
+0|RequestCurrentStats|0|bool|
+1|GetStat|2|bool|const char *pchName, float *pData
+2|GetStat|2|bool|const char *pchName, int32 *pData
+3|SetStat|2|bool|const char *pchName, float fData
+4|SetStat|2|bool|const char *pchName, int32 nData
+5|UpdateAvgRateStat|3|bool|const char *pchName, float flCountThisSession, double dSessionLength
+6|GetAchievement|2|bool|const char *pchName, bool *pbAchieved
+7|SetAchievement|1|bool|const char *pchName
+8|ClearAchievement|1|bool|const char *pchName
+9|StoreStats|0|bool|
+10|GetAchievementIcon|1|int|const char *pchName
+11|GetAchievementDisplayAttribute|2|const char *|const char *pchName, const char *pchKey
+12|IndicateAchievementProgress|3|bool|const char *pchName, uint32 nCurProgress, uint32 nMaxProgress
+13|RequestUserStats|1|SteamAPICall_t|CSteamID steamIDUser
+14|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
+15|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
+16|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved
+17|ResetAllStats|1|bool|bool bAchievementsToo
+18|FindOrCreateLeaderboard|3|SteamAPICall_t|const char *pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType
+19|FindLeaderboard|1|SteamAPICall_t|const char *pchLeaderboardName
+20|GetLeaderboardName|1|const char *|SteamLeaderboard_t hSteamLeaderboard
+21|GetLeaderboardEntryCount|1|int|SteamLeaderboard_t hSteamLeaderboard
+22|GetLeaderboardSortMethod|1|ELeaderboardSortMethod|SteamLeaderboard_t hSteamLeaderboard
+23|GetLeaderboardDisplayType|1|ELeaderboardDisplayType|SteamLeaderboard_t hSteamLeaderboard
+24|DownloadLeaderboardEntries|4|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd
+25|GetDownloadedLeaderboardEntry|5|bool|SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index, LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails, int cDetailsMax
+26|UploadLeaderboardScore|5|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32 *pScoreDetails, int cScoreDetailsCount
+27|GetNumberOfCurrentPlayers|0|SteamAPICall_t|

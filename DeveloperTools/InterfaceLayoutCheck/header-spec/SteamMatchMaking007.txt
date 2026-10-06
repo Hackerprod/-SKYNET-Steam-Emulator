@@ -1,0 +1,36 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteammatchmaking007.h (class ISteamMatchmaking007)
+# also: .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/106/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/107/headers/steam/isteammatchmaking.h
+0|GetFavoriteGameCount|0|int|
+1|GetFavoriteGame|7|bool|int iGame, AppId_t *pnAppID, uint32 *pnIP, uint16 *pnConnPort, uint16 *pnQueryPort, uint32 *punFlags, uint32 *pRTime32LastPlayedOnServer
+2|AddFavoriteGame|6|int|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags, uint32 rTime32LastPlayedOnServer
+3|RemoveFavoriteGame|5|bool|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags
+4|RequestLobbyList|0|SteamAPICall_t|
+5|AddRequestLobbyListStringFilter|3|void|const char *pchKeyToMatch, const char *pchValueToMatch, ELobbyComparison eComparisonType
+6|AddRequestLobbyListNumericalFilter|3|void|const char *pchKeyToMatch, int nValueToMatch, ELobbyComparison eComparisonType
+7|AddRequestLobbyListNearValueFilter|2|void|const char *pchKeyToMatch, int nValueToBeCloseTo
+8|AddRequestLobbyListFilterSlotsAvailable|1|void|int nSlotsAvailable
+9|GetLobbyByIndex|1|CSteamID|int iLobby
+10|CreateLobby|2|SteamAPICall_t|ELobbyType eLobbyType, int cMaxMembers
+11|JoinLobby|1|SteamAPICall_t|CSteamID steamIDLobby
+12|LeaveLobby|1|void|CSteamID steamIDLobby
+13|InviteUserToLobby|2|bool|CSteamID steamIDLobby, CSteamID steamIDInvitee
+14|GetNumLobbyMembers|1|int|CSteamID steamIDLobby
+15|GetLobbyMemberByIndex|2|CSteamID|CSteamID steamIDLobby, int iMember
+16|GetLobbyData|2|const char *|CSteamID steamIDLobby, const char *pchKey
+17|SetLobbyData|3|bool|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+18|GetLobbyDataCount|1|int|CSteamID steamIDLobby
+19|GetLobbyDataByIndex|6|bool|CSteamID steamIDLobby, int iLobbyData, char *pchKey, int cchKeyBufferSize, char *pchValue, int cchValueBufferSize
+20|DeleteLobbyData|2|bool|CSteamID steamIDLobby, const char *pchKey
+21|GetLobbyMemberData|3|const char *|CSteamID steamIDLobby, CSteamID steamIDUser, const char *pchKey
+22|SetLobbyMemberData|3|void|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+23|SendLobbyChatMsg|3|bool|CSteamID steamIDLobby, const void *pvMsgBody, int cubMsgBody
+24|GetLobbyChatEntry|6|int|CSteamID steamIDLobby, int iChatID, CSteamID *pSteamIDUser, void *pvData, int cubData, EChatEntryType *peChatEntryType
+25|RequestLobbyData|1|bool|CSteamID steamIDLobby
+26|SetLobbyGameServer|4|void|CSteamID steamIDLobby, uint32 unGameServerIP, uint16 unGameServerPort, CSteamID steamIDGameServer
+27|GetLobbyGameServer|4|bool|CSteamID steamIDLobby, uint32 *punGameServerIP, uint16 *punGameServerPort, CSteamID *psteamIDGameServer
+28|SetLobbyMemberLimit|2|bool|CSteamID steamIDLobby, int cMaxMembers
+29|GetLobbyMemberLimit|1|int|CSteamID steamIDLobby
+30|SetLobbyType|2|bool|CSteamID steamIDLobby, ELobbyType eLobbyType
+31|SetLobbyJoinable|2|bool|CSteamID steamIDLobby, bool bLobbyJoinable
+32|GetLobbyOwner|1|CSteamID|CSteamID steamIDLobby
+33|SetLobbyOwner|2|bool|CSteamID steamIDLobby, CSteamID steamIDNewOwner

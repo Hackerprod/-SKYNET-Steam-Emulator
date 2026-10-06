@@ -1,0 +1,31 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamfriends007.h (class ISteamFriends007)
+# also: .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamfriends.h
+0|GetPersonaName|0|const char *|
+1|SetPersonaName_old|1|void|const char *pchPersonaName
+2|GetPersonaState|0|EPersonaState|
+3|GetFriendCount|1|int|EFriendFlags eFriendFlags
+4|GetFriendByIndex|2|CSteamID|int iFriend, int iFriendFlags
+5|GetFriendRelationship|1|EFriendRelationship|CSteamID steamIDFriend
+6|GetFriendPersonaState|1|EPersonaState|CSteamID steamIDFriend
+7|GetFriendPersonaName|1|const char *|CSteamID steamIDFriend
+8|GetFriendGamePlayed|2|bool|CSteamID steamIDFriend, FriendGameInfo_t *pFriendGameInfo
+9|GetFriendPersonaNameHistory|2|const char *|CSteamID steamIDFriend, int iPersonaName
+10|HasFriend|2|bool|CSteamID steamIDFriend, EFriendFlags eFriendFlags
+11|GetClanCount|0|int|
+12|GetClanByIndex|1|CSteamID|int iClan
+13|GetClanName|1|const char *|CSteamID steamIDClan
+14|GetClanTag|1|const char *|CSteamID steamIDClan
+15|GetFriendCountFromSource|1|int|CSteamID steamIDSource
+16|GetFriendFromSourceByIndex|2|CSteamID|CSteamID steamIDSource, int iFriend
+17|IsUserInSource|2|bool|CSteamID steamIDUser, CSteamID steamIDSource
+18|SetInGameVoiceSpeaking|2|void|CSteamID steamIDUser, bool bSpeaking
+19|ActivateGameOverlay|1|void|const char *pchDialog
+20|ActivateGameOverlayToUser|2|void|const char *pchDialog, CSteamID steamID
+21|ActivateGameOverlayToWebPage|1|void|const char *pchURL
+22|ActivateGameOverlayToStore|1|void|AppId_t nAppID
+23|SetPlayedWith|1|void|CSteamID steamIDUserPlayedWith
+24|ActivateGameOverlayInviteDialog|1|void|CSteamID steamIDLobby
+25|GetSmallFriendAvatar|1|int|CSteamID steamIDFriend
+26|GetMediumFriendAvatar|1|int|CSteamID steamIDFriend
+27|GetLargeFriendAvatar|1|int|CSteamID steamIDFriend
+28|RequestUserInformation|2|bool|CSteamID steamIDUser, bool bRequireNameOnly

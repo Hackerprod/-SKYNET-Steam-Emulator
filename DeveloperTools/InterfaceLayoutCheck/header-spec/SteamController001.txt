@@ -1,0 +1,7 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamcontroller001.h (class ISteamController001)
+0|Init|1|bool|const char *pchAbsolutePathToControllerConfigVDF
+1|Shutdown|0|bool|
+2|RunFrame|0|void|
+3|GetControllerState|2|bool|uint32 unControllerIndex, SteamControllerState001_t *pState
+4|TriggerHapticPulse|3|void|uint32 unControllerIndex, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+5|SetOverrideMode|1|void|const char *pchMode

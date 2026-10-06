@@ -1,0 +1,27 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamnetworkingutils.h (class ISteamNetworkingUtils)
+# also: .tmp/SmokeAPI/res/steamworks/153a/headers/steam/isteamnetworkingutils.h, .tmp/SmokeAPI/res/steamworks/154/headers/steam/isteamnetworkingutils.h, .tmp/SmokeAPI/res/steamworks/155/headers/steam/isteamnetworkingutils.h, .tmp/SmokeAPI/res/steamworks/156/headers/steam/isteamnetworkingutils.h, .tmp/SmokeAPI/res/steamworks/157/headers/steam/isteamnetworkingutils.h, .tmp/SmokeAPI/res/steamworks/158a/headers/steam/isteamnetworkingutils.h (+6 more)
+0|AllocateMessage|1|SteamNetworkingMessage_t *|int cbAllocateBuffer
+1|GetRelayNetworkStatus|1|ESteamNetworkingAvailability|SteamRelayNetworkStatus_t *pDetails
+2|GetLocalPingLocation|1|float|SteamNetworkPingLocation_t &result
+3|EstimatePingTimeBetweenTwoLocations|2|int|const SteamNetworkPingLocation_t &location1, const SteamNetworkPingLocation_t &location2
+4|EstimatePingTimeFromLocalHost|1|int|const SteamNetworkPingLocation_t &remoteLocation
+5|ConvertPingLocationToString|3|void|const SteamNetworkPingLocation_t &location, char *pszBuf, int cchBufSize
+6|ParsePingLocationString|2|bool|const char *pszString, SteamNetworkPingLocation_t &result
+7|CheckPingDataUpToDate|1|bool|float flMaxAgeSeconds
+8|GetPingToDataCenter|2|int|SteamNetworkingPOPID popID, SteamNetworkingPOPID *pViaRelayPoP
+9|GetDirectPingToPOP|1|int|SteamNetworkingPOPID popID
+10|GetPOPCount|0|int|
+11|GetPOPList|2|int|SteamNetworkingPOPID *list, int nListSz
+12|GetLocalTimestamp|0|SteamNetworkingMicroseconds|
+13|SetDebugOutputFunction|2|void|ESteamNetworkingSocketsDebugOutputType eDetailLevel, FSteamNetworkingSocketsDebugOutput pfnFunc
+14|GetIPv4FakeIPType|1|ESteamNetworkingFakeIPType|uint32 nIPv4
+15|GetRealIdentityForFakeIP|2|EResult|const SteamNetworkingIPAddr &fakeIP, SteamNetworkingIdentity *pOutRealIdentity
+16|SetConfigValue|5|bool|ESteamNetworkingConfigValue eValue, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj, ESteamNetworkingConfigDataType eDataType, const void *pArg
+17|GetConfigValue|6|ESteamNetworkingGetConfigValueResult|ESteamNetworkingConfigValue eValue, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj, ESteamNetworkingConfigDataType *pOutDataType, void *pResult, size_t *cbResult
+18|GetConfigValueInfo|3|const char *|ESteamNetworkingConfigValue eValue, ESteamNetworkingConfigDataType *pOutDataType, ESteamNetworkingConfigScope *pOutScope
+19|IterateGenericEditableConfigValues|2|ESteamNetworkingConfigValue|ESteamNetworkingConfigValue eCurrent, bool bEnumerateDevVars
+20|SteamNetworkingIPAddr_ToString|4|void|const SteamNetworkingIPAddr &addr, char *buf, size_t cbBuf, bool bWithPort
+21|SteamNetworkingIPAddr_ParseString|2|bool|SteamNetworkingIPAddr *pAddr, const char *pszStr
+22|SteamNetworkingIPAddr_GetFakeIPType|1|ESteamNetworkingFakeIPType|const SteamNetworkingIPAddr &addr
+23|SteamNetworkingIdentity_ToString|3|void|const SteamNetworkingIdentity &identity, char *buf, size_t cbBuf
+24|SteamNetworkingIdentity_ParseString|2|bool|SteamNetworkingIdentity *pIdentity, const char *pszStr

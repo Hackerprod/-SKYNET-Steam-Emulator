@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps005.h (class ISteamApps005)
+# also: .tmp/SmokeAPI/res/steamworks/118/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/119/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/120/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/121/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/122/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/123a/headers/steam/isteamapps.h (+1 more)
+0|BIsSubscribed|0|bool|
+1|BIsLowViolence|0|bool|
+2|BIsCybercafe|0|bool|
+3|BIsVACBanned|0|bool|
+4|GetCurrentGameLanguage|0|const char *|
+5|GetAvailableGameLanguages|0|const char *|
+6|BIsSubscribedApp|1|bool|AppId_t appID
+7|BIsDlcInstalled|1|bool|AppId_t appID
+8|GetEarliestPurchaseUnixTime|1|uint32|AppId_t nAppID
+9|BIsSubscribedFromFreeWeekend|0|bool|
+10|GetDLCCount|0|int|
+11|BGetDLCDataByIndex|5|bool|int iDLC, AppId_t *pAppID, bool *pbAvailable, char *pchName, int cchNameBufferSize
+12|InstallDLC|1|void|AppId_t nAppID
+13|UninstallDLC|1|void|AppId_t nAppID
+14|RequestAppProofOfPurchaseKey|1|void|AppId_t nAppID
+15|GetCurrentBetaName|2|bool|char *pchName, int cchNameBufferSize
+16|MarkContentCorrupt|1|bool|bool bMissingFilesOnly
+17|GetInstalledDepots|2|uint32|DepotId_t *pvecDepots, uint32 cMaxDepots
+18|GetAppInstallDir|3|uint32|AppId_t appID, char *pchFolder, uint32 cchFolderBufferSize
+19|BIsAppInstalled|1|bool|AppId_t appID

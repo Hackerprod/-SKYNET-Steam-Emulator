@@ -1,0 +1,17 @@
+# source: .tmp/SmokeAPI/res/steamworks/163/headers/steam/isteamremoteplay.h (class ISteamRemotePlay)
+# also: .tmp/SmokeAPI/res/steamworks/162/headers/steam/isteamremoteplay.h
+0|GetSessionCount|0|uint32|
+1|GetSessionID|1|RemotePlaySessionID_t|int iSessionIndex
+2|GetSessionSteamID|1|CSteamID|RemotePlaySessionID_t unSessionID
+3|GetSessionClientName|1|const char *|RemotePlaySessionID_t unSessionID
+4|GetSessionClientFormFactor|1|ESteamDeviceFormFactor|RemotePlaySessionID_t unSessionID
+5|BGetSessionClientResolution|3|bool|RemotePlaySessionID_t unSessionID, int *pnResolutionX, int *pnResolutionY
+6|ShowRemotePlayTogetherUI|0|bool|
+7|BSendRemotePlayTogetherInvite|1|bool|CSteamID steamIDFriend
+8|BEnableRemotePlayTogetherDirectInput|0|bool|
+9|DisableRemotePlayTogetherDirectInput|0|void|
+10|GetInput|2|uint32|RemotePlayInput_t *pInput, uint32 unMaxEvents
+11|SetMouseVisibility|2|void|RemotePlaySessionID_t unSessionID, bool bVisible
+12|SetMousePosition|3|void|RemotePlaySessionID_t unSessionID, float flNormalizedX, float flNormalizedY
+13|CreateMouseCursor|6|RemotePlayCursorID_t|int nWidth, int nHeight, int nHotX, int nHotY, const void *pBGRA, int nPitch
+14|SetMouseCursor|2|void|RemotePlaySessionID_t unSessionID, RemotePlayCursorID_t unCursorID

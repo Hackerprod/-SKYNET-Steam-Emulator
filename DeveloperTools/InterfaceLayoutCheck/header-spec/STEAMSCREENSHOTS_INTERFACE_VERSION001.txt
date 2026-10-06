@@ -1,0 +1,8 @@
+# source: .tmp/SmokeAPI/res/steamworks/122/headers/steam/isteamscreenshots.h (class ISteamScreenshots)
+# also: .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/117/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/118/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/119/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/120/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/121/headers/steam/isteamscreenshots.h
+0|WriteScreenshot|4|ScreenshotHandle|void *pubRGB, uint32 cubRGB, int nWidth, int nHeight
+1|AddScreenshotToLibrary|4|ScreenshotHandle|const char *pchFilename, const char *pchThumbnailFilename, int nWidth, int nHeight
+2|TriggerScreenshot|0|void|
+3|HookScreenshots|1|void|bool bHook
+4|SetLocation|2|bool|ScreenshotHandle hScreenshot, const char *pchLocation
+5|TagUser|2|bool|ScreenshotHandle hScreenshot, CSteamID steamID

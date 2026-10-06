@@ -1,0 +1,21 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamremotestorage003.h (class ISteamRemoteStorage003)
+0|FileWrite|3|bool|const char *pchFile, const void *pvData, int32 cubData
+1|FileRead|3|int32|const char *pchFile, void *pvData, int32 cubDataToRead
+2|FileForget|1|bool|const char *pchFile
+3|FileDelete|1|bool|const char *pchFile
+4|FileShare|1|SteamAPICall_t|const char *pchFile
+5|FileExists|1|bool|const char *pchFile
+6|FilePersisted|1|bool|const char *pchFile
+7|GetFileSize|1|int32|const char *pchFile
+8|GetFileTimestamp|1|int64|const char *pchFile
+9|GetFileCount|0|int32|
+10|GetFileNameAndSize|2|const char *|int iFile, int32 *pnFileSizeInBytes
+11|GetQuota|2|bool|int32 *pnTotalBytes, int32 *puAvailableBytes
+12|IsCloudEnabledForAccount|0|bool|
+13|IsCloudEnabledForApp|0|bool|
+14|SetCloudEnabledForApp|1|void|bool bEnabled
+15|UGCDownload|1|SteamAPICall_t|UGCHandle_t hContent
+16|GetUGCDetails|5|bool|UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner
+17|UGCRead|3|int32|UGCHandle_t hContent, void *pvData, int32 cubDataToRead
+18|GetCachedUGCCount|0|int32|
+19|GetCachedUGCHandle|1|UGCHandle_t|int32 iCachedContent

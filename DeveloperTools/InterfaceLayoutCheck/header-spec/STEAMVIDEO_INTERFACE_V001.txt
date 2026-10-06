@@ -1,0 +1,4 @@
+# source: .tmp/SmokeAPI/res/steamworks/139/headers/steam/isteamvideo.h (class ISteamVideo)
+# also: .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/135/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/135a/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/136/headers/steam/isteamvideo.h (+2 more)
+0|GetVideoURL|1|void|AppId_t unVideoAppID
+1|IsBroadcasting|1|bool|int *pnNumViewers

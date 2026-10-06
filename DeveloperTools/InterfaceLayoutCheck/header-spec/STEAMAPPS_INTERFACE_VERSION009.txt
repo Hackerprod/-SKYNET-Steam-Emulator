@@ -1,0 +1,34 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamapps.h (class ISteamApps)
+0|BIsSubscribed|0|bool|
+1|BIsLowViolence|0|bool|
+2|BIsCybercafe|0|bool|
+3|BIsVACBanned|0|bool|
+4|GetCurrentGameLanguage|0|const char *|
+5|GetAvailableGameLanguages|0|const char *|
+6|BIsSubscribedApp|1|bool|AppId_t appID
+7|BIsDlcInstalled|1|bool|AppId_t appID
+8|GetEarliestPurchaseUnixTime|1|uint32|AppId_t nAppID
+9|BIsSubscribedFromFreeWeekend|0|bool|
+10|GetDLCCount|0|int|
+11|BGetDLCDataByIndex|5|bool|int iDLC, AppId_t *pAppID, bool *pbAvailable, char *pchName, int cchNameBufferSize
+12|InstallDLC|1|void|AppId_t nAppID
+13|UninstallDLC|1|void|AppId_t nAppID
+14|RequestAppProofOfPurchaseKey|1|void|AppId_t nAppID
+15|GetCurrentBetaName|2|bool|char *pchName, int cchNameBufferSize
+16|MarkContentCorrupt|1|bool|bool bMissingFilesOnly
+17|GetInstalledDepots|3|uint32|AppId_t appID, DepotId_t *pvecDepots, uint32 cMaxDepots
+18|GetAppInstallDir|3|uint32|AppId_t appID, char *pchFolder, uint32 cchFolderBufferSize
+19|BIsAppInstalled|1|bool|AppId_t appID
+20|GetAppOwner|0|CSteamID|
+21|GetLaunchQueryParam|1|const char *|const char *pchKey
+22|GetDlcDownloadProgress|3|bool|AppId_t nAppID, uint64 *punBytesDownloaded, uint64 *punBytesTotal
+23|GetAppBuildId|0|int|
+24|RequestAllProofOfPurchaseKeys|0|void|
+25|GetFileDetails|1|SteamAPICall_t|const char* pszFileName
+26|GetLaunchCommandLine|2|int|char *pszCommandLine, int cubCommandLine
+27|BIsSubscribedFromFamilySharing|0|bool|
+28|BIsTimedTrial|2|bool|uint32* punSecondsAllowed, uint32* punSecondsPlayed
+29|SetDlcContext|1|bool|AppId_t nAppID
+30|GetNumBetas|2|int|int *pnAvailable, int *pnPrivate
+31|GetBetaInfo|8|bool|int iBetaIndex, uint32 *punFlags, uint32 *punBuildID, char *pchBetaName, int cchBetaName, char *pchDescription, int cchDescription, uint32 *punLastUpdated
+32|SetActiveBeta|1|bool|const char *pchBetaName

@@ -1,0 +1,21 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamgameserver009.h (class ISteamGameServer009)
+# also: .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/106/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/107/headers/steam/isteamgameserver.h
+0|LogOn|0|void|
+1|LogOff|0|void|
+2|BLoggedOn|0|bool|
+3|BSecure|0|bool|
+4|GetSteamID|0|CSteamID|
+5|SendUserConnectAndAuthenticate|4|bool|uint32 unIPClient, const void *pvAuthBlob, uint32 cubAuthBlobSize, CSteamID *pSteamIDUser
+6|CreateUnauthenticatedUserConnection|0|CSteamID|
+7|SendUserDisconnect|1|void|CSteamID steamIDUser
+8|BUpdateUserData|3|bool|CSteamID steamIDUser, const char *pchPlayerName, uint32 uScore
+9|BSetServerType|8|bool|uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, uint16 unSpectatorPort, uint16 usQueryPort, const char *pchGameDir, const char *pchVersion, bool bLANMode
+10|UpdateServerStatus|6|void|int cPlayers, int cPlayersMax, int cBotPlayers, const char *pchServerName, const char *pSpectatorServerName, const char *pchMapName
+11|UpdateSpectatorPort|1|void|uint16 unSpectatorPort
+12|SetGameType|1|void|const char *pchGameType
+13|BGetUserAchievementStatus|2|bool|CSteamID steamID, const char *pchAchievementName
+14|GetGameplayStats|0|void|
+15|RequestUserGroupStatus|2|bool|CSteamID steamIDUser, CSteamID steamIDGroup
+16|GetPublicIP_old|0|uint32|
+17|SetGameData|1|void|const char *pchGameData
+18|UserHasLicenseForApp|2|EUserHasLicenseForAppResult|CSteamID steamID, AppId_t appID

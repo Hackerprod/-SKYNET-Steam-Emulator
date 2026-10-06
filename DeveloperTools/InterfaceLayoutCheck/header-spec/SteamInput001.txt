@@ -1,0 +1,37 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteaminput001.h (class ISteamInput001)
+# also: .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteaminput.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteaminput.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteaminput.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteaminput.h, .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteaminput.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteaminput.h (+2 more)
+0|Init|0|bool|
+1|Shutdown|0|bool|
+2|RunFrame|0|void|
+3|GetConnectedControllers|1|int|InputHandle_t *handlesOut
+4|GetActionSetHandle|1|InputActionSetHandle_t|const char *pszActionSetName
+5|ActivateActionSet|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle
+6|GetCurrentActionSet|1|InputActionSetHandle_t|InputHandle_t inputHandle
+7|ActivateActionSetLayer|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetLayerHandle
+8|DeactivateActionSetLayer|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetLayerHandle
+9|DeactivateAllActionSetLayers|1|void|InputHandle_t inputHandle
+10|GetActiveActionSetLayers|2|int|InputHandle_t inputHandle, InputActionSetHandle_t *handlesOut
+11|GetDigitalActionHandle|1|InputDigitalActionHandle_t|const char *pszActionName
+12|GetDigitalActionData|2|InputDigitalActionData_t|InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle
+13|GetDigitalActionOrigins|4|int|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, EInputActionOrigin *originsOut
+14|GetAnalogActionHandle|1|InputAnalogActionHandle_t|const char *pszActionName
+15|GetAnalogActionData|2|InputAnalogActionData_t|InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle
+16|GetAnalogActionOrigins|4|int|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, EInputActionOrigin *originsOut
+17|GetGlyphForActionOrigin|1|const char *|EInputActionOrigin eOrigin
+18|GetStringForActionOrigin|1|const char *|EInputActionOrigin eOrigin
+19|StopAnalogActionMomentum|2|void|InputHandle_t inputHandle, InputAnalogActionHandle_t eAction
+20|GetMotionData|1|InputMotionData_t|InputHandle_t inputHandle
+21|TriggerVibration|3|void|InputHandle_t inputHandle, unsigned short usLeftSpeed, unsigned short usRightSpeed
+22|SetLEDColor|5|void|InputHandle_t inputHandle, uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags
+23|TriggerHapticPulse|3|void|InputHandle_t inputHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+24|TriggerRepeatedHapticPulse|6|void|InputHandle_t inputHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags
+25|ShowBindingPanel|1|bool|InputHandle_t inputHandle
+26|GetInputTypeForHandle|1|ESteamInputType|InputHandle_t inputHandle
+27|GetControllerForGamepadIndex|1|InputHandle_t|int nIndex
+28|GetGamepadIndexForController|1|int|InputHandle_t ulinputHandle
+29|GetStringForXboxOrigin|1|const char *|EXboxOrigin eOrigin
+30|GetGlyphForXboxOrigin|1|const char *|EXboxOrigin eOrigin
+31|GetActionOriginFromXboxOrigin|2|EInputActionOrigin|InputHandle_t inputHandle, EXboxOrigin eOrigin
+32|TranslateActionOrigin|2|EInputActionOrigin|ESteamInputType eDestinationInputType, EInputActionOrigin eSourceOrigin
+33|GetDeviceBindingRevision|3|bool|InputHandle_t inputHandle, int *pMajor, int *pMinor
+34|GetRemotePlaySessionID|1|uint32|InputHandle_t inputHandle

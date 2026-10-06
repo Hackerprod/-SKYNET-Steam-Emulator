@@ -1,0 +1,19 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuser013.h (class ISteamUser013)
+# also: .tmp/SmokeAPI/res/steamworks/106/headers/steam/isteamuser.h, .tmp/SmokeAPI/res/steamworks/107/headers/steam/isteamuser.h, .tmp/SmokeAPI/res/steamworks/108/headers/steam/isteamuser.h, .tmp/SmokeAPI/res/steamworks/109/headers/steam/isteamuser.h, .tmp/SmokeAPI/res/steamworks/110/headers/steam/isteamuser.h
+0|GetHSteamUser|0|HSteamUser|
+1|BLoggedOn|0|bool|
+2|GetSteamID|0|CSteamID|
+3|InitiateGameConnection|6|int|void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure
+4|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+5|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo
+6|GetUserDataFolder|2|bool|char *pchBuffer, int cubBuffer
+7|StartVoiceRecording|0|void|
+8|StopVoiceRecording|0|void|
+9|GetAvailableVoice|2|EVoiceResult|uint32 *pcbCompressed, uint32 *pcbUncompressed
+10|GetVoice|8|EVoiceResult|bool bWantCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, bool bWantUncompressed, void *pUncompressedDestBuffer, uint32 cbUncompressedDestBufferSize, uint32 *nUncompressBytesWritten
+11|DecompressVoice|5|EVoiceResult|const void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten
+12|GetAuthSessionTicket|3|HAuthTicket|void *pTicket, int cbMaxTicket, uint32 *pcbTicket
+13|BeginAuthSession|3|EBeginAuthSessionResult|const void *pAuthTicket, int cbAuthTicket, CSteamID steamID
+14|EndAuthSession|1|void|CSteamID steamID
+15|CancelAuthTicket|1|void|HAuthTicket hAuthTicket
+16|UserHasLicenseForApp|2|EUserHasLicenseForAppResult|CSteamID steamID, AppId_t appID

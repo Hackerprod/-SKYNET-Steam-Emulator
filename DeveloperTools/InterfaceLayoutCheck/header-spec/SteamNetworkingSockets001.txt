@@ -1,0 +1,37 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworkingsockets001.h (class ISteamNetworkingSockets001)
+0|CreateListenSocket|3|HSteamListenSocket|int nSteamConnectVirtualPort, uint32 nIP, uint16 nPort
+1|ConnectBySteamID|2|HSteamNetConnection|CSteamID steamIDTarget, int nVirtualPort
+2|ConnectByIPv4Address|2|HSteamNetConnection|uint32 nIP, uint16 nPort
+3|AcceptConnection|1|EResult|HSteamNetConnection hConn
+4|CloseConnection|4|bool|HSteamNetConnection hPeer, int nReason, const char *pszDebug, bool bEnableLinger
+5|CloseListenSocket|2|bool|HSteamListenSocket hSocket, const char *pszNotifyRemoteReason
+6|SetConnectionUserData|2|bool|HSteamNetConnection hPeer, int64 nUserData
+7|GetConnectionUserData|1|int64|HSteamNetConnection hPeer
+8|SetConnectionName|2|void|HSteamNetConnection hPeer, const char *pszName
+9|GetConnectionName|3|bool|HSteamNetConnection hPeer, char *pszName, int nMaxLen
+10|SendMessageToConnection|4|EResult|HSteamNetConnection hConn, const void *pData, uint32 cbData, ESteamNetworkingSendType eSendType
+11|FlushMessagesOnConnection|1|EResult|HSteamNetConnection hConn
+12|ReceiveMessagesOnConnection|3|int|HSteamNetConnection hConn, SteamNetworkingMessage001_t **ppOutMessages, int nMaxMessages
+13|ReceiveMessagesOnListenSocket|3|int|HSteamListenSocket hSocket, SteamNetworkingMessage001_t **ppOutMessages, int nMaxMessages
+14|GetConnectionInfo|2|bool|HSteamNetConnection hConn, SteamNetConnectionInfo001_t *pInfo
+15|GetQuickConnectionStatus|2|bool|HSteamNetConnection hConn, SteamNetworkingQuickConnectionStatus *pStats
+16|GetDetailedConnectionStatus|3|int|HSteamNetConnection hConn, char *pszBuf, int cbBuf
+17|GetListenSocketInfo|3|bool|HSteamListenSocket hSocket, uint32 *pnIP, uint16 *pnPort
+18|CreateSocketPair|3|bool|HSteamNetConnection *pOutConnection1, HSteamNetConnection *pOutConnection2, bool bUseNetworkLoopback
+19|ReceivedRelayAuthTicket|3|bool|const void *pvTicket, int cbTicket, SteamDatagramRelayAuthTicket *pOutParsedTicket
+20|FindRelayAuthTicketForServer|3|int|CSteamID steamID, int nVirtualPort, SteamDatagramRelayAuthTicket *pOutParsedTicket
+21|ConnectToHostedDedicatedServer|2|HSteamNetConnection|CSteamID steamIDTarget, int nVirtualPort
+22|GetHostedDedicatedServerPort|0|uint16|
+23|GetHostedDedicatedServerPOPID|0|SteamNetworkingPOPID|
+24|GetHostedDedicatedServerAddress001|1|bool|SteamDatagramHostedAddress *pRouting
+25|CreateHostedDedicatedServerListenSocket|1|HSteamListenSocket|int nVirtualPort
+26|GetConnectionDebugText|3|bool|HSteamNetConnection hConn, char *pOut, int nOutCCH
+27|GetConfigurationValue|1|int32|ESteamNetworkingConfigurationValue eConfigValue
+28|SetConfigurationValue|2|bool|ESteamNetworkingConfigurationValue eConfigValue, int32 nValue
+29|GetConfigurationValueName|1|const char *|ESteamNetworkingConfigurationValue eConfigValue
+30|GetConfigurationString|3|int32|ESteamNetworkingConfigurationString eConfigString, char *pDest, int32 destSize
+31|SetConfigurationString|2|bool|ESteamNetworkingConfigurationString eConfigString, const char *pString
+32|GetConfigurationStringName|1|const char *|ESteamNetworkingConfigurationString eConfigString
+33|GetConnectionConfigurationValue|2|int32|HSteamNetConnection hConn, ESteamNetworkingConnectionConfigurationValue eConfigValue
+34|SetConnectionConfigurationValue|3|bool|HSteamNetConnection hConn, ESteamNetworkingConnectionConfigurationValue eConfigValue, int32 nValue
+35|RunCallbacks|1|void|ISteamNetworkingSocketsCallbacks *pCallbacks

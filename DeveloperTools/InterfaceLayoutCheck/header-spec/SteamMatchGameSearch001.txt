@@ -1,0 +1,16 @@
+# source: .tmp/SmokeAPI/res/steamworks/162/headers/steam/isteammatchmaking.h (class ISteamGameSearch)
+# also: .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteammatchmaking.h (+14 more)
+0|AddGameSearchParams|2|EGameSearchErrorCode_t|const char *pchKeyToFind, const char *pchValuesToFind
+1|SearchForGameWithLobby|3|EGameSearchErrorCode_t|CSteamID steamIDLobby, int nPlayerMin, int nPlayerMax
+2|SearchForGameSolo|2|EGameSearchErrorCode_t|int nPlayerMin, int nPlayerMax
+3|AcceptGame|0|EGameSearchErrorCode_t|
+4|DeclineGame|0|EGameSearchErrorCode_t|
+5|RetrieveConnectionDetails|3|EGameSearchErrorCode_t|CSteamID steamIDHost, char *pchConnectionDetails, int cubConnectionDetails
+6|EndGameSearch|0|EGameSearchErrorCode_t|
+7|SetGameHostParams|2|EGameSearchErrorCode_t|const char *pchKey, const char *pchValue
+8|SetConnectionDetails|2|EGameSearchErrorCode_t|const char *pchConnectionDetails, int cubConnectionDetails
+9|RequestPlayersForGame|3|EGameSearchErrorCode_t|int nPlayerMin, int nPlayerMax, int nMaxTeamSize
+10|HostConfirmGameStart|1|EGameSearchErrorCode_t|uint64 ullUniqueGameID
+11|CancelRequestPlayersForGame|0|EGameSearchErrorCode_t|
+12|SubmitPlayerResult|3|EGameSearchErrorCode_t|uint64 ullUniqueGameID, CSteamID steamIDPlayer, EPlayerResult_t EPlayerResult
+13|EndGame|1|EGameSearchErrorCode_t|uint64 ullUniqueGameID

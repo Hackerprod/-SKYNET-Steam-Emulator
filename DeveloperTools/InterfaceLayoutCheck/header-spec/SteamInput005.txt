@@ -1,0 +1,49 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteaminput005.h (class ISteamInput005)
+# also: .tmp/SmokeAPI/res/steamworks/152/headers/steam/isteaminput.h
+0|Init|1|bool|bool bExplicitlyCallRunFrame
+1|Shutdown|0|bool|
+2|SetInputActionManifestFilePath|1|bool|const char *pchInputActionManifestAbsolutePath
+3|RunFrame|1|void|bool bReservedValue
+4|BWaitForData|2|bool|bool bWaitForever, uint32 unTimeout
+5|BNewDataAvailable|0|bool|
+6|GetConnectedControllers|1|int|InputHandle_t *handlesOut
+7|EnableDeviceCallbacks|0|void|
+8|EnableActionEventCallbacks|1|void|SteamInputActionEventCallbackPointer pCallback
+9|GetActionSetHandle|1|InputActionSetHandle_t|const char *pszActionSetName
+10|ActivateActionSet|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle
+11|GetCurrentActionSet|1|InputActionSetHandle_t|InputHandle_t inputHandle
+12|ActivateActionSetLayer|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetLayerHandle
+13|DeactivateActionSetLayer|2|void|InputHandle_t inputHandle, InputActionSetHandle_t actionSetLayerHandle
+14|DeactivateAllActionSetLayers|1|void|InputHandle_t inputHandle
+15|GetActiveActionSetLayers|2|int|InputHandle_t inputHandle, InputActionSetHandle_t *handlesOut
+16|GetDigitalActionHandle|1|InputDigitalActionHandle_t|const char *pszActionName
+17|GetDigitalActionData|2|InputDigitalActionData_t|InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle
+18|GetDigitalActionOrigins|4|int|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, EInputActionOrigin *originsOut
+19|GetStringForDigitalActionName|1|const char *|InputDigitalActionHandle_t eActionHandle
+20|GetAnalogActionHandle|1|InputAnalogActionHandle_t|const char *pszActionName
+21|GetAnalogActionData|2|InputAnalogActionData_t|InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle
+22|GetAnalogActionOrigins|4|int|InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, EInputActionOrigin *originsOut
+23|GetGlyphPNGForActionOrigin|3|const char *|EInputActionOrigin eOrigin, ESteamInputGlyphSize eSize, uint32 unFlags
+24|GetGlyphSVGForActionOrigin|2|const char *|EInputActionOrigin eOrigin, uint32 unFlags
+25|GetGlyphForActionOrigin_Legacy|1|const char *|EInputActionOrigin eOrigin
+26|GetStringForActionOrigin|1|const char *|EInputActionOrigin eOrigin
+27|GetStringForAnalogActionName|1|const char *|InputAnalogActionHandle_t eActionHandle
+28|StopAnalogActionMomentum|2|void|InputHandle_t inputHandle, InputAnalogActionHandle_t eAction
+29|GetMotionData|1|InputMotionData_t|InputHandle_t inputHandle
+30|TriggerVibration|3|void|InputHandle_t inputHandle, unsigned short usLeftSpeed, unsigned short usRightSpeed
+31|TriggerVibrationExtended|5|void|InputHandle_t inputHandle, unsigned short usLeftSpeed, unsigned short usRightSpeed, unsigned short usLeftTriggerSpeed, unsigned short usRightTriggerSpeed
+32|TriggerSimpleHapticEvent|6|void|InputHandle_t inputHandle, EControllerHapticLocation eHapticLocation, uint8 nIntensity, char nGainDB, uint8 nOtherIntensity, char nOtherGainDB
+33|SetLEDColor|5|void|InputHandle_t inputHandle, uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags
+34|Legacy_TriggerHapticPulse|3|void|InputHandle_t inputHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+35|Legacy_TriggerRepeatedHapticPulse|6|void|InputHandle_t inputHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags
+36|ShowBindingPanel|1|bool|InputHandle_t inputHandle
+37|GetInputTypeForHandle|1|ESteamInputType|InputHandle_t inputHandle
+38|GetControllerForGamepadIndex|1|InputHandle_t|int nIndex
+39|GetGamepadIndexForController|1|int|InputHandle_t ulinputHandle
+40|GetStringForXboxOrigin|1|const char *|EXboxOrigin eOrigin
+41|GetGlyphForXboxOrigin|1|const char *|EXboxOrigin eOrigin
+42|GetActionOriginFromXboxOrigin|2|EInputActionOrigin|InputHandle_t inputHandle, EXboxOrigin eOrigin
+43|TranslateActionOrigin|2|EInputActionOrigin|ESteamInputType eDestinationInputType, EInputActionOrigin eSourceOrigin
+44|GetDeviceBindingRevision|3|bool|InputHandle_t inputHandle, int *pMajor, int *pMinor
+45|GetRemotePlaySessionID|1|uint32|InputHandle_t inputHandle
+46|GetSessionInputConfigurationSettings|0|uint16|

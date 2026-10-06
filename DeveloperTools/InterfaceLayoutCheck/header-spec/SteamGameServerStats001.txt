@@ -1,0 +1,14 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamgameserverstats.h (class ISteamGameServerStats)
+# also: .tmp/SmokeAPI/res/steamworks/108/headers/steam/isteamgameserverstats.h, .tmp/SmokeAPI/res/steamworks/109/headers/steam/isteamgameserverstats.h, .tmp/SmokeAPI/res/steamworks/110/headers/steam/isteamgameserverstats.h, .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamgameserverstats.h, .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamgameserverstats.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamgameserverstats.h (+51 more)
+# overload GetUserStat slots 1,2
+# overload SetUserStat slots 4,5
+0|RequestUserStats|1|SteamAPICall_t|CSteamID steamIDUser
+1|GetUserStatFloat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
+2|GetUserStatInt32|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
+3|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved
+4|SetUserStatFloat|3|bool|CSteamID steamIDUser, const char *pchName, float fData
+5|SetUserStatInt32|3|bool|CSteamID steamIDUser, const char *pchName, int32 nData
+6|UpdateUserAvgRateStat|4|bool|CSteamID steamIDUser, const char *pchName, float flCountThisSession, double dSessionLength
+7|SetUserAchievement|2|bool|CSteamID steamIDUser, const char *pchName
+8|ClearUserAchievement|2|bool|CSteamID steamIDUser, const char *pchName
+9|StoreUserStats|1|SteamAPICall_t|CSteamID steamIDUser

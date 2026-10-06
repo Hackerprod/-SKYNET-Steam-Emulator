@@ -1,0 +1,19 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamcontroller003.h (class ISteamController003)
+# also: .tmp/SmokeAPI/res/steamworks/135/headers/steam/isteamcontroller.h, .tmp/SmokeAPI/res/steamworks/135a/headers/steam/isteamcontroller.h, .tmp/SmokeAPI/res/steamworks/136/headers/steam/isteamcontroller.h, .tmp/SmokeAPI/res/steamworks/137/headers/steam/isteamcontroller.h
+0|Init|0|bool|
+1|Shutdown|0|bool|
+2|RunFrame|0|void|
+3|GetConnectedControllers|1|int|ControllerHandle_t *handlesOut
+4|ShowBindingPanel|1|bool|ControllerHandle_t controllerHandle
+5|GetActionSetHandle|1|ControllerActionSetHandle_t|const char *pszActionSetName
+6|ActivateActionSet|2|void|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle
+7|GetCurrentActionSet|1|ControllerActionSetHandle_t|ControllerHandle_t controllerHandle
+8|GetDigitalActionHandle|1|ControllerDigitalActionHandle_t|const char *pszActionName
+9|GetDigitalActionData|2|ControllerDigitalActionData_t|ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle
+10|GetDigitalActionOrigins|4|int|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, EControllerActionOrigin *originsOut
+11|GetAnalogActionHandle|1|ControllerAnalogActionHandle_t|const char *pszActionName
+12|GetAnalogActionData|2|ControllerAnalogActionData_t|ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle
+13|GetAnalogActionOrigins|4|int|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, EControllerActionOrigin *originsOut
+14|StopAnalogActionMomentum|2|void|ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t eAction
+15|TriggerHapticPulse|3|void|ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+16|TriggerRepeatedHapticPulse|6|void|ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags

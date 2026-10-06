@@ -1,0 +1,8 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamtv.h (class ISteamTV)
+0|IsBroadcasting|1|bool|int *pnNumViewers
+1|AddBroadcastGameData|2|void|const char * pchKey, const char * pchValue
+2|RemoveBroadcastGameData|1|void|const char * pchKey
+3|AddTimelineMarker|5|void|const char * pchTemplateName, bool bPersistent, uint8 nColorR, uint8 nColorG, uint8 nColorB
+4|RemoveTimelineMarker|0|void|
+5|AddRegion|4|uint32|const char * pchElementName, const char * pchTimelineDataSection, const SteamTVRegion_t * pSteamTVRegion, ESteamTVRegionBehavior eSteamTVRegionBehavior
+6|RemoveRegion|1|void|uint32 unRegionHandle

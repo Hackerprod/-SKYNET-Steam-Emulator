@@ -1,0 +1,8 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamnetworkingmessages.h (class ISteamNetworkingMessages)
+# also: .tmp/SmokeAPI/res/steamworks/150/headers/steam/isteamnetworkingmessages.h, .tmp/SmokeAPI/res/steamworks/151/headers/steam/isteamnetworkingmessages.h, .tmp/SmokeAPI/res/steamworks/152/headers/steam/isteamnetworkingmessages.h, .tmp/SmokeAPI/res/steamworks/153a/headers/steam/isteamnetworkingmessages.h, .tmp/SmokeAPI/res/steamworks/154/headers/steam/isteamnetworkingmessages.h, .tmp/SmokeAPI/res/steamworks/155/headers/steam/isteamnetworkingmessages.h (+9 more)
+0|SendMessageToUser|5|EResult|const SteamNetworkingIdentity &identityRemote, const void *pubData, uint32 cubData, int nSendFlags, int nRemoteChannel
+1|ReceiveMessagesOnChannel|3|int|int nLocalChannel, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages
+2|AcceptSessionWithUser|1|bool|const SteamNetworkingIdentity &identityRemote
+3|CloseSessionWithUser|1|bool|const SteamNetworkingIdentity &identityRemote
+4|CloseChannelWithUser|2|bool|const SteamNetworkingIdentity &identityRemote, int nLocalChannel
+5|GetSessionConnectionInfo|3|ESteamNetworkingConnectionState|const SteamNetworkingIdentity &identityRemote, SteamNetConnectionInfo_t *pConnectionInfo, SteamNetConnectionRealTimeStatus_t *pQuickStatus

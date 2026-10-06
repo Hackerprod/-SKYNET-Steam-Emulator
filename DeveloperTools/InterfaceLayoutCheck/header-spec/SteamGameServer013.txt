@@ -1,0 +1,46 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamgameserver013.h (class ISteamGameServer013)
+# also: .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/149/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/150/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/151/headers/steam/isteamgameserver.h
+0|InitGameServer|6|bool|uint32 unIP, uint16 usGamePort, uint16 usQueryPort, uint32 unFlags, AppId_t nGameAppId, const char *pchVersionString
+1|SetProduct|1|void|const char *pszProduct
+2|SetGameDescription|1|void|const char *pszGameDescription
+3|SetModDir|1|void|const char *pszModDir
+4|SetDedicatedServer|1|void|bool bDedicated
+5|LogOn|1|void|const char *pszToken
+6|LogOnAnonymous|0|void|
+7|LogOff|0|void|
+8|BLoggedOn|0|bool|
+9|BSecure|0|bool|
+10|GetSteamID|0|CSteamID|
+11|WasRestartRequested|0|bool|
+12|SetMaxPlayerCount|1|void|int cPlayersMax
+13|SetBotPlayerCount|1|void|int cBotplayers
+14|SetServerName|1|void|const char *pszServerName
+15|SetMapName|1|void|const char *pszMapName
+16|SetPasswordProtected|1|void|bool bPasswordProtected
+17|SetSpectatorPort|1|void|uint16 unSpectatorPort
+18|SetSpectatorServerName|1|void|const char *pszSpectatorServerName
+19|ClearAllKeyValues|0|void|
+20|SetKeyValue|2|void|const char *pKey, const char *pValue
+21|SetGameTags|1|void|const char *pchGameTags
+22|SetGameData|1|void|const char *pchGameData
+23|SetRegion|1|void|const char *pszRegion
+24|SendUserConnectAndAuthenticate|4|bool|uint32 unIPClient, const void *pvAuthBlob, uint32 cubAuthBlobSize, CSteamID *pSteamIDUser
+25|CreateUnauthenticatedUserConnection|0|CSteamID|
+26|SendUserDisconnect|1|void|CSteamID steamIDUser
+27|BUpdateUserData|3|bool|CSteamID steamIDUser, const char *pchPlayerName, uint32 uScore
+28|GetAuthSessionTicket|3|HAuthTicket|void *pTicket, int cbMaxTicket, uint32 *pcbTicket
+29|BeginAuthSession|3|EBeginAuthSessionResult|const void *pAuthTicket, int cbAuthTicket, CSteamID steamID
+30|EndAuthSession|1|void|CSteamID steamID
+31|CancelAuthTicket|1|void|HAuthTicket hAuthTicket
+32|UserHasLicenseForApp|2|EUserHasLicenseForAppResult|CSteamID steamID, AppId_t appID
+33|RequestUserGroupStatus|2|bool|CSteamID steamIDUser, CSteamID steamIDGroup
+34|GetGameplayStats|0|void|
+35|GetServerReputation|0|SteamAPICall_t|
+36|GetPublicIP|0|SteamIPAddress_t|
+37|HandleIncomingPacket|4|bool|const void *pData, int cbData, uint32 srcIP, uint16 srcPort
+38|GetNextOutgoingPacket|4|int|void *pOut, int cbMaxOut, uint32 *pNetAdr, uint16 *pPort
+39|EnableHeartbeats|1|void|bool bActive
+40|SetHeartbeatInterval|1|void|int iHeartbeatInterval
+41|ForceHeartbeat|0|void|
+42|AssociateWithClan|1|SteamAPICall_t|CSteamID steamIDClan
+43|ComputeNewPlayerCompatibility|1|SteamAPICall_t|CSteamID steamIDNewPlayer

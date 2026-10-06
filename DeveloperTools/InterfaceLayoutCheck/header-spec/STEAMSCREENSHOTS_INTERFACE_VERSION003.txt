@@ -1,0 +1,11 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamscreenshots.h (class ISteamScreenshots)
+# also: .tmp/SmokeAPI/res/steamworks/138a/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/139/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/140/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/141/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/142/headers/steam/isteamscreenshots.h, .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteamscreenshots.h (+21 more)
+0|WriteScreenshot|4|ScreenshotHandle|void *pubRGB, uint32 cubRGB, int nWidth, int nHeight
+1|AddScreenshotToLibrary|4|ScreenshotHandle|const char *pchFilename, const char *pchThumbnailFilename, int nWidth, int nHeight
+2|TriggerScreenshot|0|void|
+3|HookScreenshots|1|void|bool bHook
+4|SetLocation|2|bool|ScreenshotHandle hScreenshot, const char *pchLocation
+5|TagUser|2|bool|ScreenshotHandle hScreenshot, CSteamID steamID
+6|TagPublishedFile|2|bool|ScreenshotHandle hScreenshot, PublishedFileId_t unPublishedFileID
+7|IsScreenshotsHooked|0|bool|
+8|AddVRScreenshotToLibrary|3|ScreenshotHandle|EVRScreenshotType eType, const char *pchFilename, const char *pchVRFilename

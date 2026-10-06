@@ -1,0 +1,52 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamuserstats.h (class ISteamUserStats)
+# also: .tmp/SmokeAPI/res/steamworks/161/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/162/headers/steam/isteamuserstats.h, .tmp/SmokeAPI/res/steamworks/163/headers/steam/isteamuserstats.h
+# overload GetStat slots 0,1
+# overload SetStat slots 2,3
+# overload GetUserStat slots 16,17
+# overload GetGlobalStat slots 38,39
+# overload GetGlobalStatHistory slots 40,41
+# overload GetAchievementProgressLimits slots 42,43
+0|GetStatFloat|2|bool|const char *pchName, float *pData
+1|GetStatInt32|2|bool|const char *pchName, int32 *pData
+2|SetStatFloat|2|bool|const char *pchName, float fData
+3|SetStatInt32|2|bool|const char *pchName, int32 nData
+4|UpdateAvgRateStat|3|bool|const char *pchName, float flCountThisSession, double dSessionLength
+5|GetAchievement|2|bool|const char *pchName, bool *pbAchieved
+6|SetAchievement|1|bool|const char *pchName
+7|ClearAchievement|1|bool|const char *pchName
+8|GetAchievementAndUnlockTime|3|bool|const char *pchName, bool *pbAchieved, uint32 *punUnlockTime
+9|StoreStats|0|bool|
+10|GetAchievementIcon|1|int|const char *pchName
+11|GetAchievementDisplayAttribute|2|const char *|const char *pchName, const char *pchKey
+12|IndicateAchievementProgress|3|bool|const char *pchName, uint32 nCurProgress, uint32 nMaxProgress
+13|GetNumAchievements|0|uint32|
+14|GetAchievementName|1|const char *|uint32 iAchievement
+15|RequestUserStats|1|SteamAPICall_t|CSteamID steamIDUser
+16|GetUserStatFloat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
+17|GetUserStatInt32|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
+18|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved
+19|GetUserAchievementAndUnlockTime|4|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved, uint32 *punUnlockTime
+20|ResetAllStats|1|bool|bool bAchievementsToo
+21|FindOrCreateLeaderboard|3|SteamAPICall_t|const char *pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType
+22|FindLeaderboard|1|SteamAPICall_t|const char *pchLeaderboardName
+23|GetLeaderboardName|1|const char *|SteamLeaderboard_t hSteamLeaderboard
+24|GetLeaderboardEntryCount|1|int|SteamLeaderboard_t hSteamLeaderboard
+25|GetLeaderboardSortMethod|1|ELeaderboardSortMethod|SteamLeaderboard_t hSteamLeaderboard
+26|GetLeaderboardDisplayType|1|ELeaderboardDisplayType|SteamLeaderboard_t hSteamLeaderboard
+27|DownloadLeaderboardEntries|4|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd
+28|DownloadLeaderboardEntriesForUsers|3|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, CSteamID *prgUsers, int cUsers
+29|GetDownloadedLeaderboardEntry|5|bool|SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index, LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails, int cDetailsMax
+30|UploadLeaderboardScore|5|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32 *pScoreDetails, int cScoreDetailsCount
+31|AttachLeaderboardUGC|2|SteamAPICall_t|SteamLeaderboard_t hSteamLeaderboard, UGCHandle_t hUGC
+32|GetNumberOfCurrentPlayers|0|SteamAPICall_t|
+33|RequestGlobalAchievementPercentages|0|SteamAPICall_t|
+34|GetMostAchievedAchievementInfo|4|int|char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved
+35|GetNextMostAchievedAchievementInfo|5|int|int iIteratorPrevious, char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved
+36|GetAchievementAchievedPercent|2|bool|const char *pchName, float *pflPercent
+37|RequestGlobalStats|1|SteamAPICall_t|int nHistoryDays
+38|GetGlobalStatDouble|2|bool|const char *pchStatName, double *pData
+39|GetGlobalStatInt64|2|bool|const char *pchStatName, int64 *pData
+40|GetGlobalStatHistoryDouble|3|int32|const char *pchStatName, double *pData, uint32 cubData
+41|GetGlobalStatHistoryInt64|3|int32|const char *pchStatName, int64 *pData, uint32 cubData
+42|GetAchievementProgressLimitsFloat|3|bool|const char *pchName, float *pfMinProgress, float *pfMaxProgress
+43|GetAchievementProgressLimitsInt32|3|bool|const char *pchName, int32 *pnMinProgress, int32 *pnMaxProgress

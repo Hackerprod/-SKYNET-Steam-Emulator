@@ -1,0 +1,29 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteammatchmaking004.h (class ISteamMatchmaking004)
+# also: .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteammatchmaking.h
+0|GetFavoriteGameCount|0|int|
+1|GetFavoriteGame|7|bool|int iGame, AppId_t *pnAppID, uint32 *pnIP, uint16 *pnConnPort, uint16 *pnQueryPort, uint32 *punFlags, uint32 *pRTime32LastPlayedOnServer
+2|AddFavoriteGame|6|int|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags, uint32 rTime32LastPlayedOnServer
+3|RemoveFavoriteGame|5|bool|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags
+4|RequestLobbyList_OLD|0|void|
+5|AddRequestLobbyListFilter|2|void|const char *pchKeyToMatch, const char *pchValueToMatch
+6|AddRequestLobbyListNumericalFilter|3|void|const char *pchKeyToMatch, int nValueToMatch, int nComparisonType
+7|AddRequestLobbyListSlotsAvailableFilter|0|void|
+8|GetLobbyByIndex|1|CSteamID|int iLobby
+9|CreateLobby|1|void|bool bPrivate
+10|JoinLobby_OLD|1|void|CSteamID steamIDLobby
+11|LeaveLobby|1|void|CSteamID steamIDLobby
+12|InviteUserToLobby|2|bool|CSteamID steamIDLobby, CSteamID steamIDInvitee
+13|GetNumLobbyMembers|1|int|CSteamID steamIDLobby
+14|GetLobbyMemberByIndex|2|CSteamID|CSteamID steamIDLobby, int iMember
+15|GetLobbyData|2|const char *|CSteamID steamIDLobby, const char *pchKey
+16|SetLobbyData|3|bool|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+17|GetLobbyMemberData|3|const char *|CSteamID steamIDLobby, CSteamID steamIDUser, const char *pchKey
+18|SetLobbyMemberData|3|void|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+19|SendLobbyChatMsg|3|bool|CSteamID steamIDLobby, const void *pvMsgBody, int cubMsgBody
+20|GetLobbyChatEntry|6|int|CSteamID steamIDLobby, int iChatID, CSteamID *pSteamIDUser, void *pvData, int cubData, EChatEntryType *peChatEntryType
+21|RequestLobbyData|1|bool|CSteamID steamIDLobby
+22|SetLobbyGameServer|4|void|CSteamID steamIDLobby, uint32 unGameServerIP, uint16 unGameServerPort, CSteamID steamIDGameServer
+23|GetLobbyGameServer|4|bool|CSteamID steamIDLobby, uint32 *punGameServerIP, uint16 *punGameServerPort, CSteamID *psteamIDGameServer
+24|SetLobbyMemberLimit|2|bool|CSteamID steamIDLobby, int cMaxMembers
+25|GetLobbyMemberLimit|1|int|CSteamID steamIDLobby
+26|RequestFriendsLobbies|0|bool|

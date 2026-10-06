@@ -1,0 +1,51 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamugc006.h (class ISteamUGC006)
+0|CreateQueryUserUGCRequest|7|UGCQueryHandle_t|AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+1|CreateQueryAllUGCRequest|5|UGCQueryHandle_t|EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+2|CreateQueryUGCDetailsRequest|2|UGCQueryHandle_t|PublishedFileId_t *pvecPublishedFileID, uint32 unNumPublishedFileIDs
+3|SendQueryUGCRequest|1|SteamAPICall_t|UGCQueryHandle_t handle
+4|GetQueryUGCResult|3|bool|UGCQueryHandle_t handle, uint32 index, SteamUGCDetails_t *pDetails
+5|GetQueryUGCPreviewURL|4|bool|UGCQueryHandle_t handle, uint32 index, char *pchURL, uint32 cchURLSize
+6|GetQueryUGCMetadata|4|bool|UGCQueryHandle_t handle, uint32 index, char *pchMetadata, uint32 cchMetadatasize
+7|GetQueryUGCChildren|4|bool|UGCQueryHandle_t handle, uint32 index, PublishedFileId_t *pvecPublishedFileID, uint32 cMaxEntries
+8|GetQueryUGCStatistic|4|bool|UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint32 *pStatValue
+9|GetQueryUGCNumAdditionalPreviews|2|uint32|UGCQueryHandle_t handle, uint32 index
+10|GetQueryUGCAdditionalPreview|6|bool|UGCQueryHandle_t handle, uint32 index, uint32 previewIndex, char *pchURLOrVideoID, uint32 cchURLSize, bool *hz
+11|ReleaseQueryUGCRequest|1|bool|UGCQueryHandle_t handle
+12|AddRequiredTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+13|AddExcludedTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+14|SetReturnLongDescription|2|bool|UGCQueryHandle_t handle, bool bReturnLongDescription
+15|SetReturnMetadata|2|bool|UGCQueryHandle_t handle, bool bReturnMetadata
+16|SetReturnChildren|2|bool|UGCQueryHandle_t handle, bool bReturnChildren
+17|SetReturnAdditionalPreviews|2|bool|UGCQueryHandle_t handle, bool bReturnAdditionalPreviews
+18|SetReturnTotalOnly|2|bool|UGCQueryHandle_t handle, bool bReturnTotalOnly
+19|SetLanguage|2|bool|UGCQueryHandle_t handle, const char *pchLanguage
+20|SetAllowCachedResponse|2|bool|UGCQueryHandle_t handle, uint32 unMaxAgeSeconds
+21|SetCloudFileNameFilter|2|bool|UGCQueryHandle_t handle, const char *pMatchCloudFileName
+22|SetMatchAnyTag|2|bool|UGCQueryHandle_t handle, bool bMatchAnyTag
+23|SetSearchText|2|bool|UGCQueryHandle_t handle, const char *pSearchText
+24|SetRankedByTrendDays|2|bool|UGCQueryHandle_t handle, uint32 unDays
+25|RequestUGCDetails|2|SteamAPICall_t|PublishedFileId_t nPublishedFileID, uint32 unMaxAgeSeconds
+26|CreateItem|2|SteamAPICall_t|AppId_t nConsumerAppId, EWorkshopFileType eFileType
+27|StartItemUpdate|2|UGCUpdateHandle_t|AppId_t nConsumerAppId, PublishedFileId_t nPublishedFileID
+28|SetItemTitle|2|bool|UGCUpdateHandle_t handle, const char *pchTitle
+29|SetItemDescription|2|bool|UGCUpdateHandle_t handle, const char *pchDescription
+30|SetItemUpdateLanguage|2|bool|UGCUpdateHandle_t handle, const char *pchUpdateLanguage
+31|SetItemMetadata|2|bool|UGCUpdateHandle_t handle, const char *pchMetadata
+32|SetItemVisibility|2|bool|UGCUpdateHandle_t handle, ERemoteStoragePublishedFileVisibility eVisibility
+33|SetItemTags|2|bool|UGCUpdateHandle_t updateHandle, const SteamParamStringArray_t *pTags
+34|SetItemContent|2|bool|UGCUpdateHandle_t handle, const char *pszContentFolder
+35|SetItemPreview|2|bool|UGCUpdateHandle_t handle, const char *pszPreviewFile
+36|SubmitItemUpdate|2|SteamAPICall_t|UGCUpdateHandle_t handle, const char *pchChangeNote
+37|GetItemUpdateProgress|3|EItemUpdateStatus|UGCUpdateHandle_t handle, uint64 *punBytesProcessed, uint64* punBytesTotal
+38|SetUserItemVote|2|SteamAPICall_t|PublishedFileId_t nPublishedFileID, bool bVoteUp
+39|GetUserItemVote|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
+40|AddItemToFavorites|2|SteamAPICall_t|AppId_t nAppId, PublishedFileId_t nPublishedFileID
+41|RemoveItemFromFavorites|2|SteamAPICall_t|AppId_t nAppId, PublishedFileId_t nPublishedFileID
+42|SubscribeItem|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
+43|UnsubscribeItem|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
+44|GetNumSubscribedItems|0|uint32|
+45|GetSubscribedItems|2|uint32|PublishedFileId_t* pvecPublishedFileID, uint32 cMaxEntries
+46|GetItemState|1|uint32|PublishedFileId_t nPublishedFileID
+47|GetItemInstallInfo|5|bool|PublishedFileId_t nPublishedFileID, uint64 *punSizeOnDisk, char *pchFolder, uint32 cchFolderSize, uint32 *punTimeStamp
+48|GetItemDownloadInfo|3|bool|PublishedFileId_t nPublishedFileID, uint64 *punBytesDownloaded, uint64 *punBytesTotal
+49|DownloadItem|2|bool|PublishedFileId_t nPublishedFileID, bool bHighPriority

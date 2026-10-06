@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuserstats004.h (class ISteamUserStats004)
+# also: .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteamuserstats.h
+# overload GetStat slots 1,2
+# overload SetStat slots 3,4
+# overload GetUserStat slots 14,15
+0|RequestCurrentStats|0|bool|
+1|GetStat|2|bool|const char *pchName, float *pData
+2|GetStat|2|bool|const char *pchName, int32 *pData
+3|SetStat|2|bool|const char *pchName, float fData
+4|SetStat|2|bool|const char *pchName, int32 nData
+5|UpdateAvgRateStat|3|bool|const char *pchName, float flCountThisSession, double dSessionLength
+6|GetAchievement|2|bool|const char *pchName, bool *pbAchieved
+7|SetAchievement|1|bool|const char *pchName
+8|ClearAchievement|1|bool|const char *pchName
+9|StoreStats|0|bool|
+10|GetAchievementIcon|1|int|const char *pchName
+11|GetAchievementDisplayAttribute|2|const char *|const char *pchName, const char *pchKey
+12|IndicateAchievementProgress|3|bool|const char *pchName, uint32 nCurProgress, uint32 nMaxProgress
+13|RequestUserStats|1|SteamAPICall_t|CSteamID steamIDUser
+14|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
+15|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
+16|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved

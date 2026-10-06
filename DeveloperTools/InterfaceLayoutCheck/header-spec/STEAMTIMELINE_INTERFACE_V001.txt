@@ -1,0 +1,5 @@
+# source: .tmp/SmokeAPI/res/steamworks/160/headers/steam/isteamtimeline.h (class ISteamTimeline)
+0|SetTimelineStateDescription|2|void|const char *pchDescription, float flTimeDelta
+1|ClearTimelineStateDescription|1|void|float flTimeDelta
+2|AddTimelineEvent|7|void|const char *pchIcon, const char *pchTitle, const char *pchDescription, uint32 unPriority, float flStartOffsetSeconds, float flDurationSeconds, ETimelineEventClipPriority ePossibleClip
+3|SetTimelineGameMode|1|void|ETimelineGameMode eMode

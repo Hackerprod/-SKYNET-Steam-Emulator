@@ -1,0 +1,34 @@
+# source: .tmp/SmokeAPI/res/steamworks/162/headers/steam/isteammusicremote.h (class ISteamMusicRemote)
+# also: .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteammusicremote.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteammusicremote.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteammusicremote.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteammusicremote.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteammusicremote.h, .tmp/SmokeAPI/res/steamworks/135/headers/steam/isteammusicremote.h (+28 more)
+0|RegisterSteamMusicRemote|1|bool|const char *pchName
+1|DeregisterSteamMusicRemote|0|bool|
+2|BIsCurrentMusicRemote|0|bool|
+3|BActivationSuccess|1|bool|bool bValue
+4|SetDisplayName|1|bool|const char *pchDisplayName
+5|SetPNGIcon_64x64|2|bool|void *pvBuffer, uint32 cbBufferLength
+6|EnablePlayPrevious|1|bool|bool bValue
+7|EnablePlayNext|1|bool|bool bValue
+8|EnableShuffled|1|bool|bool bValue
+9|EnableLooped|1|bool|bool bValue
+10|EnableQueue|1|bool|bool bValue
+11|EnablePlaylists|1|bool|bool bValue
+12|UpdatePlaybackStatus|1|bool|AudioPlayback_Status nStatus
+13|UpdateShuffled|1|bool|bool bValue
+14|UpdateLooped|1|bool|bool bValue
+15|UpdateVolume|1|bool|float flValue
+16|CurrentEntryWillChange|0|bool|
+17|CurrentEntryIsAvailable|1|bool|bool bAvailable
+18|UpdateCurrentEntryText|1|bool|const char *pchText
+19|UpdateCurrentEntryElapsedSeconds|1|bool|int nValue
+20|UpdateCurrentEntryCoverArt|2|bool|void *pvBuffer, uint32 cbBufferLength
+21|CurrentEntryDidChange|0|bool|
+22|QueueWillChange|0|bool|
+23|ResetQueueEntries|0|bool|
+24|SetQueueEntry|3|bool|int nID, int nPosition, const char *pchEntryText
+25|SetCurrentQueueEntry|1|bool|int nID
+26|QueueDidChange|0|bool|
+27|PlaylistWillChange|0|bool|
+28|ResetPlaylistEntries|0|bool|
+29|SetPlaylistEntry|3|bool|int nID, int nPosition, const char *pchEntryText
+30|SetCurrentPlaylistEntry|1|bool|int nID
+31|PlaylistDidChange|0|bool|

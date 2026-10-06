@@ -1,0 +1,27 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamhttp.h (class ISteamHTTP)
+# also: .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteamhttp.h (+16 more)
+0|CreateHTTPRequest|2|HTTPRequestHandle|EHTTPMethod eHTTPRequestMethod, const char *pchAbsoluteURL
+1|SetHTTPRequestContextValue|2|bool|HTTPRequestHandle hRequest, uint64 ulContextValue
+2|SetHTTPRequestNetworkActivityTimeout|2|bool|HTTPRequestHandle hRequest, uint32 unTimeoutSeconds
+3|SetHTTPRequestHeaderValue|3|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, const char *pchHeaderValue
+4|SetHTTPRequestGetOrPostParameter|3|bool|HTTPRequestHandle hRequest, const char *pchParamName, const char *pchParamValue
+5|SendHTTPRequest|2|bool|HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle
+6|SendHTTPRequestAndStreamResponse|2|bool|HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle
+7|DeferHTTPRequest|1|bool|HTTPRequestHandle hRequest
+8|PrioritizeHTTPRequest|1|bool|HTTPRequestHandle hRequest
+9|GetHTTPResponseHeaderSize|3|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, uint32 *unResponseHeaderSize
+10|GetHTTPResponseHeaderValue|4|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, uint8 *pHeaderValueBuffer, uint32 unBufferSize
+11|GetHTTPResponseBodySize|2|bool|HTTPRequestHandle hRequest, uint32 *unBodySize
+12|GetHTTPResponseBodyData|3|bool|HTTPRequestHandle hRequest, uint8 *pBodyDataBuffer, uint32 unBufferSize
+13|GetHTTPStreamingResponseBodyData|4|bool|HTTPRequestHandle hRequest, uint32 cOffset, uint8 *pBodyDataBuffer, uint32 unBufferSize
+14|ReleaseHTTPRequest|1|bool|HTTPRequestHandle hRequest
+15|GetHTTPDownloadProgressPct|2|bool|HTTPRequestHandle hRequest, float *pflPercentOut
+16|SetHTTPRequestRawPostBody|4|bool|HTTPRequestHandle hRequest, const char *pchContentType, uint8 *pubBody, uint32 unBodyLen
+17|CreateCookieContainer|1|HTTPCookieContainerHandle|bool bAllowResponsesToModify
+18|ReleaseCookieContainer|1|bool|HTTPCookieContainerHandle hCookieContainer
+19|SetCookie|4|bool|HTTPCookieContainerHandle hCookieContainer, const char *pchHost, const char *pchUrl, const char *pchCookie
+20|SetHTTPRequestCookieContainer|2|bool|HTTPRequestHandle hRequest, HTTPCookieContainerHandle hCookieContainer
+21|SetHTTPRequestUserAgentInfo|2|bool|HTTPRequestHandle hRequest, const char *pchUserAgentInfo
+22|SetHTTPRequestRequiresVerifiedCertificate|2|bool|HTTPRequestHandle hRequest, bool bRequireVerifiedCertificate
+23|SetHTTPRequestAbsoluteTimeoutMS|2|bool|HTTPRequestHandle hRequest, uint32 unMilliseconds
+24|GetHTTPRequestWasTimedOut|2|bool|HTTPRequestHandle hRequest, bool *pbWasTimedOut

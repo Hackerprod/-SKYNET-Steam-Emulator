@@ -1,0 +1,40 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamhtmlsurface.h (class ISteamHTMLSurface)
+# also: .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteamhtmlsurface.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteamhtmlsurface.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteamhtmlsurface.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteamhtmlsurface.h, .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteamhtmlsurface.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteamhtmlsurface.h (+16 more)
+0|~ISteamHTMLSurface|0||
+1|Init|0|bool|
+2|Shutdown|0|bool|
+3|CreateBrowser|2|SteamAPICall_t|const char *pchUserAgent, const char *pchUserCSS
+4|RemoveBrowser|1|void|HHTMLBrowser unBrowserHandle
+5|LoadURL|3|void|HHTMLBrowser unBrowserHandle, const char *pchURL, const char *pchPostData
+6|SetSize|3|void|HHTMLBrowser unBrowserHandle, uint32 unWidth, uint32 unHeight
+7|StopLoad|1|void|HHTMLBrowser unBrowserHandle
+8|Reload|1|void|HHTMLBrowser unBrowserHandle
+9|GoBack|1|void|HHTMLBrowser unBrowserHandle
+10|GoForward|1|void|HHTMLBrowser unBrowserHandle
+11|AddHeader|3|void|HHTMLBrowser unBrowserHandle, const char *pchKey, const char *pchValue
+12|ExecuteJavascript|2|void|HHTMLBrowser unBrowserHandle, const char *pchScript
+13|MouseUp|2|void|HHTMLBrowser unBrowserHandle, EHTMLMouseButton eMouseButton
+14|MouseDown|2|void|HHTMLBrowser unBrowserHandle, EHTMLMouseButton eMouseButton
+15|MouseDoubleClick|2|void|HHTMLBrowser unBrowserHandle, EHTMLMouseButton eMouseButton
+16|MouseMove|3|void|HHTMLBrowser unBrowserHandle, int x, int y
+17|MouseWheel|2|void|HHTMLBrowser unBrowserHandle, int32 nDelta
+18|KeyDown|4|void|HHTMLBrowser unBrowserHandle, uint32 nNativeKeyCode, EHTMLKeyModifiers eHTMLKeyModifiers, bool bIsSystemKey
+19|KeyUp|3|void|HHTMLBrowser unBrowserHandle, uint32 nNativeKeyCode, EHTMLKeyModifiers eHTMLKeyModifiers
+20|KeyChar|3|void|HHTMLBrowser unBrowserHandle, uint32 cUnicodeChar, EHTMLKeyModifiers eHTMLKeyModifiers
+21|SetHorizontalScroll|2|void|HHTMLBrowser unBrowserHandle, uint32 nAbsolutePixelScroll
+22|SetVerticalScroll|2|void|HHTMLBrowser unBrowserHandle, uint32 nAbsolutePixelScroll
+23|SetKeyFocus|2|void|HHTMLBrowser unBrowserHandle, bool bHasKeyFocus
+24|ViewSource|1|void|HHTMLBrowser unBrowserHandle
+25|CopyToClipboard|1|void|HHTMLBrowser unBrowserHandle
+26|PasteFromClipboard|1|void|HHTMLBrowser unBrowserHandle
+27|Find|4|void|HHTMLBrowser unBrowserHandle, const char *pchSearchStr, bool bCurrentlyInFind, bool bReverse
+28|StopFind|1|void|HHTMLBrowser unBrowserHandle
+29|GetLinkAtPosition|3|void|HHTMLBrowser unBrowserHandle, int x, int y
+30|SetCookie|7|void|const char *pchHostname, const char *pchKey, const char *pchValue, const char *pchPath, RTime32 nExpires, bool bSecure, bool bHTTPOnly
+31|SetPageScaleFactor|4|void|HHTMLBrowser unBrowserHandle, float flZoom, int nPointX, int nPointY
+32|SetBackgroundMode|2|void|HHTMLBrowser unBrowserHandle, bool bBackgroundMode
+33|SetDPIScalingFactor|2|void|HHTMLBrowser unBrowserHandle, float flDPIScaling
+34|OpenDeveloperTools|1|void|HHTMLBrowser unBrowserHandle
+35|AllowStartRequest|2|void|HHTMLBrowser unBrowserHandle, bool bAllowed
+36|JSDialogResponse|2|void|HHTMLBrowser unBrowserHandle, bool bResult
+37|FileLoadDialogResponse|2|void|HHTMLBrowser unBrowserHandle, const char **pchSelectedFiles

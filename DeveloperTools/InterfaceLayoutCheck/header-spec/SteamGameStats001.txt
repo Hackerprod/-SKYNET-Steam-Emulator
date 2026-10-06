@@ -1,0 +1,15 @@
+# source: .tmp/SmokeAPI/res/steamworks/117/headers/steam/isteamgamestats.h (class ISteamGameStats)
+# also: .tmp/SmokeAPI/res/steamworks/108/headers/steam/isteamgamestats.h, .tmp/SmokeAPI/res/steamworks/109/headers/steam/isteamgamestats.h, .tmp/SmokeAPI/res/steamworks/110/headers/steam/isteamgamestats.h, .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamgamestats.h, .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamgamestats.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamgamestats.h (+3 more)
+0|GetNewSession|4|SteamAPICall_t|int8 nAccountType, uint64 ulAccountID, int32 nAppID, RTime32 rtTimeStarted
+1|EndSession|3|SteamAPICall_t|uint64 ulSessionID, RTime32 rtTimeEnded, int nReasonCode
+2|AddSessionAttributeInt|3|EResult|uint64 ulSessionID, const char* pstrName, int32 nData
+3|AddSessionAttributeString|3|EResult|uint64 ulSessionID, const char* pstrName, const char *pstrData
+4|AddSessionAttributeFloat|3|EResult|uint64 ulSessionID, const char* pstrName, float fData
+5|AddNewRow|3|EResult|uint64 *pulRowID, uint64 ulSessionID, const char *pstrTableName
+6|CommitRow|1|EResult|uint64 ulRowID
+7|CommitOutstandingRows|1|EResult|uint64 ulSessionID
+8|AddRowAttributeInt|3|EResult|uint64 ulRowID, const char *pstrName, int32 nData
+9|AddRowAtributeString|3|EResult|uint64 ulRowID, const char *pstrName, const char *pstrData
+10|AddRowAttributeFloat|3|EResult|uint64 ulRowID, const char *pstrName, float fData
+11|AddSessionAttributeInt64|3|EResult|uint64 ulSessionID, const char *pstrName, int64 llData
+12|AddRowAttributeInt64|3|EResult|uint64 ulRowID, const char *pstrName, int64 llData

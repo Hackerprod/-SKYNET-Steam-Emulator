@@ -1,0 +1,5 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamgamecoordinator.h (class ISteamGameCoordinator)
+# also: .tmp/SmokeAPI/res/steamworks/109/headers/steam/isteamgamecoordinator.h, .tmp/SmokeAPI/res/steamworks/110/headers/steam/isteamgamecoordinator.h, .tmp/SmokeAPI/res/steamworks/111/headers/steam/isteamgamecoordinator.h, .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamgamecoordinator.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamgamecoordinator.h, .tmp/SmokeAPI/res/steamworks/114/headers/steam/isteamgamecoordinator.h (+50 more)
+0|SendMessage|3|EGCResults|uint32 unMsgType, const void *pubData, uint32 cubData
+1|IsMessageAvailable|1|bool|uint32 *pcubMsgSize
+2|RetrieveMessage|4|EGCResults|uint32 *punMsgType, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize

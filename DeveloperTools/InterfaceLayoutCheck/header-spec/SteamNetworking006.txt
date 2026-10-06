@@ -1,0 +1,24 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamnetworking.h (class ISteamNetworking)
+# also: .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/149/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/150/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/151/headers/steam/isteamnetworking.h, .tmp/SmokeAPI/res/steamworks/152/headers/steam/isteamnetworking.h (+12 more)
+0|SendP2PPacket|5|bool|CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType, int nChannel
+1|IsP2PPacketAvailable|2|bool|uint32 *pcubMsgSize, int nChannel
+2|ReadP2PPacket|5|bool|void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote, int nChannel
+3|AcceptP2PSessionWithUser|1|bool|CSteamID steamIDRemote
+4|CloseP2PSessionWithUser|1|bool|CSteamID steamIDRemote
+5|CloseP2PChannelWithUser|2|bool|CSteamID steamIDRemote, int nChannel
+6|GetP2PSessionState|2|bool|CSteamID steamIDRemote, P2PSessionState_t *pConnectionState
+7|AllowP2PPacketRelay|1|bool|bool bAllow
+8|CreateListenSocket|4|SNetListenSocket_t|int nVirtualP2PPort, SteamIPAddress_t nIP, uint16 nPort, bool bAllowUseOfPacketRelay
+9|CreateP2PConnectionSocket|4|SNetSocket_t|CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay
+10|CreateConnectionSocket|3|SNetSocket_t|SteamIPAddress_t nIP, uint16 nPort, int nTimeoutSec
+11|DestroySocket|2|bool|SNetSocket_t hSocket, bool bNotifyRemoteEnd
+12|DestroyListenSocket|2|bool|SNetListenSocket_t hSocket, bool bNotifyRemoteEnd
+13|SendDataOnSocket|4|bool|SNetSocket_t hSocket, void *pubData, uint32 cubData, bool bReliable
+14|IsDataAvailableOnSocket|2|bool|SNetSocket_t hSocket, uint32 *pcubMsgSize
+15|RetrieveDataFromSocket|4|bool|SNetSocket_t hSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize
+16|IsDataAvailable|3|bool|SNetListenSocket_t hListenSocket, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+17|RetrieveData|5|bool|SNetListenSocket_t hListenSocket, void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, SNetSocket_t *phSocket
+18|GetSocketInfo|5|bool|SNetSocket_t hSocket, CSteamID *pSteamIDRemote, int *peSocketStatus, SteamIPAddress_t *punIPRemote, uint16 *punPortRemote
+19|GetListenSocketInfo|3|bool|SNetListenSocket_t hListenSocket, SteamIPAddress_t *pnIP, uint16 *pnPort
+20|GetSocketConnectionType|1|ESNetSocketConnectionType|SNetSocket_t hSocket
+21|GetMaxPacketSize|1|int|SNetSocket_t hSocket

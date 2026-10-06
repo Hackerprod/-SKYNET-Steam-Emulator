@@ -1,0 +1,16 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps004.h (class ISteamApps004)
+# also: .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/114/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/115/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/117/headers/steam/isteamapps.h
+0|BIsSubscribed|0|bool|
+1|BIsLowViolence|0|bool|
+2|BIsCybercafe|0|bool|
+3|BIsVACBanned|0|bool|
+4|GetCurrentGameLanguage|0|const char *|
+5|GetAvailableGameLanguages|0|const char *|
+6|BIsSubscribedApp|1|bool|AppId_t appID
+7|BIsDlcInstalled|1|bool|AppId_t appID
+8|GetEarliestPurchaseUnixTime|1|uint32|AppId_t nAppID
+9|BIsSubscribedFromFreeWeekend|0|bool|
+10|GetDLCCount|0|int|
+11|BGetDLCDataByIndex|5|bool|int iDLC, AppId_t *pAppID, bool *pbAvailable, char *pchName, int cchNameBufferSize
+12|InstallDLC|1|void|AppId_t nAppID
+13|UninstallDLC|1|void|AppId_t nAppID

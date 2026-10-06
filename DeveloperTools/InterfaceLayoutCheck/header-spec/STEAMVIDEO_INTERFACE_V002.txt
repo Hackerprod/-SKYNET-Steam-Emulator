@@ -1,0 +1,6 @@
+# source: .tmp/SmokeAPI/res/steamworks/159/headers/steam/isteamvideo.h (class ISteamVideo)
+# also: .tmp/SmokeAPI/res/steamworks/140/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/141/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/142/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteamvideo.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteamvideo.h (+14 more)
+0|GetVideoURL|1|void|AppId_t unVideoAppID
+1|IsBroadcasting|1|bool|int *pnNumViewers
+2|GetOPFSettings|1|void|AppId_t unVideoAppID
+3|GetOPFStringForApp|3|bool|AppId_t unVideoAppID, char *pchBuffer, int32 *pnBufferSize

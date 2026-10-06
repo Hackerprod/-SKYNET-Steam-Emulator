@@ -1,0 +1,8 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuser010.h (class ISteamUser010)
+# also: .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteamuser.h
+0|GetHSteamUser|0|HSteamUser|
+1|BLoggedOn|0|bool|
+2|GetSteamID|0|CSteamID|
+3|InitiateGameConnection|6|int|void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure
+4|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+5|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo

@@ -1,0 +1,9 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamremotestorage001.h (class ISteamRemoteStorage001)
+0|FileWrite|3|bool|const char *pchFile, const void *pvData, int32 cubData
+1|GetFileSize|1|int32|const char *pchFile
+2|FileRead|3|int32|const char *pchFile, void *pvData, int32 cubDataToRead
+3|FileExists|1|bool|const char *pchFile
+4|FileDelete|1|bool|const char *pchFile
+5|GetFileCount|0|int32|
+6|GetFileNameAndSize|2|const char *|int iFile, int32 *pnFileSizeInBytes
+7|GetQuota|2|bool|int32 *pnTotalBytes, int32 *puAvailableBytes

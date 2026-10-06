@@ -1,0 +1,14 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteammatchmaking.h (class ISteamParties)
+# also: .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/147/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/148a/headers/steam/isteammatchmaking.h (+16 more)
+0|GetNumActiveBeacons|0|uint32|
+1|GetBeaconByIndex|1|PartyBeaconID_t|uint32 unIndex
+2|GetBeaconDetails|5|bool|PartyBeaconID_t ulBeaconID, CSteamID *pSteamIDBeaconOwner, SteamPartyBeaconLocation_t *pLocation, char *pchMetadata, int cchMetadata
+3|JoinParty|1|SteamAPICall_t|PartyBeaconID_t ulBeaconID
+4|GetNumAvailableBeaconLocations|1|bool|uint32 *puNumLocations
+5|GetAvailableBeaconLocations|2|bool|SteamPartyBeaconLocation_t *pLocationList, uint32 uMaxNumLocations
+6|CreateBeacon|4|SteamAPICall_t|uint32 unOpenSlots, SteamPartyBeaconLocation_t *pBeaconLocation, const char *pchConnectString, const char *pchMetadata
+7|OnReservationCompleted|2|void|PartyBeaconID_t ulBeacon, CSteamID steamIDUser
+8|CancelReservation|2|void|PartyBeaconID_t ulBeacon, CSteamID steamIDUser
+9|ChangeNumOpenSlots|2|SteamAPICall_t|PartyBeaconID_t ulBeacon, uint32 unOpenSlots
+10|DestroyBeacon|1|bool|PartyBeaconID_t ulBeacon
+11|GetBeaconLocationData|4|bool|SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, char *pchDataStringOut, int cchDataStringOut

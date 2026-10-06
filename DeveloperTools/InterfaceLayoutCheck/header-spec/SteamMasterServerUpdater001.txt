@@ -1,0 +1,16 @@
+# source: .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteammasterserverupdater.h (class ISteamMasterServerUpdater)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteammasterserverupdater.h, .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteammasterserverupdater.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteammasterserverupdater.h, .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteammasterserverupdater.h, .tmp/SmokeAPI/res/steamworks/104/headers/steam/isteammasterserverupdater.h, .tmp/SmokeAPI/res/steamworks/105/headers/steam/isteammasterserverupdater.h (+11 more)
+0|SetActive|1|void|bool bActive
+1|SetHeartbeatInterval|1|void|int iHeartbeatInterval
+2|HandleIncomingPacket|4|bool|const void *pData, int cbData, uint32 srcIP, uint16 srcPort
+3|GetNextOutgoingPacket|4|int|void *pOut, int cbMaxOut, uint32 *pNetAdr, uint16 *pPort
+4|SetBasicServerData|7|void|unsigned short nProtocolVersion, bool bDedicatedServer, const char *pRegionName, const char *pProductName, unsigned short nMaxReportedClients, bool bPasswordProtected, const char *pGameDescription
+5|ClearAllKeyValues|0|void|
+6|SetKeyValue|2|void|const char *pKey, const char *pValue
+7|NotifyShutdown|0|void|
+8|WasRestartRequested|0|bool|
+9|ForceHeartbeat|0|void|
+10|AddMasterServer|1|bool|const char *pServerAddress
+11|RemoveMasterServer|1|bool|const char *pServerAddress
+12|GetNumMasterServers|0|int|
+13|GetMasterServerAddress|3|int|int iServer, char *pOut, int outBufferSize

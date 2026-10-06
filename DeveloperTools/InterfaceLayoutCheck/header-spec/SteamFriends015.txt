@@ -1,0 +1,74 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamfriends015.h (class ISteamFriends015)
+# also: .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamfriends.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamfriends.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamfriends.h, .tmp/SmokeAPI/res/steamworks/135/headers/steam/isteamfriends.h, .tmp/SmokeAPI/res/steamworks/135a/headers/steam/isteamfriends.h, .tmp/SmokeAPI/res/steamworks/136/headers/steam/isteamfriends.h (+6 more)
+0|GetPersonaName|0|const char *|
+1|SetPersonaName|1|SteamAPICall_t|const char *pchPersonaName
+2|GetPersonaState|0|EPersonaState|
+3|GetFriendCount|1|int|int iFriendFlags
+4|GetFriendByIndex|2|CSteamID|int iFriend, int iFriendFlags
+5|GetFriendRelationship|1|EFriendRelationship|CSteamID steamIDFriend
+6|GetFriendPersonaState|1|EPersonaState|CSteamID steamIDFriend
+7|GetFriendPersonaName|1|const char *|CSteamID steamIDFriend
+8|GetFriendGamePlayed|2|bool|CSteamID steamIDFriend, FriendGameInfo_t *pFriendGameInfo
+9|GetFriendPersonaNameHistory|2|const char *|CSteamID steamIDFriend, int iPersonaName
+10|GetFriendSteamLevel|1|int|CSteamID steamIDFriend
+11|GetPlayerNickname|1|const char *|CSteamID steamIDPlayer
+12|GetFriendsGroupCount|0|int|
+13|GetFriendsGroupIDByIndex|1|FriendsGroupID_t|int iFG
+14|GetFriendsGroupName|1|const char *|FriendsGroupID_t friendsGroupID
+15|GetFriendsGroupMembersCount|1|int|FriendsGroupID_t friendsGroupID
+16|GetFriendsGroupMembersList|3|void|FriendsGroupID_t friendsGroupID, CSteamID *pOutSteamIDMembers, int nMembersCount
+17|HasFriend|2|bool|CSteamID steamIDFriend, int iFriendFlags
+18|GetClanCount|0|int|
+19|GetClanByIndex|1|CSteamID|int iClan
+20|GetClanName|1|const char *|CSteamID steamIDClan
+21|GetClanTag|1|const char *|CSteamID steamIDClan
+22|GetClanActivityCounts|4|bool|CSteamID steamIDClan, int *pnOnline, int *pnInGame, int *pnChatting
+23|DownloadClanActivityCounts|2|SteamAPICall_t|CSteamID *psteamIDClans, int cClansToRequest
+24|GetFriendCountFromSource|1|int|CSteamID steamIDSource
+25|GetFriendFromSourceByIndex|2|CSteamID|CSteamID steamIDSource, int iFriend
+26|IsUserInSource|2|bool|CSteamID steamIDUser, CSteamID steamIDSource
+27|SetInGameVoiceSpeaking|2|void|CSteamID steamIDUser, bool bSpeaking
+28|ActivateGameOverlay|1|void|const char *pchDialog
+29|ActivateGameOverlayToUser|2|void|const char *pchDialog, CSteamID steamID
+30|ActivateGameOverlayToWebPage|1|void|const char *pchURL
+31|ActivateGameOverlayToStore|2|void|AppId_t nAppID, EOverlayToStoreFlag eFlag
+32|SetPlayedWith|1|void|CSteamID steamIDUserPlayedWith
+33|ActivateGameOverlayInviteDialog|1|void|CSteamID steamIDLobby
+34|GetSmallFriendAvatar|1|int|CSteamID steamIDFriend
+35|GetMediumFriendAvatar|1|int|CSteamID steamIDFriend
+36|GetLargeFriendAvatar|1|int|CSteamID steamIDFriend
+37|RequestUserInformation|2|bool|CSteamID steamIDUser, bool bRequireNameOnly
+38|RequestClanOfficerList|1|SteamAPICall_t|CSteamID steamIDClan
+39|GetClanOwner|1|CSteamID|CSteamID steamIDClan
+40|GetClanOfficerCount|1|int|CSteamID steamIDClan
+41|GetClanOfficerByIndex|2|CSteamID|CSteamID steamIDClan, int iOfficer
+42|GetUserRestrictions|0|uint32|
+43|SetRichPresence|2|bool|const char *pchKey, const char *pchValue
+44|ClearRichPresence|0|void|
+45|GetFriendRichPresence|2|const char *|CSteamID steamIDFriend, const char *pchKey
+46|GetFriendRichPresenceKeyCount|1|int|CSteamID steamIDFriend
+47|GetFriendRichPresenceKeyByIndex|2|const char *|CSteamID steamIDFriend, int iKey
+48|RequestFriendRichPresence|1|void|CSteamID steamIDFriend
+49|InviteUserToGame|2|bool|CSteamID steamIDFriend, const char *pchConnectString
+50|GetCoplayFriendCount|0|int|
+51|GetCoplayFriend|1|CSteamID|int iCoplayFriend
+52|GetFriendCoplayTime|1|int|CSteamID steamIDFriend
+53|GetFriendCoplayGame|1|AppId_t|CSteamID steamIDFriend
+54|JoinClanChatRoom|1|SteamAPICall_t|CSteamID steamIDClan
+55|LeaveClanChatRoom|1|bool|CSteamID steamIDClan
+56|GetClanChatMemberCount|1|int|CSteamID steamIDClan
+57|GetChatMemberByIndex|2|CSteamID|CSteamID steamIDClan, int iUser
+58|SendClanChatMessage|2|bool|CSteamID steamIDClanChat, const char *pchText
+59|GetClanChatMessage|6|int|CSteamID steamIDClanChat, int iMessage, void *prgchText, int cchTextMax, EChatEntryType *peChatEntryType, CSteamID *psteamidChatter
+60|IsClanChatAdmin|2|bool|CSteamID steamIDClanChat, CSteamID steamIDUser
+61|IsClanChatWindowOpenInSteam|1|bool|CSteamID steamIDClanChat
+62|OpenClanChatWindowInSteam|1|bool|CSteamID steamIDClanChat
+63|CloseClanChatWindowInSteam|1|bool|CSteamID steamIDClanChat
+64|SetListenForFriendsMessages|1|bool|bool bInterceptEnabled
+65|ReplyToFriendMessage|2|bool|CSteamID steamIDFriend, const char *pchMsgToSend
+66|GetFriendMessage|5|int|CSteamID steamIDFriend, int iMessageID, void *pvData, int cubData, EChatEntryType *peChatEntryType
+67|GetFollowerCount|1|SteamAPICall_t|CSteamID steamID
+68|IsFollowing|1|SteamAPICall_t|CSteamID steamID
+69|EnumerateFollowingList|1|SteamAPICall_t|uint32 unStartIndex
+70|IsClanPublic|1|bool|CSteamID steamIDClan
+71|IsClanOfficialGameGroup|1|bool|CSteamID steamIDClan

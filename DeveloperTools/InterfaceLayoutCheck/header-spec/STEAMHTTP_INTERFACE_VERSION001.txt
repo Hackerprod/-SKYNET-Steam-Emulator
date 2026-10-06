@@ -1,0 +1,17 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamhttp001.h (class ISteamHTTP001)
+# also: .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/114/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/115/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/117/headers/steam/isteamhttp.h, .tmp/SmokeAPI/res/steamworks/118/headers/steam/isteamhttp.h (+3 more)
+0|CreateHTTPRequest|2|HTTPRequestHandle|EHTTPMethod eHTTPRequestMethod, const char *pchAbsoluteURL
+1|SetHTTPRequestContextValue|2|bool|HTTPRequestHandle hRequest, uint64 ulContextValue
+2|SetHTTPRequestNetworkActivityTimeout|2|bool|HTTPRequestHandle hRequest, uint32 unTimeoutSeconds
+3|SetHTTPRequestHeaderValue|3|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, const char *pchHeaderValue
+4|SetHTTPRequestGetOrPostParameter|3|bool|HTTPRequestHandle hRequest, const char *pchParamName, const char *pchParamValue
+5|SendHTTPRequest|2|bool|HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle
+6|DeferHTTPRequest|1|bool|HTTPRequestHandle hRequest
+7|PrioritizeHTTPRequest|1|bool|HTTPRequestHandle hRequest
+8|GetHTTPResponseHeaderSize|3|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, uint32 *unResponseHeaderSize
+9|GetHTTPResponseHeaderValue|4|bool|HTTPRequestHandle hRequest, const char *pchHeaderName, uint8 *pHeaderValueBuffer, uint32 unBufferSize
+10|GetHTTPResponseBodySize|2|bool|HTTPRequestHandle hRequest, uint32 *unBodySize
+11|GetHTTPResponseBodyData|3|bool|HTTPRequestHandle hRequest, uint8 *pBodyDataBuffer, uint32 unBufferSize
+12|ReleaseHTTPRequest|1|bool|HTTPRequestHandle hRequest
+13|GetHTTPDownloadProgressPct|2|bool|HTTPRequestHandle hRequest, float *pflPercentOut
+14|SetHTTPRequestRawPostBody|4|bool|HTTPRequestHandle hRequest, const char *pchContentType, uint8 *pubBody, uint32 unBodyLen

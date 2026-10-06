@@ -1,0 +1,24 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamclient007.h (class ISteamClient007)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteamclient.h, .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteamclient.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteamclient.h, .tmp/SmokeAPI/res/steamworks/103/headers/steam/isteamclient.h
+# WARNING sources disagree: LONGER-THAN-CHOSEN other-sources=[sdk103] n=22 (chosen n=21) first-diff@21 other=getisteamremotestorage chosen=None
+0|CreateSteamPipe|0|HSteamPipe|
+1|BReleaseSteamPipe|1|bool|HSteamPipe hSteamPipe
+2|ConnectToGlobalUser|1|HSteamUser|HSteamPipe hSteamPipe
+3|CreateLocalUser|1|HSteamUser|HSteamPipe *phSteamPipe
+4|ReleaseUser|2|void|HSteamPipe hSteamPipe, HSteamUser hUser
+5|GetISteamUser|3|ISteamUser *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+6|GetISteamGameServer|3|ISteamGameServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+7|SetLocalIPBinding|2|void|uint32 unIP, uint16 usPort
+8|GetISteamFriends|3|ISteamFriends *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+9|GetISteamUtils|2|ISteamUtils *|HSteamPipe hSteamPipe, const char *pchVersion
+10|GetISteamMatchmaking|3|ISteamMatchmaking *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+11|GetISteamContentServer|3|ISteamContentServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+12|GetISteamMasterServerUpdater|3|ISteamMasterServerUpdater *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+13|GetISteamMatchmakingServers|3|ISteamMatchmakingServers *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+14|GetISteamGenericInterface|3|void *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+15|RunFrame|0|void|
+16|GetIPCCallCount|0|uint32|
+17|GetISteamUserStats|3|ISteamUserStats *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+18|GetISteamApps|3|ISteamApps *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+19|GetISteamNetworking|3|ISteamNetworking *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+20|SetWarningMessageHook|1|void|SteamAPIWarningMessageHook_t pFunction

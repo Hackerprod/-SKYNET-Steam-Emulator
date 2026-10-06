@@ -1,0 +1,33 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamcontroller006.h (class ISteamController006)
+# also: .tmp/SmokeAPI/res/steamworks/142/headers/steam/isteamcontroller.h
+0|Init|0|bool|
+1|Shutdown|0|bool|
+2|RunFrame|0|void|
+3|GetConnectedControllers|1|int|ControllerHandle_t *handlesOut
+4|ShowBindingPanel|1|bool|ControllerHandle_t controllerHandle
+5|GetActionSetHandle|1|ControllerActionSetHandle_t|const char *pszActionSetName
+6|ActivateActionSet|2|void|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle
+7|GetCurrentActionSet|1|ControllerActionSetHandle_t|ControllerHandle_t controllerHandle
+8|ActivateActionSetLayer|2|void|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetLayerHandle
+9|DeactivateActionSetLayer|2|void|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetLayerHandle
+10|DeactivateAllActionSetLayers|1|void|ControllerHandle_t controllerHandle
+11|GetActiveActionSetLayers|2|int|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t *handlesOut
+12|GetDigitalActionHandle|1|ControllerDigitalActionHandle_t|const char *pszActionName
+13|GetDigitalActionData|2|ControllerDigitalActionData_t|ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle
+14|GetDigitalActionOrigins|4|int|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, EControllerActionOrigin *originsOut
+15|GetAnalogActionHandle|1|ControllerAnalogActionHandle_t|const char *pszActionName
+16|GetAnalogActionData|2|ControllerAnalogActionData_t|ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle
+17|GetAnalogActionOrigins|4|int|ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, EControllerActionOrigin *originsOut
+18|StopAnalogActionMomentum|2|void|ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t eAction
+19|TriggerHapticPulse|3|void|ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec
+20|TriggerRepeatedHapticPulse|6|void|ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags
+21|TriggerVibration|3|void|ControllerHandle_t controllerHandle, unsigned short usLeftSpeed, unsigned short usRightSpeed
+22|SetLEDColor|5|void|ControllerHandle_t controllerHandle, uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags
+23|GetGamepadIndexForController|1|int|ControllerHandle_t ulControllerHandle
+24|GetControllerForGamepadIndex|1|ControllerHandle_t|int nIndex
+25|GetMotionData|1|ControllerMotionData_t|ControllerHandle_t controllerHandle
+26|ShowDigitalActionOrigins|5|bool|ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle, float flScale, float flXPosition, float flYPosition
+27|ShowAnalogActionOrigins|5|bool|ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition
+28|GetStringForActionOrigin|1|const char *|EControllerActionOrigin eOrigin
+29|GetGlyphForActionOrigin|1|const char *|EControllerActionOrigin eOrigin
+30|GetInputTypeForHandle|1|ESteamInputType|ControllerHandle_t controllerHandle

@@ -1,0 +1,24 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamremotestorage004.h (class ISteamRemoteStorage004)
+# also: .tmp/SmokeAPI/res/steamworks/112/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/113/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/114/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/115/headers/steam/isteamremotestorage.h, .tmp/SmokeAPI/res/steamworks/116/headers/steam/isteamremotestorage.h
+0|FileWrite|3|bool|const char *pchFile, const void *pvData, int32 cubData
+1|FileRead|3|int32|const char *pchFile, void *pvData, int32 cubDataToRead
+2|FileForget|1|bool|const char *pchFile
+3|FileDelete|1|bool|const char *pchFile
+4|FileShare|1|SteamAPICall_t|const char *pchFile
+5|SetSyncPlatforms|2|bool|const char *pchFile, ERemoteStoragePlatform eRemoteStoragePlatform
+6|FileExists|1|bool|const char *pchFile
+7|FilePersisted|1|bool|const char *pchFile
+8|GetFileSize|1|int32|const char *pchFile
+9|GetFileTimestamp|1|int64|const char *pchFile
+10|GetSyncPlatforms|1|ERemoteStoragePlatform|const char *pchFile
+11|GetFileCount|0|int32|
+12|GetFileNameAndSize|2|const char *|int iFile, int32 *pnFileSizeInBytes
+13|GetQuota|2|bool|int32 *pnTotalBytes, int32 *puAvailableBytes
+14|IsCloudEnabledForAccount|0|bool|
+15|IsCloudEnabledForApp|0|bool|
+16|SetCloudEnabledForApp|1|void|bool bEnabled
+17|UGCDownload|1|SteamAPICall_t|UGCHandle_t hContent
+18|GetUGCDetails|5|bool|UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner
+19|UGCRead|3|int32|UGCHandle_t hContent, void *pvData, int32 cubDataToRead
+20|GetCachedUGCCount|0|int32|
+21|GetCachedUGCHandle|1|UGCHandle_t|int32 iCachedContent

@@ -1,0 +1,21 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamuserstats002.h (class ISteamUserStats002)
+# overload GetStat slots 6,7
+# overload SetStat slots 8,9
+0|GetNumStats|1|uint32|CGameID nGameID
+1|GetStatName|2|const char *|CGameID nGameID, uint32 iStat
+2|GetStatType|2|ESteamUserStatType|CGameID nGameID, const char *pchName
+3|GetNumAchievements|1|uint32|CGameID nGameID
+4|GetAchievementName|2|const char *|CGameID nGameID, uint32 iAchievement
+5|RequestCurrentStats|1|bool|CGameID nGameID
+6|GetStat|3|bool|CGameID nGameID, const char *pchName, float *pData
+7|GetStat|3|bool|CGameID nGameID, const char *pchName, int32 *pData
+8|SetStat|3|bool|CGameID nGameID, const char *pchName, float fData
+9|SetStat|3|bool|CGameID nGameID, const char *pchName, int32 nData
+10|UpdateAvgRateStat|4|bool|CGameID nGameID, const char *pchName, float flCountThisSession, double dSessionLength
+11|GetAchievement|3|bool|CGameID nGameID, const char *pchName, bool *pbAchieved
+12|SetAchievement|2|bool|CGameID nGameID, const char *pchName
+13|ClearAchievement|2|bool|CGameID nGameID, const char *pchName
+14|StoreStats|1|bool|CGameID nGameID
+15|GetAchievementIcon|2|int|CGameID nGameID, const char *pchName
+16|GetAchievementDisplayAttribute|3|const char *|CGameID nGameID, const char *pchName, const char *pchKey
+17|IndicateAchievementProgress|4|bool|CGameID nGameID, const char *pchName, uint32 nCurProgress, uint32 nMaxProgress

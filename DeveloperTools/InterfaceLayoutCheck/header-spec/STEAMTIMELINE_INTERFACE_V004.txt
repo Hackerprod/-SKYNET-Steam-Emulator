@@ -1,0 +1,20 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamtimeline.h (class ISteamTimeline)
+# also: .tmp/SmokeAPI/res/steamworks/161/headers/steam/isteamtimeline.h, .tmp/SmokeAPI/res/steamworks/162/headers/steam/isteamtimeline.h, .tmp/SmokeAPI/res/steamworks/163/headers/steam/isteamtimeline.h
+0|SetTimelineTooltip|2|void|const char *pchDescription, float flTimeDelta
+1|ClearTimelineTooltip|1|void|float flTimeDelta
+2|SetTimelineGameMode|1|void|ETimelineGameMode eMode
+3|AddInstantaneousTimelineEvent|6|TimelineEventHandle_t|const char *pchTitle, const char *pchDescription, const char *pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, ETimelineEventClipPriority ePossibleClip
+4|AddRangeTimelineEvent|7|TimelineEventHandle_t|const char *pchTitle, const char *pchDescription, const char *pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, float flDuration, ETimelineEventClipPriority ePossibleClip
+5|StartRangeTimelineEvent|6|TimelineEventHandle_t|const char *pchTitle, const char *pchDescription, const char *pchIcon, uint32 unPriority, float flStartOffsetSeconds, ETimelineEventClipPriority ePossibleClip
+6|UpdateRangeTimelineEvent|6|void|TimelineEventHandle_t ulEvent, const char *pchTitle, const char *pchDescription, const char *pchIcon, uint32 unPriority, ETimelineEventClipPriority ePossibleClip
+7|EndRangeTimelineEvent|2|void|TimelineEventHandle_t ulEvent, float flEndOffsetSeconds
+8|RemoveTimelineEvent|1|void|TimelineEventHandle_t ulEvent
+9|DoesEventRecordingExist|1|SteamAPICall_t|TimelineEventHandle_t ulEvent
+10|StartGamePhase|0|void|
+11|EndGamePhase|0|void|
+12|SetGamePhaseID|1|void|const char *pchPhaseID
+13|DoesGamePhaseRecordingExist|1|SteamAPICall_t|const char *pchPhaseID
+14|AddGamePhaseTag|4|void|const char *pchTagName, const char *pchTagIcon, const char *pchTagGroup, uint32 unPriority
+15|SetGamePhaseAttribute|3|void|const char *pchAttributeGroup, const char *pchAttributeValue, uint32 unPriority
+16|OpenOverlayToGamePhase|1|void|const char *pchPhaseID
+17|OpenOverlayToTimelineEvent|1|void|const TimelineEventHandle_t ulEvent

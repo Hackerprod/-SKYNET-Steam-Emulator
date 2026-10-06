@@ -1,0 +1,8 @@
+# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamparentalsettings.h (class ISteamParentalSettings)
+# also: .tmp/SmokeAPI/res/steamworks/141/headers/steam/isteamparentalsettings.h, .tmp/SmokeAPI/res/steamworks/142/headers/steam/isteamparentalsettings.h, .tmp/SmokeAPI/res/steamworks/143/headers/steam/isteamparentalsettings.h, .tmp/SmokeAPI/res/steamworks/144/headers/steam/isteamparentalsettings.h, .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteamparentalsettings.h, .tmp/SmokeAPI/res/steamworks/146/headers/steam/isteamparentalsettings.h (+18 more)
+0|BIsParentalLockEnabled|0|bool|
+1|BIsParentalLockLocked|0|bool|
+2|BIsAppBlocked|1|bool|AppId_t nAppID
+3|BIsAppInBlockList|1|bool|AppId_t nAppID
+4|BIsFeatureBlocked|1|bool|EParentalFeature eFeature
+5|BIsFeatureInBlockList|1|bool|EParentalFeature eFeature

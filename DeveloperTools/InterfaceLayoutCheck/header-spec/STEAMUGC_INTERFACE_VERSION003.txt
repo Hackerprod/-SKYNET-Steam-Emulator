@@ -1,0 +1,33 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamugc003.h (class ISteamUGC003)
+# also: .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteamugc.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamugc.h
+0|CreateQueryUserUGCRequest|7|UGCQueryHandle_t|AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+1|CreateQueryAllUGCRequest|5|UGCQueryHandle_t|EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
+2|SendQueryUGCRequest|1|SteamAPICall_t|UGCQueryHandle_t handle
+3|GetQueryUGCResult|3|bool|UGCQueryHandle_t handle, uint32 index, SteamUGCDetails_t *pDetails
+4|ReleaseQueryUGCRequest|1|bool|UGCQueryHandle_t handle
+5|AddRequiredTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+6|AddExcludedTag|2|bool|UGCQueryHandle_t handle, const char *pTagName
+7|SetReturnLongDescription|2|bool|UGCQueryHandle_t handle, bool bReturnLongDescription
+8|SetReturnTotalOnly|2|bool|UGCQueryHandle_t handle, bool bReturnTotalOnly
+9|SetAllowCachedResponse|2|bool|UGCQueryHandle_t handle, uint32 unMaxAgeSeconds
+10|SetCloudFileNameFilter|2|bool|UGCQueryHandle_t handle, const char *pMatchCloudFileName
+11|SetMatchAnyTag|2|bool|UGCQueryHandle_t handle, bool bMatchAnyTag
+12|SetSearchText|2|bool|UGCQueryHandle_t handle, const char *pSearchText
+13|SetRankedByTrendDays|2|bool|UGCQueryHandle_t handle, uint32 unDays
+14|RequestUGCDetails|2|SteamAPICall_t|PublishedFileId_t nPublishedFileID, uint32 unMaxAgeSeconds
+15|CreateItem|2|SteamAPICall_t|AppId_t nConsumerAppId, EWorkshopFileType eFileType
+16|StartItemUpdate|2|UGCUpdateHandle_t|AppId_t nConsumerAppId, PublishedFileId_t nPublishedFileID
+17|SetItemTitle|2|bool|UGCUpdateHandle_t handle, const char *pchTitle
+18|SetItemDescription|2|bool|UGCUpdateHandle_t handle, const char *pchDescription
+19|SetItemVisibility|2|bool|UGCUpdateHandle_t handle, ERemoteStoragePublishedFileVisibility eVisibility
+20|SetItemTags|2|bool|UGCUpdateHandle_t updateHandle, const SteamParamStringArray_t *pTags
+21|SetItemContent|2|bool|UGCUpdateHandle_t handle, const char *pszContentFolder
+22|SetItemPreview|2|bool|UGCUpdateHandle_t handle, const char *pszPreviewFile
+23|SubmitItemUpdate|2|SteamAPICall_t|UGCUpdateHandle_t handle, const char *pchChangeNote
+24|GetItemUpdateProgress|3|EItemUpdateStatus|UGCUpdateHandle_t handle, uint64 *punBytesProcessed, uint64* punBytesTotal
+25|SubscribeItem|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
+26|UnsubscribeItem|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
+27|GetNumSubscribedItems|0|uint32|
+28|GetSubscribedItems|2|uint32|PublishedFileId_t* pvecPublishedFileID, uint32 cMaxEntries
+29|GetItemInstallInfo|5|bool|PublishedFileId_t nPublishedFileID, uint64 *punSizeOnDisk, char *pchFolder, uint32 cchFolderSize, bool *pbLegacyItem
+30|GetItemUpdateInfo|5|bool|PublishedFileId_t nPublishedFileID, bool *pbNeedsUpdate, bool *pbIsDownloading, uint64 *punBytesDownloaded, uint64 *punBytesTotal

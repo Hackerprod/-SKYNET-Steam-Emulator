@@ -1,0 +1,7 @@
+# source: .tmp/SmokeAPI/res/steamworks/141/headers/steam/isteamunifiedmessages.h (class ISteamUnifiedMessages)
+# also: .tmp/SmokeAPI/res/steamworks/123a/headers/steam/isteamunifiedmessages.h, .tmp/SmokeAPI/res/steamworks/125/headers/steam/isteamunifiedmessages.h, .tmp/SmokeAPI/res/steamworks/126a/headers/steam/isteamunifiedmessages.h, .tmp/SmokeAPI/res/steamworks/127/headers/steam/isteamunifiedmessages.h, .tmp/SmokeAPI/res/steamworks/128/headers/steam/isteamunifiedmessages.h, .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamunifiedmessages.h (+13 more)
+0|SendMethod|4|ClientUnifiedMessageHandle|const char *pchServiceMethod, const void *pRequestBuffer, uint32 unRequestBufferSize, uint64 unContext
+1|GetMethodResponseInfo|3|bool|ClientUnifiedMessageHandle hHandle, uint32 *punResponseSize, EResult *peResult
+2|GetMethodResponseData|4|bool|ClientUnifiedMessageHandle hHandle, void *pResponseBuffer, uint32 unResponseBufferSize, bool bAutoRelease
+3|ReleaseMethod|1|bool|ClientUnifiedMessageHandle hHandle
+4|SendNotification|3|bool|const char *pchServiceNotification, const void *pNotificationBuffer, uint32 unNotificationBufferSize

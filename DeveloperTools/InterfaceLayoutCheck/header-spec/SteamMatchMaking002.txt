@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteammatchmaking002.h (class ISteamMatchmaking002)
+# also: .tmp/SmokeAPI/res/steamworks/100/headers/steam/isteammatchmaking.h, .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteammatchmaking.h
+0|GetFavoriteGameCount|0|int|
+1|GetFavoriteGame|7|bool|int iGame, AppId_t *pnAppID, uint32 *pnIP, uint16 *pnConnPort, uint16 *pnQueryPort, uint32 *punFlags, uint32 *pRTime32LastPlayedOnServer
+2|AddFavoriteGame|6|int|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags, uint32 rTime32LastPlayedOnServer
+3|RemoveFavoriteGame|5|bool|AppId_t nAppID, uint32 nIP, uint16 nConnPort, uint16 nQueryPort, uint32 unFlags
+4|RequestLobbyList_OLD|0|void|
+5|GetLobbyByIndex|1|CSteamID|int iLobby
+6|CreateLobby|1|void|bool bPrivate
+7|JoinLobby_OLD|1|void|CSteamID steamIDLobby
+8|LeaveLobby|1|void|CSteamID steamIDLobby
+9|InviteUserToLobby|2|bool|CSteamID steamIDLobby, CSteamID steamIDInvitee
+10|GetNumLobbyMembers|1|int|CSteamID steamIDLobby
+11|GetLobbyMemberByIndex|2|CSteamID|CSteamID steamIDLobby, int iMember
+12|GetLobbyData|2|const char *|CSteamID steamIDLobby, const char *pchKey
+13|SetLobbyData|3|bool|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+14|GetLobbyMemberData|3|const char *|CSteamID steamIDLobby, CSteamID steamIDUser, const char *pchKey
+15|SetLobbyMemberData|3|void|CSteamID steamIDLobby, const char *pchKey, const char *pchValue
+16|SendLobbyChatMsg|3|bool|CSteamID steamIDLobby, const void *pvMsgBody, int cubMsgBody
+17|GetLobbyChatEntry|6|int|CSteamID steamIDLobby, int iChatID, CSteamID *pSteamIDUser, void *pvData, int cubData, EChatEntryType *peChatEntryType
+18|RequestLobbyData|1|bool|CSteamID steamIDLobby
+19|SetLobbyGameServer|4|void|CSteamID steamIDLobby, uint32 unGameServerIP, uint16 unGameServerPort, CSteamID steamIDGameServer

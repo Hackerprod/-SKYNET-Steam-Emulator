@@ -1,0 +1,33 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworkingsockets003.h (class ISteamNetworkingSockets003)
+# also: .tmp/SmokeAPI/res/steamworks/145/headers/steam/isteamnetworkingsockets.h
+0|CreateListenSocketIP|1|HSteamListenSocket|const SteamNetworkingIPAddr &localAddress
+1|ConnectByIPAddress|1|HSteamNetConnection|const SteamNetworkingIPAddr &address
+2|CreateListenSocketP2P|1|HSteamListenSocket|int nVirtualPort
+3|ConnectP2P|2|HSteamNetConnection|const SteamNetworkingIdentity &identityRemote, int nVirtualPort
+4|AcceptConnection|1|EResult|HSteamNetConnection hConn
+5|CloseConnection|4|bool|HSteamNetConnection hPeer, int nReason, const char *pszDebug, bool bEnableLinger
+6|CloseListenSocket|1|bool|HSteamListenSocket hSocket
+7|SetConnectionUserData|2|bool|HSteamNetConnection hPeer, int64 nUserData
+8|GetConnectionUserData|1|int64|HSteamNetConnection hPeer
+9|SetConnectionName|2|void|HSteamNetConnection hPeer, const char *pszName
+10|GetConnectionName|3|bool|HSteamNetConnection hPeer, char *pszName, int nMaxLen
+11|SendMessageToConnection|4|EResult|HSteamNetConnection hConn, const void *pData, uint32 cbData, int nSendFlags
+12|FlushMessagesOnConnection|1|EResult|HSteamNetConnection hConn
+13|ReceiveMessagesOnConnection|3|int|HSteamNetConnection hConn, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages
+14|ReceiveMessagesOnListenSocket|3|int|HSteamListenSocket hSocket, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages
+15|GetConnectionInfo|2|bool|HSteamNetConnection hConn, SteamNetConnectionInfo_t *pInfo
+16|GetQuickConnectionStatus|2|bool|HSteamNetConnection hConn, SteamNetworkingQuickConnectionStatus *pStats
+17|GetDetailedConnectionStatus|3|int|HSteamNetConnection hConn, char *pszBuf, int cbBuf
+18|GetListenSocketAddress|2|bool|HSteamListenSocket hSocket, SteamNetworkingIPAddr *address
+19|CreateSocketPair|5|bool|HSteamNetConnection *pOutConnection1, HSteamNetConnection *pOutConnection2, bool bUseNetworkLoopback, const SteamNetworkingIdentity *pIdentity1, const SteamNetworkingIdentity *pIdentity2
+20|GetIdentity|1|bool|SteamNetworkingIdentity *pIdentity
+21|InitAuthentication|0|ESteamNetworkingAvailability|
+22|GetAuthenticationStatus|1|ESteamNetworkingAvailability|SteamNetAuthenticationStatus_t *pDetails
+23|ReceivedRelayAuthTicket|3|bool|const void *pvTicket, int cbTicket, SteamDatagramRelayAuthTicket *pOutParsedTicket
+24|FindRelayAuthTicketForServer|3|int|const SteamNetworkingIdentity &identityGameServer, int nVirtualPort, SteamDatagramRelayAuthTicket *pOutParsedTicket
+25|ConnectToHostedDedicatedServer|2|HSteamNetConnection|const SteamNetworkingIdentity &identityTarget, int nVirtualPort
+26|GetHostedDedicatedServerPort|0|uint16|
+27|GetHostedDedicatedServerPOPID|0|SteamNetworkingPOPID|
+28|GetHostedDedicatedServerAddress|1|EResult|SteamDatagramHostedAddress *pRouting
+29|CreateHostedDedicatedServerListenSocket|1|HSteamListenSocket|int nVirtualPort
+30|GetGameCoordinatorServerLogin|3|EResult|SteamDatagramGameCoordinatorServerLogin *pLoginInfo, int *pcbSignedBlob, void *pBlob

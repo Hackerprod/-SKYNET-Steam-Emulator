@@ -1,0 +1,54 @@
+# source: .tmp/goldberg_emulator_ref/sdk_includes/isteamremotestorage011.h (class ISteamRemoteStorage011)
+# also: .tmp/SmokeAPI/res/steamworks/125/headers/steam/isteamremotestorage.h
+0|FileWrite|3|bool|const char *pchFile, const void *pvData, int32 cubData
+1|FileRead|3|int32|const char *pchFile, void *pvData, int32 cubDataToRead
+2|FileForget|1|bool|const char *pchFile
+3|FileDelete|1|bool|const char *pchFile
+4|FileShare|1|SteamAPICall_t|const char *pchFile
+5|SetSyncPlatforms|2|bool|const char *pchFile, ERemoteStoragePlatform eRemoteStoragePlatform
+6|FileWriteStreamOpen|1|UGCFileWriteStreamHandle_t|const char *pchFile
+7|FileWriteStreamWriteChunk|3|bool|UGCFileWriteStreamHandle_t writeHandle, const void *pvData, int32 cubData
+8|FileWriteStreamClose|1|bool|UGCFileWriteStreamHandle_t writeHandle
+9|FileWriteStreamCancel|1|bool|UGCFileWriteStreamHandle_t writeHandle
+10|FileExists|1|bool|const char *pchFile
+11|FilePersisted|1|bool|const char *pchFile
+12|GetFileSize|1|int32|const char *pchFile
+13|GetFileTimestamp|1|int64|const char *pchFile
+14|GetSyncPlatforms|1|ERemoteStoragePlatform|const char *pchFile
+15|GetFileCount|0|int32|
+16|GetFileNameAndSize|2|const char *|int iFile, int32 *pnFileSizeInBytes
+17|GetQuota|2|bool|int32 *pnTotalBytes, int32 *puAvailableBytes
+18|IsCloudEnabledForAccount|0|bool|
+19|IsCloudEnabledForApp|0|bool|
+20|SetCloudEnabledForApp|1|void|bool bEnabled
+21|UGCDownload|2|SteamAPICall_t|UGCHandle_t hContent, uint32 unPriority
+22|GetUGCDownloadProgress|3|bool|UGCHandle_t hContent, int32 *pnBytesDownloaded, int32 *pnBytesExpected
+23|GetUGCDetails|5|bool|UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner
+24|UGCRead|4|int32|UGCHandle_t hContent, void *pvData, int32 cubDataToRead, uint32 cOffset
+25|GetCachedUGCCount|0|int32|
+26|GetCachedUGCHandle|1|UGCHandle_t|int32 iCachedContent
+27|PublishWorkshopFile|8|SteamAPICall_t|const char *pchFile, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags, EWorkshopFileType eWorkshopFileType
+28|CreatePublishedFileUpdateRequest|1|PublishedFileUpdateHandle_t|PublishedFileId_t unPublishedFileId
+29|UpdatePublishedFileFile|2|bool|PublishedFileUpdateHandle_t updateHandle, const char *pchFile
+30|UpdatePublishedFilePreviewFile|2|bool|PublishedFileUpdateHandle_t updateHandle, const char *pchPreviewFile
+31|UpdatePublishedFileTitle|2|bool|PublishedFileUpdateHandle_t updateHandle, const char *pchTitle
+32|UpdatePublishedFileDescription|2|bool|PublishedFileUpdateHandle_t updateHandle, const char *pchDescription
+33|UpdatePublishedFileVisibility|2|bool|PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility
+34|UpdatePublishedFileTags|2|bool|PublishedFileUpdateHandle_t updateHandle, SteamParamStringArray_t *pTags
+35|CommitPublishedFileUpdate|1|SteamAPICall_t|PublishedFileUpdateHandle_t updateHandle
+36|GetPublishedFileDetails|2|SteamAPICall_t|PublishedFileId_t unPublishedFileId, uint32 unMaxSecondsOld
+37|DeletePublishedFile|1|SteamAPICall_t|PublishedFileId_t unPublishedFileId
+38|EnumerateUserPublishedFiles|1|SteamAPICall_t|uint32 unStartIndex
+39|SubscribePublishedFile|1|SteamAPICall_t|PublishedFileId_t unPublishedFileId
+40|EnumerateUserSubscribedFiles|1|SteamAPICall_t|uint32 unStartIndex
+41|UnsubscribePublishedFile|1|SteamAPICall_t|PublishedFileId_t unPublishedFileId
+42|UpdatePublishedFileSetChangeDescription|2|bool|PublishedFileUpdateHandle_t updateHandle, const char *pchChangeDescription
+43|GetPublishedItemVoteDetails|1|SteamAPICall_t|PublishedFileId_t unPublishedFileId
+44|UpdateUserPublishedItemVote|2|SteamAPICall_t|PublishedFileId_t unPublishedFileId, bool bVoteUp
+45|GetUserPublishedItemVoteDetails|1|SteamAPICall_t|PublishedFileId_t unPublishedFileId
+46|EnumerateUserSharedWorkshopFiles|4|SteamAPICall_t|CSteamID steamId, uint32 unStartIndex, SteamParamStringArray_t *pRequiredTags, SteamParamStringArray_t *pExcludedTags
+47|PublishVideo|9|SteamAPICall_t|EWorkshopVideoProvider eVideoProvider, const char *pchVideoAccount, const char *pchVideoIdentifier, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags
+48|SetUserPublishedFileAction|2|SteamAPICall_t|PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction
+49|EnumeratePublishedFilesByUserAction|2|SteamAPICall_t|EWorkshopFileAction eAction, uint32 unStartIndex
+50|EnumeratePublishedWorkshopFiles|6|SteamAPICall_t|EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags
+51|UGCDownloadToLocation|3|SteamAPICall_t|UGCHandle_t hContent, const char *pchLocation, uint32 unPriority
