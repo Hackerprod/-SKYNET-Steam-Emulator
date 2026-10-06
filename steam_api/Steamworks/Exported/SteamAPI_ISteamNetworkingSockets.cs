@@ -97,8 +97,9 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamNetworkingSockets.SendMessageToConnection(hConn, pData, cbData, nSendFlags, pOutMessageNumber);
         }
 
+        // bDeleteFailedMessages is ignored: pre-1.65 callers do not pass it and the core always releases every message.
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamNetworkingSockets_SendMessages(IntPtr _, int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult)
+        public static void SteamAPI_ISteamNetworkingSockets_SendMessages(IntPtr _, int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult, bool bDeleteFailedMessages)
         {
             Write("SteamAPI_ISteamNetworkingSockets_SendMessages");
             SteamEmulator.SteamNetworkingSockets.SendMessages(nMessages, pMessages, pOutMessageNumberOrResult);

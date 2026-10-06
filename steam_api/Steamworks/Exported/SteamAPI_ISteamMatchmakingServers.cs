@@ -128,6 +128,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamMatchmakingServers_ServerFriends(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
+        {
+            Write("SteamAPI_ISteamMatchmakingServers_ServerFriends");
+            return -1;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamMatchmakingServers_CancelServerQuery(IntPtr _, int hServerQuery)
         {
             Write("SteamAPI_ISteamMatchmakingServers_CancelServerQuery");
@@ -214,6 +221,28 @@ namespace SKYNET.Steamworks.Exported
             NativeMatchmakingCallbacks.RulesComplete(_);
         }
 
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerFriendsResponse_AddFriendToList(
+            IntPtr _,
+            ulong steamID,
+            IntPtr pchName,
+            bool bCurrentlyConnected)
+        {
+            NativeMatchmakingCallbacks.AddFriend(_, steamID, pchName, bCurrentlyConnected);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerFriendsResponse_FriendsFailedToRespond(IntPtr _)
+        {
+            NativeMatchmakingCallbacks.FriendsFailed(_);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerFriendsResponse_FriendsRefreshComplete(IntPtr _)
+        {
+            NativeMatchmakingCallbacks.FriendsComplete(_);
+        }
 
         private static void Write(string msg)
         {

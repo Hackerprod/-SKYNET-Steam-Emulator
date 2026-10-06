@@ -31,3 +31,5 @@
 30|GetNumBetas|System.Int32|System.IntPtr,System.IntPtr,System.IntPtr
 31|GetBetaInfo|System.Boolean|System.IntPtr,System.Int32,System.IntPtr,System.IntPtr,System.IntPtr,System.Int32,System.IntPtr,System.Int32,System.IntPtr
 32|SetActiveBeta|System.Boolean|System.IntPtr,System.String
+33|SetGamePerformanceSetting|System.Void|System.IntPtr,System.Int32
+34|SetGameRenderResolution|System.Void|System.IntPtr,System.UInt32,System.UInt32

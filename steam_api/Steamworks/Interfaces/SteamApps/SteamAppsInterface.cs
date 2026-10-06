@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetAppOwner", "GetLaunchQueryParam", "GetDlcDownloadProgress", "GetAppBuildId",
         "RequestAllProofOfPurchaseKeys", "GetFileDetails", "GetLaunchCommandLine", "BIsSubscribedFromFamilySharing",
         "BIsTimedTrial", "SetDlcContext", "GetNumBetas", "GetBetaInfo",
-        "SetActiveBeta")]
+        "SetActiveBeta", "SetGamePerformanceSetting", "SetGameRenderResolution")]
     public class SteamAppsInterface : ISteamInterface
     {
         private static bool _getAppDataLogged;
@@ -182,5 +182,26 @@ namespace SKYNET.Steamworks.Interfaces
         }
 
         public bool SetActiveBeta(IntPtr _, string betaName) => SteamEmulator.SteamApps.SetActiveBeta(betaName);
+
+        private static bool _setGamePerformanceSettingLogged;
+        private static bool _setGameRenderResolutionLogged;
+
+        public void SetGamePerformanceSetting(IntPtr _, int setting)
+        {
+            if (!_setGamePerformanceSettingLogged)
+            {
+                _setGamePerformanceSettingLogged = true;
+                SteamEmulator.Write("SteamApps", "SetGamePerformanceSetting not implemented");
+            }
+        }
+
+        public void SetGameRenderResolution(IntPtr _, uint width, uint height)
+        {
+            if (!_setGameRenderResolutionLogged)
+            {
+                _setGameRenderResolutionLogged = true;
+                SteamEmulator.Write("SteamApps", "SetGameRenderResolution not implemented");
+            }
+        }
     }
 }

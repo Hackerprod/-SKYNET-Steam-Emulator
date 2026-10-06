@@ -546,6 +546,20 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUtils_v011()
+        {
+            Write($"SteamAPI_SteamUtils_v011");
+            return InterfaceManager.FindOrCreateInterface("SteamUtils011");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUtils_v011()
+        {
+            Write($"SteamAPI_SteamGameServerUtils_v011");
+            return InterfaceManager.FindOrCreateInterface("SteamUtils011");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamUtils_v010()
         {
             Write($"SteamAPI_SteamUtils_v010");
@@ -578,6 +592,13 @@ namespace SKYNET.Steamworks.Exported
         {
             Write($"SteamAPI_SteamMatchmaking_v009");
             return InterfaceManager.FindOrCreateInterface("SteamMatchMaking009");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamMatchmakingServers_v003()
+        {
+            Write($"SteamAPI_SteamMatchmakingServers_v003");
+            return InterfaceManager.FindOrCreateInterface("SteamMatchMakingServers003");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -635,6 +656,13 @@ namespace SKYNET.Steamworks.Exported
         {
             Write($"SteamAPI_SteamInput_v002");
             return InterfaceManager.FindOrCreateInterface("SteamInput002");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamInput_v007()
+        {
+            Write($"SteamAPI_SteamInput_v007");
+            return InterfaceManager.FindOrCreateInterface("SteamInput007");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -743,6 +771,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamNetworkingSockets_SteamAPI_v013()
+        {
+            Write($"SteamAPI_SteamNetworkingSockets_SteamAPI_v013");
+            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets013");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingSockets_SteamAPI_v012()
         {
             Write($"SteamAPI_SteamNetworkingSockets_SteamAPI_v012");
@@ -754,6 +789,13 @@ namespace SKYNET.Steamworks.Exported
         {
             Write($"SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009");
             return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets009");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v013()
+        {
+            Write($"SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v013");
+            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets013");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

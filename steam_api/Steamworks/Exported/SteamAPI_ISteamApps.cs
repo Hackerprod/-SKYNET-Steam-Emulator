@@ -266,6 +266,18 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamApps.SetActiveBeta(pchBetaName);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamApps_SetGamePerformanceSetting(IntPtr _, int setting)
+        {
+            Write("SteamAPI_ISteamApps_SetGamePerformanceSetting");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamApps_SetGameRenderResolution(IntPtr _, uint unWidth, uint unHeight)
+        {
+            Write("SteamAPI_ISteamApps_SetGameRenderResolution");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

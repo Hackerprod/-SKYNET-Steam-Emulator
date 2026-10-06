@@ -150,6 +150,24 @@ namespace SKYNET.Steamworks.Types
                 callback => ((NoArgumentDelegate)callback)(target),
                 callback => ((NoArgumentThisCallDelegate)callback)(target));
 
+        public static void AddFriend(IntPtr target, ulong steamId, IntPtr name, bool currentlyConnected)
+        {
+            var connected = currentlyConnected ? (byte)1 : (byte)0;
+            Invoke(target, 0, typeof(FriendDelegate), typeof(FriendThisCallDelegate),
+                callback => ((FriendDelegate)callback)(target, steamId, name, connected),
+                callback => ((FriendThisCallDelegate)callback)(target, steamId, name, connected));
+        }
+
+        public static void FriendsFailed(IntPtr target) =>
+            Invoke(target, 1, typeof(NoArgumentDelegate), typeof(NoArgumentThisCallDelegate),
+                callback => ((NoArgumentDelegate)callback)(target),
+                callback => ((NoArgumentThisCallDelegate)callback)(target));
+
+        public static void FriendsComplete(IntPtr target) =>
+            Invoke(target, 2, typeof(NoArgumentDelegate), typeof(NoArgumentThisCallDelegate),
+                callback => ((NoArgumentDelegate)callback)(target),
+                callback => ((NoArgumentThisCallDelegate)callback)(target));
+
         public static void RuleResponded(IntPtr target, string key, string value)
         {
             var nativeKey = StringToUtf8(key);
@@ -240,6 +258,10 @@ namespace SKYNET.Steamworks.Types
         private delegate void PlayerDelegate(IntPtr self, IntPtr name, int score, float timePlayed);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         private delegate void PlayerThisCallDelegate(IntPtr self, IntPtr name, int score, float timePlayed);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void FriendDelegate(IntPtr self, ulong steamId, IntPtr name, byte currentlyConnected);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate void FriendThisCallDelegate(IntPtr self, ulong steamId, IntPtr name, byte currentlyConnected);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void RuleDelegate(IntPtr self, IntPtr key, IntPtr value);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]

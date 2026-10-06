@@ -15,6 +15,12 @@ namespace SKYNET.Steamworks.Interfaces
         "CancelQuery", "RefreshQuery", "IsRefreshing", "GetServerCount",
         "RefreshServer", "PingServer", "PlayerDetails", "ServerRules",
         "CancelServerQuery")]
+    [InterfaceLayout("SteamMatchMakingServers003",
+        "RequestInternetServerList", "RequestLANServerList", "RequestFriendsServerList", "RequestFavoritesServerList",
+        "RequestHistoryServerList", "RequestSpectatorServerList", "ReleaseRequest", "GetServerDetails",
+        "CancelQuery", "RefreshQuery", "IsRefreshing", "GetServerCount",
+        "RefreshServer", "PingServer", "PlayerDetails", "ServerRules",
+        "ServerFriends", "CancelServerQuery")]
     public class SteamMatchMakingServers002 : ISteamInterface
     {
         public IntPtr RequestInternetServerList(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
@@ -95,6 +101,12 @@ namespace SKYNET.Steamworks.Interfaces
         public int ServerRules(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
         {
             return (int)SteamEmulator.SteamMatchMakingServers.ServerRules(unIP, usPort, pRequestServersResponse);
+        }
+
+        public int ServerFriends(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
+        {
+            LogStub("ServerFriends");
+            return -1;
         }
 
         public void CancelServerQuery(IntPtr _, int hServerQuery)

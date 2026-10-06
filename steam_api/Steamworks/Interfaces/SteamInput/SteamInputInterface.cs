@@ -54,6 +54,19 @@ namespace SKYNET.Steamworks.Interfaces
         "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex", "GetGamepadIndexForController",
         "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin", "TranslateActionOrigin",
         "GetDeviceBindingRevision", "GetRemotePlaySessionID", "GetSessionInputConfigurationSettings", "SetDualSenseTriggerEffect")]
+    [InterfaceLayout("SteamInput007",
+        "Init", "Shutdown", "SetInputActionManifestFilePath", "RunFrame",
+        "BWaitForData", "BNewDataAvailable", "GetConnectedControllers", "EnableDeviceCallbacks",
+        "EnableActionEventCallbacks", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "ActivateActionSetLayer", "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetStringForDigitalActionName",
+        "GetAnalogActionHandle", "GetAnalogActionData", "GetAnalogActionOrigins", "GetGlyphPNGForActionOrigin",
+        "GetGlyphSVGForActionOrigin", "GetGlyphForActionOrigin_Legacy", "GetStringForActionOrigin", "GetStringForAnalogActionName",
+        "StopAnalogActionMomentum", "GetMotionData", "TriggerVibration", "TriggerVibrationExtended",
+        "TriggerSimpleHapticEvent", "SetLEDColor", "Legacy_TriggerHapticPulse", "Legacy_TriggerRepeatedHapticPulse",
+        "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex", "GetGamepadIndexForController",
+        "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin", "TranslateActionOrigin",
+        "GetDeviceBindingRevision", "GetRemotePlaySessionID", "GetSessionInputConfigurationSettings", "SetDualSenseTriggerEffect")]
     public class SteamInputInterface : ISteamInterface
     {
         public bool Init(IntPtr _, bool bExplicitlyCallRunFrame)

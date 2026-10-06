@@ -91,6 +91,19 @@ namespace SKYNET.Steamworks.Interfaces
         "ConnectP2PCustomSignaling", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate",
         "ResetIdentity", "RunCallbacks", "BeginAsyncRequestFakeIP", "GetFakeIP",
         "CreateListenSocketP2PFakeIP", "GetRemoteFakeIPForConnection", "CreateFakeUDPPort")]
+    [InterfaceLayout("SteamNetworkingSockets013",
+        "CreateListenSocketIP", "ConnectByIPAddress", "CreateListenSocketP2P", "ConnectP2P",
+        "AcceptConnection", "CloseConnection", "CloseListenSocket", "SetConnectionUserData",
+        "GetConnectionUserData", "SetConnectionName", "GetConnectionName", "SendMessageToConnection",
+        "SendMessages__V013", "FlushMessagesOnConnection", "ReceiveMessagesOnConnection", "GetConnectionInfo",
+        "GetConnectionRealTimeStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
+        "ConfigureConnectionLanes", "GetIdentity", "InitAuthentication", "GetAuthenticationStatus",
+        "CreatePollGroup", "DestroyPollGroup", "SetConnectionPollGroup", "ReceiveMessagesOnPollGroup",
+        "ReceivedRelayAuthTicket", "FindRelayAuthTicketForServer", "ConnectToHostedDedicatedServer", "GetHostedDedicatedServerPort",
+        "GetHostedDedicatedServerPOPID", "GetHostedDedicatedServerAddress", "CreateHostedDedicatedServerListenSocket", "GetGameCoordinatorServerLogin",
+        "ConnectP2PCustomSignaling", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate",
+        "ResetIdentity", "RunCallbacks", "BeginAsyncRequestFakeIP", "GetFakeIP",
+        "CreateListenSocketP2PFakeIP", "GetRemoteFakeIPForConnection", "CreateFakeUDPPort")]
     public class SteamNetworkingSockets012 : ISteamInterface
     {
         public HSteamListenSocket CreateListenSocketIP(IntPtr _, IntPtr localAddress, int nOptions, IntPtr pOptions)
@@ -154,6 +167,12 @@ namespace SKYNET.Steamworks.Interfaces
         }
 
         public void SendMessages(IntPtr _, int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult)
+        {
+            SteamEmulator.SteamNetworkingSockets.SendMessages(nMessages, pMessages, pOutMessageNumberOrResult);
+        }
+
+        // The core always releases every message after sending, which is the bDeleteFailedMessages=true behaviour.
+        public void SendMessages__V013(IntPtr _, int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult, bool bDeleteFailedMessages)
         {
             SteamEmulator.SteamNetworkingSockets.SendMessages(nMessages, pMessages, pOutMessageNumberOrResult);
         }

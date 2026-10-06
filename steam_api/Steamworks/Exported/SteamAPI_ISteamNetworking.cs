@@ -290,6 +290,13 @@ namespace SKYNET.Steamworks.Exported
             return "";
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_servernetadr_t_IsEqualTo(IntPtr _, IntPtr rhs)
+        {
+            Write("SteamAPI_servernetadr_t_IsEqualTo");
+            return NetAdrEquals(_, rhs);
+        }
+
         #endregion
 
         #region gameserveritem_t
@@ -311,6 +318,24 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
         {
             Write($"SteamAPI_gameserveritem_t_SetName");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_gameserveritem_t_IsEqualTo(IntPtr self, IntPtr rhs)
+        {
+            Write("SteamAPI_gameserveritem_t_IsEqualTo");
+            return NetAdrEquals(self, rhs);
+        }
+
+        // servernetadr_t is {ushort connectionPort, ushort queryPort, uint ip} and is the first member of gameserveritem_t.
+        private static bool NetAdrEquals(IntPtr a, IntPtr b)
+        {
+            if (a == IntPtr.Zero || b == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            return Marshal.ReadInt64(a) == Marshal.ReadInt64(b);
         }
 
         #endregion

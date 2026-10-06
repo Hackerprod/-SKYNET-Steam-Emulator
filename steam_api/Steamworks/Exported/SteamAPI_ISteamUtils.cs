@@ -282,6 +282,34 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamUtils.GetIPv6ConnectivityState(eProtocol);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamUtils_IsRunningOnSteamHardware(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_IsRunningOnSteamHardware");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamUtils_GetSteamHardwareDefaultConfig(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_GetSteamHardwareDefaultConfig");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_IsRunningUnderProton(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_IsRunningUnderProton");
+            return false;
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

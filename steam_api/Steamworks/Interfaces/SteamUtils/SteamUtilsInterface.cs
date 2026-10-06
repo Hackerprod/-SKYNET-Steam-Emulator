@@ -79,6 +79,18 @@ namespace SKYNET.Steamworks.Interfaces
         "IsVRHeadsetStreamingEnabled", "SetVRHeadsetStreamingEnabled", "IsSteamChinaLauncher", "InitFilterText",
         "FilterText", "GetIPv6ConnectivityState", "IsSteamRunningOnSteamDeck", "ShowFloatingGamepadTextInput",
         "SetGameLauncherMode", "DismissFloatingGamepadTextInput", "DismissGamepadTextInput")]
+    [InterfaceLayout("SteamUtils011",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry__V010", "GetImageSize", "GetImageRGBA",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
+        "ShowGamepadTextInput", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput", "GetSteamUILanguage",
+        "IsSteamRunningInVR", "SetOverlayNotificationInset", "IsSteamInBigPictureMode", "StartVRDashboard",
+        "IsVRHeadsetStreamingEnabled", "SetVRHeadsetStreamingEnabled", "IsSteamChinaLauncher", "InitFilterText",
+        "FilterText", "GetIPv6ConnectivityState", "ShowFloatingGamepadTextInput",
+        "SetGameLauncherMode", "DismissFloatingGamepadTextInput", "DismissGamepadTextInput", "IsRunningOnSteamHardware",
+        "GetSteamHardwareDefaultConfig", "IsRunningUnderProton")]
     public class SteamUtilsInterface : ISteamInterface
     {
         public uint GetSecondsSinceAppActive(IntPtr _)
@@ -314,6 +326,21 @@ namespace SKYNET.Steamworks.Interfaces
         }
 
         public bool DismissGamepadTextInput(IntPtr _)
+        {
+            return false;
+        }
+
+        public int IsRunningOnSteamHardware(IntPtr _)
+        {
+            return 0;
+        }
+
+        public int GetSteamHardwareDefaultConfig(IntPtr _)
+        {
+            return 0;
+        }
+
+        public bool IsRunningUnderProton(IntPtr _)
         {
             return false;
         }
