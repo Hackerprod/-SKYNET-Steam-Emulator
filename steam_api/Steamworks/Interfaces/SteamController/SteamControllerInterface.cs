@@ -8,6 +8,26 @@ using ControllerAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamController001",
+        "Init__V001", "Shutdown", "RunFrame", "GetControllerState",
+        "TriggerHapticPulse__V001", "SetOverrideMode")]
+    [InterfaceLayout("SteamController002",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "TriggerHapticPulse__V001", "ActivateMode", "GetJoystickForHandle", "GetHandleForJoystick",
+        "GetModeAnalogOutputData")]
+    [InterfaceLayout("SteamController003",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "ShowBindingPanel", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle",
+        "GetAnalogActionData", "GetAnalogActionOrigins", "StopAnalogActionMomentum", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse")]
+    [InterfaceLayout("SteamController004",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "ShowBindingPanel", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle",
+        "GetAnalogActionData", "GetAnalogActionOrigins", "StopAnalogActionMomentum", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse", "GetGamepadIndexForController", "GetControllerForGamepadIndex", "GetMotionData",
+        "ShowDigitalActionOrigins", "ShowAnalogActionOrigins")]
     [InterfaceLayout("SteamController005",
         "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
         "ShowBindingPanel", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
@@ -227,6 +247,66 @@ namespace SKYNET.Steamworks.Interfaces
         public bool ShowAnalogActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition)
         {
             return SteamEmulator.SteamController.ShowAnalogActionOrigins(controllerHandle, analogActionHandle, flScale, flXPosition, flYPosition);
+        }
+
+        private static readonly System.Collections.Generic.HashSet<string> _stubsLogged = new System.Collections.Generic.HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamController", method + " not implemented");
+        }
+
+        // v001 predates handles: Init takes the controller config VDF path, which the emulator does not use.
+        public bool Init__V001(IntPtr _, string pchAbsolutePathToControllerConfigVDF)
+        {
+            return SteamEmulator.SteamController.Init();
+        }
+
+        // v001/v002 address controllers by uint32 index instead of a 64-bit handle; no controllers are ever reported.
+        public bool GetControllerState(IntPtr _, uint unControllerIndex, IntPtr pState)
+        {
+            LogStub("GetControllerState");
+            return false;
+        }
+
+        public void TriggerHapticPulse__V001(IntPtr _, uint unControllerIndex, int eTargetPad, ushort usDurationMicroSec)
+        {
+            LogStub("TriggerHapticPulse__V001");
+        }
+
+        public void SetOverrideMode(IntPtr _, string pchMode)
+        {
+            LogStub("SetOverrideMode");
+        }
+
+        public void ActivateMode(IntPtr _, ControllerHandle_t controllerHandle, int mode)
+        {
+            LogStub("ActivateMode");
+        }
+
+        public int GetJoystickForHandle(IntPtr _, ControllerHandle_t controllerHandle)
+        {
+            LogStub("GetJoystickForHandle");
+            return -1;
+        }
+
+        public ControllerHandle_t GetHandleForJoystick(IntPtr _, int nJoystick)
+        {
+            LogStub("GetHandleForJoystick");
+            return 0;
+        }
+
+        public void GetModeAnalogOutputData(IntPtr _, ControllerHandle_t controllerHandle, int mode)
+        {
+            LogStub("GetModeAnalogOutputData");
         }
     }
 }

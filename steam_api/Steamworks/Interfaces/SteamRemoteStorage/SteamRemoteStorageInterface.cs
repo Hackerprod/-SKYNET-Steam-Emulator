@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System;
@@ -7,9 +8,130 @@ using UGCFileWriteStreamHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION001",
+        "FileWrite", "GetFileSize", "FileRead", "FileExists",
+        "FileDelete", "GetFileCount", "GetFileNameAndSize", "GetQuota__V002")]
     [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION002",
         "FileWrite", "GetFileSize", "FileRead", "FileExists",
         "GetFileCount", "GetFileNameAndSize", "GetQuota__V002")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION003",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "FileExists", "FilePersisted", "GetFileSize",
+        "GetFileTimestamp", "GetFileCount", "GetFileNameAndSize", "GetQuota__V002",
+        "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp", "UGCDownload__V003",
+        "GetUGCDetails", "UGCRead__V003", "GetCachedUGCCount", "GetCachedUGCHandle")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION004",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDetails", "UGCRead__V003",
+        "GetCachedUGCCount", "GetCachedUGCHandle")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION005",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDetails", "UGCRead__V003",
+        "GetCachedUGCCount", "GetCachedUGCHandle", "PublishFile", "PublishWorkshopFile__V005",
+        "UpdatePublishedFile", "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles",
+        "SubscribePublishedFile", "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION006",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V003", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo__V006",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION007",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V003", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION008",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk",
+        "FileWriteStreamClose", "FileWriteStreamCancel", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V003", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION009",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk",
+        "FileWriteStreamClose", "FileWriteStreamCancel", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload__V003", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V009", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION010",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk",
+        "FileWriteStreamClose", "FileWriteStreamCancel", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V009", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails__V005", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles", "UGCDownloadToLocation")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION011",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk",
+        "FileWriteStreamClose", "FileWriteStreamCancel", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead__V009", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles", "UGCDownloadToLocation")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION012",
+        "FileWrite", "FileRead", "FileForget", "FileDelete",
+        "FileShare", "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk",
+        "FileWriteStreamClose", "FileWriteStreamCancel", "FileExists", "FilePersisted",
+        "GetFileSize", "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount",
+        "GetFileNameAndSize", "GetQuota__V002", "IsCloudEnabledForAccount", "IsCloudEnabledForApp",
+        "SetCloudEnabledForApp", "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails",
+        "UGCRead", "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile",
+        "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle",
+        "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate",
+        "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile",
+        "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails",
+        "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo",
+        "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles", "UGCDownloadToLocation")]
     [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION013",
         "FileWrite", "FileRead", "FileWriteAsync", "FileReadAsync",
         "FileReadAsyncComplete", "FileForget", "FileDelete", "FileShare",
@@ -384,6 +506,88 @@ namespace SKYNET.Steamworks.Interfaces
         public bool EndFileWriteBatch(IntPtr _)
         {
             return SteamEmulator.SteamRemoteStorage.EndFileWriteBatch();
+        }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamRemoteStorage", method + " not implemented");
+        }
+
+        // Passed by value in the 005 vtable (by hidden pointer on x64), so the real layout must be declared to keep the x86 stack balanced.
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RemoteStorageUpdatePublishedFileRequest_t
+        {
+            public ulong m_unPublishedFileId;
+            public IntPtr m_pchFile;
+            public IntPtr m_pchPreviewFile;
+            public IntPtr m_pchTitle;
+            public IntPtr m_pchDescription;
+            public int m_eVisibility;
+            public IntPtr m_pTags;
+            public byte m_bUpdateFile;
+            public byte m_bUpdatePreviewFile;
+            public byte m_bUpdateTitle;
+            public byte m_bUpdateDescription;
+            public byte m_bUpdateVisibility;
+            public byte m_bUpdateTags;
+        }
+
+        // v003-v009: UGCDownload has no priority argument.
+        public SteamAPICall_t UGCDownload__V003(IntPtr _, ulong hContent)
+        {
+            return SteamEmulator.SteamRemoteStorage.UGCDownload(hContent, 0);
+        }
+
+        // v003-v008: UGCRead has neither offset nor action.
+        public int UGCRead__V003(IntPtr _, ulong hContent, IntPtr pvData, int cubDataToRead)
+        {
+            return SteamEmulator.SteamRemoteStorage.UGCRead(hContent, pvData, cubDataToRead, 0, 0);
+        }
+
+        // v009-v011: UGCRead gained an offset but no action.
+        public int UGCRead__V009(IntPtr _, ulong hContent, IntPtr pvData, int cubDataToRead, uint cOffset)
+        {
+            return SteamEmulator.SteamRemoteStorage.UGCRead(hContent, pvData, cubDataToRead, cOffset, 0);
+        }
+
+        // v005-v010: GetPublishedFileDetails has no max-age argument.
+        public ulong GetPublishedFileDetails__V005(IntPtr _, ulong unPublishedFileId)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetPublishedFileDetails(unPublishedFileId, 0);
+        }
+
+        // v005 only: no visibility / file type arguments (public, community).
+        public ulong PublishWorkshopFile__V005(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, IntPtr pTags)
+        {
+            return SteamEmulator.SteamRemoteStorage.PublishWorkshopFile(pchFile, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, 0, pTags, 0);
+        }
+
+        public ulong PublishFile(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags)
+        {
+            return SteamEmulator.SteamRemoteStorage.PublishWorkshopFile(pchFile, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, eVisibility, pTags, 0);
+        }
+
+        public ulong UpdatePublishedFile(IntPtr _, RemoteStorageUpdatePublishedFileRequest_t updatePublishedFileRequest)
+        {
+            LogStub("UpdatePublishedFile");
+            return 0;
+        }
+
+        // v006 only: takes a single video URL instead of provider/account/identifier.
+        public ulong PublishVideo__V006(IntPtr _, string pchVideoURL, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags)
+        {
+            LogStub("PublishVideo__V006");
+            return 0;
         }
     }
 }

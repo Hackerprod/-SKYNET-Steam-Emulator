@@ -183,6 +183,7 @@
     <Compile Include="Steamworks\Interfaces\SteamParties\SteamParties002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlayInterface.cs" />
     <Compile Include="Steamworks\Interfaces\SteamTimeline\SteamTimeline004.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamTV\SteamTV001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUnifiedMessages\SteamUnifiedMessages001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUserInterface.cs" />
     <Compile Include="Steamworks\Types\ISteamMatchmakingServerListResponse.cs" />

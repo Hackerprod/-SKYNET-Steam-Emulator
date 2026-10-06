@@ -2,6 +2,12 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMSCREENSHOTS_INTERFACE_VERSION001",
+        "WriteScreenshot", "AddScreenshotToLibrary", "TriggerScreenshot", "HookScreenshots",
+        "SetLocation", "TagUser")]
+    [InterfaceLayout("STEAMSCREENSHOTS_INTERFACE_VERSION002",
+        "WriteScreenshot", "AddScreenshotToLibrary", "TriggerScreenshot", "HookScreenshots",
+        "SetLocation", "TagUser", "TagPublishedFile")]
     [InterfaceLayout("STEAMSCREENSHOTS_INTERFACE_VERSION003",
         "WriteScreenshot", "AddScreenshotToLibrary", "TriggerScreenshot", "HookScreenshots",
         "SetLocation", "TagUser", "TagPublishedFile", "IsScreenshotsHooked",

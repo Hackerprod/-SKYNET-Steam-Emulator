@@ -6,6 +6,13 @@ using SteamItemDef_t = System.Int32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMINVENTORY_INTERFACE_V001",
+        "GetResultStatus", "GetResultItems", "GetResultTimestamp", "CheckResultSteamID",
+        "DestroyResult", "GetAllItems", "GetItemsByID", "SerializeResult",
+        "DeserializeResult", "GenerateItems", "GrantPromoItems", "AddPromoItem",
+        "AddPromoItems", "ConsumeItem", "ExchangeItems", "TransferItemQuantity",
+        "SendItemDropHeartbeat", "TriggerItemDrop", "TradeItems", "LoadItemDefinitions",
+        "GetItemDefinitionIDs", "GetItemDefinitionProperty", "RequestEligiblePromoItemDefinitionsIDs", "GetEligiblePromoItemDefinitionIDs")]
     [InterfaceLayout("STEAMINVENTORY_INTERFACE_V002",
         "GetResultStatus", "GetResultItems", "GetResultItemProperty", "GetResultTimestamp",
         "CheckResultSteamID", "DestroyResult", "GetAllItems", "GetItemsByID",

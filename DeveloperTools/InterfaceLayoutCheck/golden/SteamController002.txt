@@ -1,0 +1,9 @@
+0|Init|System.Boolean|System.IntPtr
+1|Shutdown|System.Boolean|System.IntPtr
+2|RunFrame|System.Void|System.IntPtr
+3|GetConnectedControllers|System.Int32|System.IntPtr,System.IntPtr
+4|TriggerHapticPulse|System.Void|System.IntPtr,System.UInt32,System.Int32,System.UInt16
+5|ActivateMode|System.Void|System.IntPtr,System.UInt64,System.Int32
+6|GetJoystickForHandle|System.Int32|System.IntPtr,System.UInt64
+7|GetHandleForJoystick|System.UInt64|System.IntPtr,System.Int32
+8|GetModeAnalogOutputData|System.Void|System.IntPtr,System.UInt64,System.Int32

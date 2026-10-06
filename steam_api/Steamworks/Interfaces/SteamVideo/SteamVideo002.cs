@@ -2,6 +2,8 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V001",
+        "GetVideoURL", "IsBroadcasting")]
     [InterfaceLayout("STEAMVIDEO_INTERFACE_V002",
         "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
     [InterfaceLayout("STEAMVIDEO_INTERFACE_V003",

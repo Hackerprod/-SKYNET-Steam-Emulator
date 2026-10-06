@@ -1,0 +1,15 @@
+0|CreateHTTPRequest|System.UInt32|System.IntPtr,System.Int32,System.String
+1|SetHTTPRequestContextValue|System.Boolean|System.IntPtr,System.UInt32,System.UInt64
+2|SetHTTPRequestNetworkActivityTimeout|System.Boolean|System.IntPtr,System.UInt32,System.UInt32
+3|SetHTTPRequestHeaderValue|System.Boolean|System.IntPtr,System.UInt32,System.String,System.String
+4|SetHTTPRequestGetOrPostParameter|System.Boolean|System.IntPtr,System.UInt32,System.String,System.String
+5|SendHTTPRequest|System.Boolean|System.IntPtr,System.UInt32,System.UInt64&
+6|DeferHTTPRequest|System.Boolean|System.IntPtr,System.UInt32
+7|PrioritizeHTTPRequest|System.Boolean|System.IntPtr,System.UInt32
+8|GetHTTPResponseHeaderSize|System.Boolean|System.IntPtr,System.UInt32,System.String,System.IntPtr
+9|GetHTTPResponseHeaderValue|System.Boolean|System.IntPtr,System.UInt32,System.String,System.IntPtr,System.UInt32
+10|GetHTTPResponseBodySize|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr
+11|GetHTTPResponseBodyData|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32
+12|ReleaseHTTPRequest|System.Boolean|System.IntPtr,System.UInt32
+13|GetHTTPDownloadProgressPct|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr
+14|SetHTTPRequestRawPostBody|System.Boolean|System.IntPtr,System.UInt32,System.String,System.IntPtr,System.UInt32

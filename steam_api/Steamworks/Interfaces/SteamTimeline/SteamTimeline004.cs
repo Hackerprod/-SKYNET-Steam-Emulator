@@ -5,6 +5,8 @@ using TimelineEventHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMTIMELINE_INTERFACE_V001",
+        "SetTimelineStateDescription", "ClearTimelineStateDescription", "AddTimelineEvent", "SetTimelineGameMode")]
     [InterfaceLayout("STEAMTIMELINE_INTERFACE_V004",
         "SetTimelineTooltip", "ClearTimelineTooltip", "SetTimelineGameMode", "AddInstantaneousTimelineEvent",
         "AddRangeTimelineEvent", "StartRangeTimelineEvent", "UpdateRangeTimelineEvent", "EndRangeTimelineEvent",
@@ -101,6 +103,28 @@ namespace SKYNET.Steamworks.Interfaces
         public void OpenOverlayToTimelineEvent(IntPtr _, TimelineEventHandle_t ulEvent)
         {
             SteamEmulator.SteamTimeline.OpenOverlayToTimelineEvent(ulEvent);
+        }
+
+        public void SetTimelineStateDescription(IntPtr _, string pchDescription, float flTimeDelta)
+        {
+            SteamEmulator.SteamTimeline.SetTimelineTooltip(pchDescription, flTimeDelta);
+        }
+
+        public void ClearTimelineStateDescription(IntPtr _, float flTimeDelta)
+        {
+            SteamEmulator.SteamTimeline.ClearTimelineTooltip(flTimeDelta);
+        }
+
+        public void AddTimelineEvent(IntPtr _, string pchIcon, string pchTitle, string pchDescription, uint unPriority, float flStartOffsetSeconds, float flDurationSeconds, int ePossibleClip)
+        {
+            if (flDurationSeconds > 0f)
+            {
+                SteamEmulator.SteamTimeline.AddRangeTimelineEvent(pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, flDurationSeconds, ePossibleClip);
+            }
+            else
+            {
+                SteamEmulator.SteamTimeline.AddInstantaneousTimelineEvent(pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, ePossibleClip);
+            }
         }
     }
 }

@@ -1,0 +1,6 @@
+0|WriteScreenshot|System.UInt32|System.IntPtr,System.IntPtr,System.UInt32,System.Int32,System.Int32
+1|AddScreenshotToLibrary|System.UInt32|System.IntPtr,System.String,System.String,System.Int32,System.Int32
+2|TriggerScreenshot|System.Void|System.IntPtr
+3|HookScreenshots|System.Void|System.IntPtr,System.Boolean
+4|SetLocation|System.Boolean|System.IntPtr,System.UInt32,System.String
+5|TagUser|System.Boolean|System.IntPtr,System.UInt32,System.UInt64

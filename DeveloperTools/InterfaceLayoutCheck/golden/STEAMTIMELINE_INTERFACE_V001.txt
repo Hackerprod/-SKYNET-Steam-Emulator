@@ -1,0 +1,4 @@
+0|SetTimelineStateDescription|System.Void|System.IntPtr,System.String,System.Single
+1|ClearTimelineStateDescription|System.Void|System.IntPtr,System.Single
+2|AddTimelineEvent|System.Void|System.IntPtr,System.String,System.String,System.String,System.UInt32,System.Single,System.Single,System.Int32
+3|SetTimelineGameMode|System.Void|System.IntPtr,System.Int32

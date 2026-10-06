@@ -8,6 +8,11 @@ using HTTPCookieContainerHandle = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMHTTP_INTERFACE_VERSION001",
+        "CreateHTTPRequest", "SetHTTPRequestContextValue", "SetHTTPRequestNetworkActivityTimeout", "SetHTTPRequestHeaderValue",
+        "SetHTTPRequestGetOrPostParameter", "SendHTTPRequest", "DeferHTTPRequest", "PrioritizeHTTPRequest",
+        "GetHTTPResponseHeaderSize", "GetHTTPResponseHeaderValue", "GetHTTPResponseBodySize", "GetHTTPResponseBodyData",
+        "ReleaseHTTPRequest", "GetHTTPDownloadProgressPct", "SetHTTPRequestRawPostBody")]
     [InterfaceLayout("STEAMHTTP_INTERFACE_VERSION002",
         "CreateHTTPRequest", "SetHTTPRequestContextValue", "SetHTTPRequestNetworkActivityTimeout", "SetHTTPRequestHeaderValue",
         "SetHTTPRequestGetOrPostParameter", "SendHTTPRequest", "SendHTTPRequestAndStreamResponse", "DeferHTTPRequest",

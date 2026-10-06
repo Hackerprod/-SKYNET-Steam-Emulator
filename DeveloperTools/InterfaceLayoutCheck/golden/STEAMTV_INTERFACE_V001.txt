@@ -1,0 +1,7 @@
+0|IsBroadcasting|System.Boolean|System.IntPtr,System.IntPtr
+1|AddBroadcastGameData|System.Void|System.IntPtr,System.String,System.String
+2|RemoveBroadcastGameData|System.Void|System.IntPtr,System.String
+3|AddTimelineMarker|System.Void|System.IntPtr,System.String,System.Boolean,System.Byte,System.Byte,System.Byte
+4|RemoveTimelineMarker|System.Void|System.IntPtr
+5|AddRegion|System.UInt32|System.IntPtr,System.String,System.String,System.IntPtr,System.Int32
+6|RemoveRegion|System.Void|System.IntPtr,System.UInt32
