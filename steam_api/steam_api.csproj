@@ -77,6 +77,7 @@
     </Compile>
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
+    <Compile Include="Callback\CallbackTypesExtra.cs" />
     <Compile Include="Callback\CallbackConstants.cs" />
     <Compile Include="Callback\CallbackBaseInvoker.cs" />
     <Compile Include="Callback\SteamCallback.cs" />

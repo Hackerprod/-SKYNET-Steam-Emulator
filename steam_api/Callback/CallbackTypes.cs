@@ -1655,7 +1655,7 @@ namespace SKYNET.Callback
     //    #endregion
     //}
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     public struct SocketStatusCallback_t : ICallbackData
     {
         public uint m_hSocket;

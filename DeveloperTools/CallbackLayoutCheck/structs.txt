@@ -1,0 +1,21 @@
+# Non-callback SDK structs mirrored (or worth mirroring) by the emulator. Callback structs are discovered automatically.
+# Optional "=ManagedName" when the managed type is named differently.
+FriendGameInfo_t
+SteamUGCDetails_t
+InputDigitalActionData_t
+InputAnalogActionData_t
+InputMotionData_t
+SteamItemDetails_t
+P2PSessionState_t
+SteamNetworkPingLocation_t
+SteamPartyBeaconLocation_t
+SteamIPAddress_t
+SteamNetworkingIPAddr
+SteamNetworkingIdentity=SteamNetworkingIdentity_t
+SteamNetConnectionInfo_t
+SteamNetConnectionRealTimeStatus_t
+SteamNetworkingMessage_t
+SteamNetworkingConfigValue_t
+LeaderboardEntry_t=NativeLeaderboardEntry
+gameserveritem_t
+servernetadr_t

@@ -1,0 +1,6 @@
+# ManagedName=HeaderName for managed types whose name differs from the SDK struct
+NativeLeaderboardEntry=LeaderboardEntry_t
+SteamNetworkingIdentity_t=SteamNetworkingIdentity
+ControllerAnalogActionData_t=InputAnalogActionData_t
+ControllerDigitalActionData_t=InputDigitalActionData_t
+ControllerMotionData_t=InputMotionData_t
