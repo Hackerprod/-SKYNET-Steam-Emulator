@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +6,21 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamNetworkingSocketsSerialized005")]
-    public class SteamNetworkingSocketsSerialized005 : ISteamInterface
+    [InterfaceLayout("SteamNetworkingSocketsSerialized002",
+        "SendP2PRendezvous", "SendP2PConnectionFailure", "GetCertAsync", "GetNetworkConfigJSON__V002",
+        "CacheRelayTicket", "GetCachedRelayTicketCount", "GetCachedRelayTicket", "PostConnectionStateMsg")]
+    [InterfaceLayout("SteamNetworkingSocketsSerialized003",
+        "SendP2PRendezvous", "SendP2PConnectionFailure", "GetCertAsync", "GetNetworkConfigJSON",
+        "CacheRelayTicket", "GetCachedRelayTicketCount", "GetCachedRelayTicket", "PostConnectionStateMsg")]
+    [InterfaceLayout("SteamNetworkingSocketsSerialized004",
+        "SendP2PRendezvous", "SendP2PConnectionFailure", "GetCertAsync", "GetNetworkConfigJSON",
+        "CacheRelayTicket", "GetCachedRelayTicketCount", "GetCachedRelayTicket", "PostConnectionStateMsg",
+        "GetSTUNServer", "BAllowDirectConnectToPeer")]
+    [InterfaceLayout("SteamNetworkingSocketsSerialized005",
+        "SendP2PRendezvous", "SendP2PConnectionFailure", "GetCertAsync", "GetNetworkConfigJSON",
+        "CacheRelayTicket", "GetCachedRelayTicketCount", "GetCachedRelayTicket", "PostConnectionStateMsg",
+        "GetSTUNServer", "BAllowDirectConnectToPeer", "BeginAsyncRequestFakeIP")]
+    public class SteamNetworkingSocketsSerializedInterface : ISteamInterface
     {
         public void SendP2PRendezvous(IntPtr _, ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
         {
@@ -62,6 +75,11 @@ namespace SKYNET.Steamworks.Interfaces
         public int BeginAsyncRequestFakeIP(IntPtr _, int nNumPorts)
         {
             return SteamEmulator.SteamNetworkingSocketsSerialized.BeginAsyncRequestFakeIP(nNumPorts);
+        }
+
+        public int GetNetworkConfigJSON__V002(IntPtr _, IntPtr buf, uint cbBuf)
+        {
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetNetworkConfigJSON(buf, cbBuf);
         }
     }
 }

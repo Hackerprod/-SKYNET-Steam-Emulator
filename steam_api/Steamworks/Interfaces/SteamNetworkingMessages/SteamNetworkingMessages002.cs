@@ -7,7 +7,9 @@ using HSteamNetPollGroup = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamNetworkingMessages002")]
+    [InterfaceLayout("SteamNetworkingMessages002",
+        "SendMessageToUser", "ReceiveMessagesOnChannel", "AcceptSessionWithUser", "CloseSessionWithUser",
+        "CloseChannelWithUser", "GetSessionConnectionInfo")]
     public class SteamNetworkingMessages002 : ISteamInterface
     {
         public int SendMessageToUser(IntPtr _, IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)

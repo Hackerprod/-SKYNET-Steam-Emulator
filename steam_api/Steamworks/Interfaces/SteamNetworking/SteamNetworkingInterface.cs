@@ -1,10 +1,28 @@
 using System;
 
-
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamNetworking005")]
-    public class SteamNetworking005 : ISteamInterface
+    [InterfaceLayout("SteamNetworking003",
+        "SendP2PPacket__V003", "IsP2PPacketAvailable__V003", "ReadP2PPacket__V003", "AcceptP2PSessionWithUser",
+        "CloseP2PSessionWithUser", "GetP2PSessionState", "CreateListenSocket", "CreateP2PConnectionSocket",
+        "CreateConnectionSocket", "DestroySocket", "DestroyListenSocket", "SendDataOnSocket",
+        "IsDataAvailableOnSocket", "RetrieveDataFromSocket", "IsDataAvailable", "RetrieveData",
+        "GetSocketInfo", "GetListenSocketInfo", "GetSocketConnectionType", "GetMaxPacketSize")]
+    [InterfaceLayout("SteamNetworking005",
+        "SendP2PPacket", "IsP2PPacketAvailable", "ReadP2PPacket", "AcceptP2PSessionWithUser",
+        "CloseP2PSessionWithUser", "CloseP2PChannelWithUser", "GetP2PSessionState", "AllowP2PPacketRelay",
+        "CreateListenSocket", "CreateP2PConnectionSocket", "CreateConnectionSocket", "DestroySocket",
+        "DestroyListenSocket", "SendDataOnSocket", "IsDataAvailableOnSocket", "RetrieveDataFromSocket",
+        "IsDataAvailable", "RetrieveData", "GetSocketInfo", "GetListenSocketInfo",
+        "GetSocketConnectionType", "GetMaxPacketSize")]
+    [InterfaceLayout("SteamNetworking006",
+        "SendP2PPacket", "IsP2PPacketAvailable", "ReadP2PPacket", "AcceptP2PSessionWithUser",
+        "CloseP2PSessionWithUser", "CloseP2PChannelWithUser", "GetP2PSessionState", "AllowP2PPacketRelay",
+        "CreateListenSocket__V006", "CreateP2PConnectionSocket", "CreateConnectionSocket__V006", "DestroySocket",
+        "DestroyListenSocket", "SendDataOnSocket", "IsDataAvailableOnSocket", "RetrieveDataFromSocket",
+        "IsDataAvailable", "RetrieveData", "GetSocketInfo", "GetListenSocketInfo",
+        "GetSocketConnectionType", "GetMaxPacketSize")]
+    public class SteamNetworkingInterface : ISteamInterface
     {
         public bool SendP2PPacket(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel = 0)
         {
@@ -46,7 +64,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworking.AllowP2PPacketRelay(bAllow);
         }
 
-        public uint CreateListenSocket(IntPtr _, int nVirtualP2PPort, uint nIP, ushort nPort, bool bAllowUseOfPacketRelay)
+        public uint CreateListenSocket__V006(IntPtr _, int nVirtualP2PPort, SteamIPAddress_t nIP, ushort nPort, bool bAllowUseOfPacketRelay)
         {
             return SteamEmulator.SteamNetworking.CreateListenSocket(nVirtualP2PPort, nIP, nPort, bAllowUseOfPacketRelay);
         }
@@ -56,7 +74,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworking.CreateP2PConnectionSocket(steamIDTarget, nVirtualPort, nTimeoutSec, bAllowUseOfPacketRelay);
         }
 
-        public uint CreateConnectionSocket(IntPtr _, uint nIP, ushort nPort, int nTimeoutSec)
+        public uint CreateConnectionSocket__V006(IntPtr _, SteamIPAddress_t nIP, ushort nPort, int nTimeoutSec)
         {
             return SteamEmulator.SteamNetworking.CreateConnectionSocket(nIP, nPort, nTimeoutSec);
         }
@@ -114,6 +132,31 @@ namespace SKYNET.Steamworks.Interfaces
         public int GetMaxPacketSize(IntPtr _, uint hSocket)
         {
             return SteamEmulator.SteamNetworking.GetMaxPacketSize(hSocket);
+        }
+
+        public uint CreateListenSocket(IntPtr _, int nVirtualP2PPort, uint nIP, ushort nPort, bool bAllowUseOfPacketRelay)
+        {
+            return SteamEmulator.SteamNetworking.CreateListenSocket(nVirtualP2PPort, nIP, nPort, bAllowUseOfPacketRelay);
+        }
+
+        public uint CreateConnectionSocket(IntPtr _, uint nIP, ushort nPort, int nTimeoutSec)
+        {
+            return SteamEmulator.SteamNetworking.CreateConnectionSocket(nIP, nPort, nTimeoutSec);
+        }
+
+        public bool SendP2PPacket__V003(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType)
+        {
+            return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, 0);
+        }
+
+        public bool IsP2PPacketAvailable__V003(IntPtr _, ref uint pcubMsgSize)
+        {
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, 0);
+        }
+
+        public bool ReadP2PPacket__V003(IntPtr _, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote)
+        {
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, 0);
         }
     }
 }

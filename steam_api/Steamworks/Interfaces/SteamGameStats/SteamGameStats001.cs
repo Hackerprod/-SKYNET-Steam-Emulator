@@ -6,7 +6,11 @@ using RTime32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamGameStats001")]
+    [InterfaceLayout("SteamGameStats001",
+        "GetNewSession", "EndSession", "AddSessionAttributeInt", "AddSessionAttributeString",
+        "AddSessionAttributeFloat", "AddNewRow", "CommitRow", "CommitOutstandingRows",
+        "AddRowAttributeInt", "AddRowAtributeString", "AddRowAttributeFloat", "AddSessionAttributeInt64",
+        "AddRowAttributeInt64")]
     public class SteamGameStats001 : ISteamInterface
     {
         public SteamAPICall_t GetNewSession(IntPtr _, sbyte nAccountType, ulong ulAccountID, int nAppID, RTime32 rtTimeStarted)

@@ -3,8 +3,16 @@ using System;
 namespace SKYNET.Steamworks.Interfaces
 {
     /// <summary>Legacy master-server updater ABI used by Left 4 Dead.</summary>
-    [Interface("SteamMasterServerUpdater001")]
-    [Interface("SteamMasterServerUpdater002")]
+    [InterfaceLayout("SteamMasterServerUpdater001",
+        "SetActive", "SetHeartbeatInterval", "HandleIncomingPacket", "GetNextOutgoingPacket",
+        "SetBasicServerData", "ClearAllKeyValues", "SetKeyValue", "NotifyShutdown",
+        "WasRestartRequested", "ForceHeartbeat", "AddMasterServer", "RemoveMasterServer",
+        "GetNumMasterServers", "GetMasterServerAddress")]
+    [InterfaceLayout("SteamMasterServerUpdater002",
+        "SetActive", "SetHeartbeatInterval", "HandleIncomingPacket", "GetNextOutgoingPacket",
+        "SetBasicServerData", "ClearAllKeyValues", "SetKeyValue", "NotifyShutdown",
+        "WasRestartRequested", "ForceHeartbeat", "AddMasterServer", "RemoveMasterServer",
+        "GetNumMasterServers", "GetMasterServerAddress")]
     public class SteamMasterServerUpdater001 : ISteamInterface
     {
         public void SetActive(IntPtr _, bool bActive)
