@@ -166,6 +166,73 @@ namespace SKYNET.Steamworks.Exported
             return _;
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamNetworkingIdentity_SetIPv4Addr(IntPtr _, uint nIPv4, ushort nPort)
+        {
+            SteamNetworkingIdentityInterop.Write(_, SteamNetworkingIdentityInterop.FromIpAddress(SteamNetworkingIPAddrInterop.FromIPv4(nIPv4, nPort)));
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_SteamNetworkingIdentity_GetIPv4(IntPtr _)
+        {
+            return ReadIPv4(_);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_SteamNetworkingIdentity_GetFakeIPType(IntPtr _)
+        {
+            return ResolveFakeIPType(_);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_SteamNetworkingIdentity_IsFakeIP(IntPtr _)
+        {
+            return ResolveFakeIPType(_) > (int)SteamNetworkingFakeIPType.NotFake;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamNetworkingIdentity_SetPSNID(IntPtr _, ulong id)
+        {
+            SteamNetworkingIdentityInterop.SetBytes(_, NetIdentityType.SonyPSN, BitConverter.GetBytes(id), nullTerminate: false, requireContent: false);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong SteamAPI_SteamNetworkingIdentity_GetPSNID(IntPtr _)
+        {
+            return ReadId(_, NetIdentityType.SonyPSN);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamNetworkingIdentity_SetStadiaID(IntPtr _, ulong id)
+        {
+            SteamNetworkingIdentityInterop.SetBytes(_, NetIdentityType.GoogleStadia, BitConverter.GetBytes(id), nullTerminate: false, requireContent: false);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong SteamAPI_SteamNetworkingIdentity_GetStadiaID(IntPtr _)
+        {
+            return ReadId(_, NetIdentityType.GoogleStadia);
+        }
+
+        private static uint ReadIPv4(IntPtr identity)
+        {
+            var addr = SteamNetworkingIdentityInterop.GetDataPointer(identity, NetIdentityType.IPAddress);
+            return addr == IntPtr.Zero ? 0 : SteamNetworkingIPAddrInterop.GetIPv4(SteamNetworkingIPAddrInterop.Read(addr));
+        }
+
+        private static int ResolveFakeIPType(IntPtr identity)
+        {
+            return SteamNetworkingIdentityInterop.GetDataPointer(identity, NetIdentityType.IPAddress) == IntPtr.Zero
+                ? (int)SteamNetworkingFakeIPType.Invalid
+                : SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(ReadIPv4(identity));
+        }
+
+        private static ulong ReadId(IntPtr identity, NetIdentityType type)
+        {
+            var data = SteamNetworkingIdentityInterop.GetDataPointer(identity, type);
+            return data == IntPtr.Zero ? 0UL : unchecked((ulong)Marshal.ReadInt64(data));
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

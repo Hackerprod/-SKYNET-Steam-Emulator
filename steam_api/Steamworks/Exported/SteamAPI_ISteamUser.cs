@@ -256,6 +256,34 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("SteamUser021");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUser_v022()
+        {
+            Write("SteamAPI_SteamUser_v022");
+            return InterfaceManager.FindOrCreateInterface("SteamUser022");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUser_GetAuthTicketForWebApi(IntPtr _, string pchIdentity)
+        {
+            Write("SteamAPI_ISteamUser_GetAuthTicketForWebApi");
+            return SteamEmulator.SteamUser.GetAuthTicketForWebApi(pchIdentity);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
+        {
+            Write("SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED");
+            return SteamEmulator.SteamUser.InitiateGameConnection_DEPRECATED(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED(IntPtr _, uint unIPServer, ushort usPortServer)
+        {
+            Write("SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED");
+            SteamEmulator.SteamUser.TerminateGameConnection_DEPRECATED(unIPServer, usPortServer);
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

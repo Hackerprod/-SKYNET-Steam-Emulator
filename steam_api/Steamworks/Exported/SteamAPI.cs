@@ -918,6 +918,90 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamApps_v009()
+        {
+            Write("SteamAPI_SteamApps_v009");
+            return InterfaceManager.FindOrCreateInterface("STEAMAPPS_INTERFACE_VERSION009");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamHTTP_v003()
+        {
+            Write("SteamAPI_SteamHTTP_v003");
+            return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerHTTP_v003()
+        {
+            Write("SteamAPI_SteamGameServerHTTP_v003");
+            return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServer_v013()
+        {
+            Write("SteamAPI_SteamGameServer_v013");
+            return InterfaceManager.FindOrCreateInterface("SteamGameServer013");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServer_v014()
+        {
+            Write("SteamAPI_SteamGameServer_v014");
+            return InterfaceManager.FindOrCreateInterface("SteamGameServer014");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamTV_v001()
+        {
+            Write("SteamAPI_SteamTV_v001");
+            return InterfaceManager.FindOrCreateInterface("STEAMTV_INTERFACE_V001");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamTimeline_v001()
+        {
+            Write("SteamAPI_SteamTimeline_v001");
+            return InterfaceManager.FindOrCreateInterface("STEAMTIMELINE_INTERFACE_V001");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamVideo_v003()
+        {
+            Write("SteamAPI_SteamVideo_v003");
+            return InterfaceManager.FindOrCreateInterface("STEAMVIDEO_INTERFACE_V003");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamRemotePlay_v002()
+        {
+            Write("SteamAPI_SteamRemotePlay_v002");
+            return InterfaceManager.FindOrCreateInterface("STEAMREMOTEPLAY_INTERFACE_VERSION002");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamRemotePlay_v004()
+        {
+            Write("SteamAPI_SteamRemotePlay_v004");
+            return InterfaceManager.FindOrCreateInterface("STEAMREMOTEPLAY_INTERFACE_VERSION004");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamNetworkingSockets_SteamAPI_v011()
+        {
+            Write("SteamAPI_SteamNetworkingSockets_SteamAPI_v011");
+            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets011");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v011()
+        {
+            Write("SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v011");
+            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets011");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAppList()
         {
             Write($"SteamAppList");

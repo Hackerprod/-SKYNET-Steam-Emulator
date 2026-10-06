@@ -154,6 +154,13 @@ namespace SKYNET.Steamworks.Exported
             SteamEmulator.SteamRemotePlay.SetMouseCursor(unSessionID, unCursorID);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemotePlay_BStartRemotePlayTogether(IntPtr _, bool bShowOverlay)
+        {
+            Write("SteamAPI_ISteamRemotePlay_BStartRemotePlayTogether");
+            return SteamEmulator.SteamRemotePlay.ShowRemotePlayTogetherUI();
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

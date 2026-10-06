@@ -278,6 +278,19 @@ namespace SKYNET.Steamworks.Exported
             Write("SteamAPI_ISteamApps_SetGameRenderResolution");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamApps_GetPublisherOwnedAppData(IntPtr _, IntPtr pubBuffer, uint unMaxBytes)
+        {
+            Write("SteamAPI_ISteamApps_GetPublisherOwnedAppData");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamApps_RequestPublisherOwnedAppData(IntPtr _)
+        {
+            Write("SteamAPI_ISteamApps_RequestPublisherOwnedAppData");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

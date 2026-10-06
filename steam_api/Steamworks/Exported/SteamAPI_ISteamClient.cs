@@ -276,6 +276,41 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_ISteamClient_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+        {
+            Write("SteamAPI_ISteamClient_GetISteamUnifiedMessages");
+            return SteamEmulator.SteamClient.GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamClient_RunFrame(IntPtr _)
+        {
+            Write("SteamAPI_ISteamClient_RunFrame");
+            SteamEmulator.SteamClient.RunFrame();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamClient_Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr func)
+        {
+            Write("SteamAPI_ISteamClient_Set_SteamAPI_CPostAPIResultInProcess");
+            SteamEmulator.SteamClient.Set_SteamAPI_CPostAPIResultInProcess(func);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamClient_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr func)
+        {
+            Write("SteamAPI_ISteamClient_Remove_SteamAPI_CPostAPIResultInProcess");
+            SteamEmulator.SteamClient.Remove_SteamAPI_CPostAPIResultInProcess(func);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamClient_Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr _, IntPtr func)
+        {
+            Write("SteamAPI_ISteamClient_Set_SteamAPI_CCheckCallbackRegisteredInProcess");
+            SteamEmulator.SteamClient.Set_SteamAPI_CCheckCallbackRegisteredInProcess(func);
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write($"", msg);

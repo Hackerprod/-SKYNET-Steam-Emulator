@@ -463,6 +463,20 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamUtils.GetIPCCallCount();
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
+        {
+            Write("SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED");
+            return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate_DEPRECATED(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED(IntPtr _, ulong steamIDUser)
+        {
+            Write("SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED");
+            SteamEmulator.SteamGameServer.SendUserDisconnect_DEPRECATED(steamIDUser);
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

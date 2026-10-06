@@ -391,6 +391,27 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("SteamInput005");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_ISteamInput_GetGlyphForActionOrigin(IntPtr _, int eOrigin)
+        {
+            Write("SteamAPI_ISteamInput_GetGlyphForActionOrigin");
+            return SteamEmulator.SteamInput.GetGlyphForActionOrigin_Legacy(eOrigin);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamInput_TriggerHapticPulse(IntPtr _, InputHandle_t inputHandle, int eTargetPad, ushort usDurationMicroSec)
+        {
+            Write("SteamAPI_ISteamInput_TriggerHapticPulse");
+            SteamEmulator.SteamInput.Legacy_TriggerHapticPulse(inputHandle, eTargetPad, usDurationMicroSec);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamInput_TriggerRepeatedHapticPulse(IntPtr _, InputHandle_t inputHandle, int eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
+        {
+            Write("SteamAPI_ISteamInput_TriggerRepeatedHapticPulse");
+            SteamEmulator.SteamInput.Legacy_TriggerRepeatedHapticPulse(inputHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

@@ -648,6 +648,181 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION014");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v015()
+        {
+            Write("SteamAPI_SteamUGC_v015");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION015");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v016()
+        {
+            Write("SteamAPI_SteamUGC_v016");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION016");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v017()
+        {
+            Write("SteamAPI_SteamUGC_v017");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION017");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v018()
+        {
+            Write("SteamAPI_SteamUGC_v018");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION018");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v020()
+        {
+            Write("SteamAPI_SteamUGC_v020");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION020");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v014()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v014");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION014");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v015()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v015");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION015");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v016()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v016");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION016");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v017()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v017");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION017");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v018()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v018");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION018");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v020()
+        {
+            Write("SteamAPI_SteamGameServerUGC_v020");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION020");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequest0(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, string pchCursor)
+        {
+            Write("SteamAPI_ISteamUGC_CreateQueryAllUGCRequest0");
+            return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, pchCursor);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, string pchCursor)
+        {
+            Write("SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor");
+            return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, pchCursor);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequestPage(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
+        {
+            Write("SteamAPI_ISteamUGC_CreateQueryAllUGCRequestPage");
+            return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetNumDownloadedItems(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUGC_GetNumDownloadedItems");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetDownloadedItems(IntPtr _, IntPtr pvecPublishedFileIDs, uint cMaxEntries)
+        {
+            Write("SteamAPI_ISteamUGC_GetDownloadedItems");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_MarkDownloadedItemAsUnused(IntPtr _, PublishedFileId_t nPublishedFileID)
+        {
+            Write("SteamAPI_ISteamUGC_MarkDownloadedItemAsUnused");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetItemUpdateInfo(IntPtr _, PublishedFileId_t nPublishedFileID, IntPtr pbNeedsUpdate, IntPtr pbIsDownloading, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
+        {
+            Write("SteamAPI_ISteamUGC_GetItemUpdateInfo");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag0(IntPtr _, UGCQueryHandle_t handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag0");
+            return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, pchKey, pchValue, cchValueSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetQueryUGCNumTags(IntPtr _, UGCQueryHandle_t handle, uint index)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryUGCNumTags");
+            return SteamEmulator.SteamUGC.GetQueryUGCNumTags(handle, index);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCTag(IntPtr _, UGCQueryHandle_t handle, uint index, uint indexTag, IntPtr pchValue, uint cchValueSize)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryUGCTag");
+            return SteamEmulator.SteamUGC.GetQueryUGCTag(handle, index, indexTag, pchValue, cchValueSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName(IntPtr _, UGCQueryHandle_t handle, uint index, uint indexTag, IntPtr pchValue, uint cchValueSize)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName");
+            return SteamEmulator.SteamUGC.GetQueryUGCTagDisplayName(handle, index, indexTag, pchValue, cchValueSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetTimeCreatedDateRange(IntPtr _, UGCQueryHandle_t handle, uint rtStart, uint rtEnd)
+        {
+            Write("SteamAPI_ISteamUGC_SetTimeCreatedDateRange");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetTimeUpdatedDateRange(IntPtr _, UGCQueryHandle_t handle, uint rtStart, uint rtEnd)
+        {
+            Write("SteamAPI_ISteamUGC_SetTimeUpdatedDateRange");
+            return false;
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

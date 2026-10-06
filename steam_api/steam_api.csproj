@@ -149,6 +149,9 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamRemoteStorage.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamScreenshots.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamTimeline.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamTV.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamUnifiedMessages.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamNetworkingCustomSignaling.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUGC.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUser.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUserStats.cs" />

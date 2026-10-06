@@ -84,12 +84,12 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamNetworkingUtils.GetPingToDataCenter(popID, pViaRelayPoP);
         }
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static int SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(IntPtr popID)
-        //{
-        //    Write("SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP");
-        //    return SteamEmulator.SteamNetworkingUtils.GetDirectPingToPOP(popID);
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(IntPtr _, uint popID)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP");
+            return SteamEmulator.SteamNetworkingUtils.GetDirectPingToPOP(popID);
+        }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamNetworkingUtils_GetPOPCount(IntPtr _)
@@ -278,6 +278,40 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString");
             return SteamEmulator.SteamNetworkingUtils.SteamNetworkingIdentity_ParseString(pIdentity, pszStr);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_IsFakeIPv4(IntPtr _, uint nIPv4)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_IsFakeIPv4");
+            return SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(nIPv4) > (int)SteamNetworkingFakeIPType.NotFake;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues(IntPtr _, int eCurrent, bool bEnumerateDevVars)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues");
+            return SteamEmulator.SteamNetworkingUtils.GetFirstConfigValue();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValuePtr(IntPtr _, int eValue, IntPtr val)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValuePtr");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValuePtr(eValue, val);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(IntPtr _, IntPtr addr)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType");
+            return SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(addr == IntPtr.Zero ? 0 : SteamNetworkingIPAddrInterop.GetIPv4(SteamNetworkingIPAddrInterop.Read(addr)));
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamNetworkingPOPIDRender_c_str(IntPtr _)
+        {
+            return _;
         }
 
         private static void Write(string msg)

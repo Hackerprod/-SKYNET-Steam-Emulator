@@ -41,6 +41,36 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamVideo.GetOPFStringForApp(unVideoAppID, pchBuffer, pnBufferSize);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamVideo_AddTimelineHighlightMarker(IntPtr _, string pchIcon, string pchTitle, string pchDescription, uint unPriority)
+        {
+            Write("SteamAPI_ISteamVideo_AddTimelineHighlightMarker");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamVideo_AddTimelineTimestamp(IntPtr _, string pchTitle)
+        {
+            Write("SteamAPI_ISteamVideo_AddTimelineTimestamp");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamVideo_AddTimelineRangeStart(IntPtr _, string pchID, string pchTitle)
+        {
+            Write("SteamAPI_ISteamVideo_AddTimelineRangeStart");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamVideo_AddTimelineRangeEnd(IntPtr _, string pchID)
+        {
+            Write("SteamAPI_ISteamVideo_AddTimelineRangeEnd");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamVideo_SetTimelineGameMode(IntPtr _, int eMode)
+        {
+            Write("SteamAPI_ISteamVideo_SetTimelineGameMode");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

@@ -310,6 +310,33 @@ namespace SKYNET.Steamworks.Exported
             return false;
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_DismissGamepadTextInput(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_DismissGamepadTextInput");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamUtils_RunFrame(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_RunFrame");
+            SteamEmulator.SteamUtils.RunFrame();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamUtils_SetGameLauncherMode(IntPtr _, bool bLauncherMode)
+        {
+            Write("SteamAPI_ISteamUtils_SetGameLauncherMode");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_ShowModalGamepadTextInput(IntPtr _, int eLineInputMode)
+        {
+            Write("SteamAPI_ISteamUtils_ShowModalGamepadTextInput");
+            return false;
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

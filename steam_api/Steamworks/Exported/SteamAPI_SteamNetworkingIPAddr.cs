@@ -97,6 +97,29 @@ namespace SKYNET.Steamworks.Exported
             return SteamNetworkingIPAddrInterop.Equals(_, x);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_SteamNetworkingIPAddr_GetFakeIPType(IntPtr _)
+        {
+            return ResolveFakeIPType(_);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_SteamNetworkingIPAddr_IsFakeIP(IntPtr _)
+        {
+            return ResolveFakeIPType(_) > (int)SteamNetworkingFakeIPType.NotFake;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamNetworkingIPAddrRender_c_str(IntPtr _)
+        {
+            return _;
+        }
+
+        private static int ResolveFakeIPType(IntPtr address)
+        {
+            return SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(address == IntPtr.Zero ? 0 : SteamNetworkingIPAddrInterop.GetIPv4(SteamNetworkingIPAddrInterop.Read(address)));
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

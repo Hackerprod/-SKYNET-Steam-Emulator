@@ -410,6 +410,34 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("STEAMREMOTESTORAGE_INTERFACE_VERSION014");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch");
+            return SteamEmulator.SteamRemoteStorage.BeginFileWriteBatch();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemoteStorage_EndFileWriteBatch(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemoteStorage_EndFileWriteBatch");
+            return SteamEmulator.SteamRemoteStorage.EndFileWriteBatch();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_ISteamRemoteStorage_GetLocalFileChange(IntPtr _, int iFile, IntPtr pEChangeType, IntPtr pEFilePathType)
+        {
+            Write("SteamAPI_ISteamRemoteStorage_GetLocalFileChange");
+            return SteamEmulator.SteamRemoteStorage.GetLocalFileChange(iFile, pEChangeType, pEFilePathType);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount");
+            return SteamEmulator.SteamRemoteStorage.GetLocalFileChangeCount();
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

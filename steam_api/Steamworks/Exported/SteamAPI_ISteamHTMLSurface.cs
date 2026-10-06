@@ -288,6 +288,12 @@ namespace SKYNET.Steamworks.Exported
             SteamEmulator.SteamHTMLSurface.ViewSource(unBrowserHandle);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamHTMLSurface_DestructISteamHTMLSurface(IntPtr _)
+        {
+            Write("SteamAPI_ISteamHTMLSurface_DestructISteamHTMLSurface");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

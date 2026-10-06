@@ -423,6 +423,13 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("STEAMUSERSTATS_INTERFACE_VERSION011");
         }
             
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUserStats_v012()
+        {
+            Write("SteamAPI_SteamUserStats_v012");
+            return InterfaceManager.FindOrCreateInterface("STEAMUSERSTATS_INTERFACE_VERSION012");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

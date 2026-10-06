@@ -272,6 +272,19 @@ namespace SKYNET.Steamworks.Exported
             SteamEmulator.SteamController.TriggerVibration(controllerHandle, usLeftSpeed, usRightSpeed);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamController_GetControllerState(IntPtr _, uint unControllerIndex, IntPtr pState)
+        {
+            Write("SteamAPI_ISteamController_GetControllerState");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamController_SetOverrideMode(IntPtr _, string pchMode)
+        {
+            Write("SteamAPI_ISteamController_SetOverrideMode");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

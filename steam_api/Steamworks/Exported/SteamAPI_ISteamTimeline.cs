@@ -142,6 +142,34 @@ namespace SKYNET.Steamworks.Exported
             SteamEmulator.SteamTimeline.OpenOverlayToTimelineEvent(ulEvent);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamTimeline_SetTimelineStateDescription(IntPtr _, string pchDescription, float flTimeDelta)
+        {
+            Write("SteamAPI_ISteamTimeline_SetTimelineStateDescription");
+            SteamEmulator.SteamTimeline.SetTimelineTooltip(pchDescription, flTimeDelta);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamTimeline_ClearTimelineStateDescription(IntPtr _, float flTimeDelta)
+        {
+            Write("SteamAPI_ISteamTimeline_ClearTimelineStateDescription");
+            SteamEmulator.SteamTimeline.ClearTimelineTooltip(flTimeDelta);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamTimeline_AddTimelineEvent(IntPtr _, string pchIcon, string pchTitle, string pchDescription, uint unPriority, float flStartOffsetSeconds, float flDurationSeconds, int ePossibleClip)
+        {
+            Write("SteamAPI_ISteamTimeline_AddTimelineEvent");
+            if (flDurationSeconds > 0f)
+            {
+                SteamEmulator.SteamTimeline.AddRangeTimelineEvent(pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, flDurationSeconds, ePossibleClip);
+            }
+            else
+            {
+                SteamEmulator.SteamTimeline.AddInstantaneousTimelineEvent(pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, ePossibleClip);
+            }
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

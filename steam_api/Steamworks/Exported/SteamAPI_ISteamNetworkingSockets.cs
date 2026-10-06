@@ -300,6 +300,55 @@ namespace SKYNET.Steamworks.Exported
             Write("SteamAPI_ISteamNetworkingSockets_RunCallbacks");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP(IntPtr _, int nNumPorts)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP");
+            return SteamEmulator.SteamNetworkingSockets.BeginAsyncRequestFakeIP(nNumPorts);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSockets_GetFakeIP(IntPtr _, int idxFirstPort, IntPtr pInfo)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_GetFakeIP");
+            SteamEmulator.SteamNetworkingSockets.GetFakeIP(idxFirstPort, pInfo);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP(IntPtr _, int idxFakePort, int nOptions, IntPtr pOptions)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP");
+            return SteamEmulator.SteamNetworkingSockets.CreateListenSocketP2PFakeIP(idxFakePort, nOptions, pOptions);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection(IntPtr _, uint hConn, IntPtr pOutAddr)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection");
+            return SteamEmulator.SteamNetworkingSockets.GetRemoteFakeIPForConnection(hConn, pOutAddr);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_ISteamNetworkingSockets_CreateFakeUDPPort(IntPtr _, int idxFakeServerPort)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_CreateFakeUDPPort");
+            return SteamEmulator.SteamNetworkingSockets.CreateFakeUDPPort(idxFakeServerPort);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingSockets_GetQuickConnectionStatus(IntPtr _, uint hConn, IntPtr pStats)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_GetQuickConnectionStatus");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSockets_ResetIdentity(IntPtr _, IntPtr pIdentity)
+        {
+            Write("SteamAPI_ISteamNetworkingSockets_ResetIdentity");
+            SteamEmulator.SteamNetworkingSockets.ResetIdentity(pIdentity);
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);
