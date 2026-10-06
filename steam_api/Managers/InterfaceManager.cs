@@ -48,11 +48,6 @@ namespace SKYNET.Managers
 
                 foreach (var layout in type.GetCustomAttributes<InterfaceLayoutAttribute>())
                 {
-                    if (interfaceLayouts.ContainsKey(layout.Name) && interfaceTypes[layout.Name] == type)
-                    {
-                        continue;
-                    }
-
                     var methods = MemoryManager.ResolveLayoutMethods(type, layout.Name, layout.MethodNames);
                     if (!interfaceLayouts.TryAdd(layout.Name, methods))
                     {

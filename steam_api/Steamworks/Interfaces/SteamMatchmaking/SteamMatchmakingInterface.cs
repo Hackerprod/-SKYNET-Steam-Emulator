@@ -1,11 +1,42 @@
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
-using SKYNET.Helpers;
+
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamMatchMaking009")]
-    public class SteamMatchMaking009 : ISteamInterface
+    [InterfaceLayout("SteamMatchMaking007",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyList", "AddRequestLobbyListStringFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListNearValueFilter",
+        "AddRequestLobbyListFilterSlotsAvailable", "GetLobbyByIndex", "CreateLobby", "JoinLobby",
+        "LeaveLobby", "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex",
+        "GetLobbyData", "SetLobbyData", "GetLobbyDataCount", "GetLobbyDataByIndex",
+        "DeleteLobbyData", "GetLobbyMemberData", "SetLobbyMemberData", "SendLobbyChatMsg",
+        "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer", "GetLobbyGameServer",
+        "SetLobbyMemberLimit", "GetLobbyMemberLimit", "SetLobbyType", "SetLobbyJoinable",
+        "GetLobbyOwner", "SetLobbyOwner")]
+    [InterfaceLayout("SteamMatchMaking008",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyList", "AddRequestLobbyListStringFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListNearValueFilter",
+        "AddRequestLobbyListFilterSlotsAvailable", "AddRequestLobbyListDistanceFilter", "AddRequestLobbyListResultCountFilter", "GetLobbyByIndex",
+        "CreateLobby", "JoinLobby", "LeaveLobby", "InviteUserToLobby",
+        "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData", "SetLobbyData",
+        "GetLobbyDataCount", "GetLobbyDataByIndex", "DeleteLobbyData", "GetLobbyMemberData",
+        "SetLobbyMemberData", "SendLobbyChatMsg", "GetLobbyChatEntry", "RequestLobbyData",
+        "SetLobbyGameServer", "GetLobbyGameServer", "SetLobbyMemberLimit", "GetLobbyMemberLimit",
+        "SetLobbyType", "SetLobbyJoinable", "GetLobbyOwner", "SetLobbyOwner")]
+    [InterfaceLayout("SteamMatchMaking009",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyList", "AddRequestLobbyListStringFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListNearValueFilter",
+        "AddRequestLobbyListFilterSlotsAvailable", "AddRequestLobbyListDistanceFilter", "AddRequestLobbyListResultCountFilter", "AddRequestLobbyListCompatibleMembersFilter",
+        "GetLobbyByIndex", "CreateLobby", "JoinLobby", "LeaveLobby",
+        "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData",
+        "SetLobbyData", "GetLobbyDataCount", "GetLobbyDataByIndex", "DeleteLobbyData",
+        "GetLobbyMemberData", "SetLobbyMemberData", "SendLobbyChatMsg", "GetLobbyChatEntry",
+        "RequestLobbyData", "SetLobbyGameServer", "GetLobbyGameServer", "SetLobbyMemberLimit",
+        "GetLobbyMemberLimit", "SetLobbyType", "SetLobbyJoinable", "GetLobbyOwner",
+        "SetLobbyOwner", "SetLinkedLobby")]
+    public class SteamMatchmakingInterface : ISteamInterface
     {
         public int GetFavoriteGameCount(IntPtr _)
         {
@@ -50,21 +81,6 @@ namespace SKYNET.Steamworks.Interfaces
         public void AddRequestLobbyListFilterSlotsAvailable(IntPtr _, int nSlotsAvailable)
         {
             SteamEmulator.SteamMatchmaking.AddRequestLobbyListFilterSlotsAvailable(nSlotsAvailable);
-        }
-
-        public void AddRequestLobbyListDistanceFilter(IntPtr _, int eLobbyDistanceFilter)
-        {
-            SteamEmulator.SteamMatchmaking.AddRequestLobbyListDistanceFilter(eLobbyDistanceFilter);
-        }
-
-        public void AddRequestLobbyListResultCountFilter(IntPtr _, int cMaxResults)
-        {
-            SteamEmulator.SteamMatchmaking.AddRequestLobbyListResultCountFilter(cMaxResults);
-        }
-
-        public void AddRequestLobbyListCompatibleMembersFilter(IntPtr _, ulong steamIDLobby)
-        {
-            SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
         }
 
         public IntPtr GetLobbyByIndex(IntPtr _, IntPtr ret, int iLobby)
@@ -192,10 +208,24 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.SetLobbyOwner(steamIDLobby, steamIDNewOwner);
         }
 
+        public void AddRequestLobbyListDistanceFilter(IntPtr _, int eLobbyDistanceFilter)
+        {
+            SteamEmulator.SteamMatchmaking.AddRequestLobbyListDistanceFilter(eLobbyDistanceFilter);
+        }
+
+        public void AddRequestLobbyListResultCountFilter(IntPtr _, int cMaxResults)
+        {
+            SteamEmulator.SteamMatchmaking.AddRequestLobbyListResultCountFilter(cMaxResults);
+        }
+
+        public void AddRequestLobbyListCompatibleMembersFilter(IntPtr _, ulong steamIDLobby)
+        {
+            SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
+        }
+
         public bool SetLinkedLobby(IntPtr _, ulong steamIDLobby, ulong steamIDLobbyDependent)
         {
             return SteamEmulator.SteamMatchmaking.SetLinkedLobby(steamIDLobby, steamIDLobbyDependent);
         }
-
     }
 }

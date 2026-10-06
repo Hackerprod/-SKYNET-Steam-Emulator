@@ -1,26 +1,134 @@
-﻿
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System;
 
 using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION016")]
-    public class SteamRemoteStorage016 : ISteamInterface
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION002",
+        "FileWrite", "GetFileSize", "FileRead", "FileExists",
+        "GetFileCount", "GetFileNameAndSize", "GetQuota__V002")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION013",
+        "FileWrite", "FileRead", "FileWriteAsync", "FileReadAsync",
+        "FileReadAsyncComplete", "FileForget", "FileDelete", "FileShare",
+        "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk", "FileWriteStreamClose",
+        "FileWriteStreamCancel", "FileExists", "FilePersisted", "GetFileSize",
+        "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount", "GetFileNameAndSize",
+        "GetQuota__V013", "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp",
+        "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails", "UGCRead",
+        "GetCachedUGCCount", "GetCachedUGCHandle", "GetFileListFromServer", "FileFetch",
+        "FilePersist", "SynchronizeToClient", "SynchronizeToServer", "ResetFileRequestState",
+        "PublishWorkshopFile", "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile",
+        "UpdatePublishedFileTitle", "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags",
+        "CommitPublishedFileUpdate", "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles",
+        "SubscribePublishedFile", "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription",
+        "GetPublishedItemVoteDetails", "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles",
+        "PublishVideo", "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles",
+        "UGCDownloadToLocation")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION014",
+        "FileWrite", "FileRead", "FileWriteAsync", "FileReadAsync",
+        "FileReadAsyncComplete", "FileForget", "FileDelete", "FileShare",
+        "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk", "FileWriteStreamClose",
+        "FileWriteStreamCancel", "FileExists", "FilePersisted", "GetFileSize",
+        "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount", "GetFileNameAndSize",
+        "GetQuota", "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp",
+        "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails", "UGCRead",
+        "GetCachedUGCCount", "GetCachedUGCHandle", "GetFileListFromServer", "FileFetch",
+        "FilePersist", "SynchronizeToClient", "SynchronizeToServer", "ResetFileRequestState",
+        "PublishWorkshopFile", "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile",
+        "UpdatePublishedFileTitle", "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags",
+        "CommitPublishedFileUpdate", "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles",
+        "SubscribePublishedFile", "EnumerateUserSubscribedFiles", "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription",
+        "GetPublishedItemVoteDetails", "UpdateUserPublishedItemVote", "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles",
+        "PublishVideo", "SetUserPublishedFileAction", "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles",
+        "UGCDownloadToLocation")]
+    [InterfaceLayout("STEAMREMOTESTORAGE_INTERFACE_VERSION016",
+        "FileWrite", "FileRead", "FileWriteAsync", "FileReadAsync",
+        "FileReadAsyncComplete", "FileForget", "FileDelete", "FileShare",
+        "SetSyncPlatforms", "FileWriteStreamOpen", "FileWriteStreamWriteChunk", "FileWriteStreamClose",
+        "FileWriteStreamCancel", "FileExists", "FilePersisted", "GetFileSize",
+        "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount", "GetFileNameAndSize",
+        "GetQuota", "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp",
+        "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails", "UGCRead",
+        "GetCachedUGCCount", "GetCachedUGCHandle", "PublishWorkshopFile", "CreatePublishedFileUpdateRequest",
+        "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile", "UpdatePublishedFileTitle", "UpdatePublishedFileDescription",
+        "UpdatePublishedFileVisibility", "UpdatePublishedFileTags", "CommitPublishedFileUpdate", "GetPublishedFileDetails",
+        "DeletePublishedFile", "EnumerateUserPublishedFiles", "SubscribePublishedFile", "EnumerateUserSubscribedFiles",
+        "UnsubscribePublishedFile", "UpdatePublishedFileSetChangeDescription", "GetPublishedItemVoteDetails", "UpdateUserPublishedItemVote",
+        "GetUserPublishedItemVoteDetails", "EnumerateUserSharedWorkshopFiles", "PublishVideo", "SetUserPublishedFileAction",
+        "EnumeratePublishedFilesByUserAction", "EnumeratePublishedWorkshopFiles", "UGCDownloadToLocation", "GetLocalFileChangeCount",
+        "GetLocalFileChange", "BeginFileWriteBatch", "EndFileWriteBatch")]
+    public class SteamRemoteStorageInterface : ISteamInterface
     {
         public bool FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWrite(pchFile, pvData, cubData);
         }
 
+        public int GetFileSize(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetFileSize(pchFile);
+        }
+
         public int FileRead(IntPtr _, string pchFile, IntPtr pvData, int cubDataToRead)
         {
             return SteamEmulator.SteamRemoteStorage.FileRead(pchFile, pvData, cubDataToRead);
+        }
+
+        public bool FileExists(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.FileExists(pchFile);
+        }
+
+        public int GetFileCount(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetFileCount();
+        }
+
+        public string GetFileNameAndSize(IntPtr _, int iFile, ref int pnFileSizeInBytes)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
+        }
+
+        public bool GetQuota__V002(IntPtr _, IntPtr pnTotalBytes, IntPtr puAvailableBytes)
+        {
+            ulong total = 0;
+            ulong available = 0;
+            bool result = SteamEmulator.SteamRemoteStorage.GetQuota(ref total, ref available);
+
+            if (pnTotalBytes != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pnTotalBytes, unchecked((int)Math.Min(total, int.MaxValue)));
+            }
+            if (puAvailableBytes != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(puAvailableBytes, unchecked((int)Math.Min(available, int.MaxValue)));
+            }
+
+            return result;
+        }
+
+        public bool GetQuota__V013(IntPtr _, IntPtr pnTotalBytes, IntPtr puAvailableBytes)
+        {
+            if (pnTotalBytes != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pnTotalBytes, 0);
+            }
+            if (puAvailableBytes != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(puAvailableBytes, 0);
+            }
+            return true;
+        }
+
+        public bool GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
         }
 
         public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
@@ -78,19 +186,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.FileWriteStreamCancel(writeHandle);
         }
 
-        public bool FileExists(IntPtr _, string pchFile)
-        {
-            return SteamEmulator.SteamRemoteStorage.FileExists(pchFile);
-        }
-
         public bool FilePersisted(IntPtr _, string pchFile)
         {
             return SteamEmulator.SteamRemoteStorage.FilePersisted(pchFile);
-        }
-
-        public int GetFileSize(IntPtr _, string pchFile)
-        {
-            return SteamEmulator.SteamRemoteStorage.GetFileSize(pchFile);
         }
 
         public long GetFileTimestamp(IntPtr _, string pchFile)
@@ -101,21 +199,6 @@ namespace SKYNET.Steamworks.Interfaces
         public int GetSyncPlatforms(IntPtr _, string pchFile)
         {
             return SteamEmulator.SteamRemoteStorage.GetSyncPlatforms(pchFile);
-        }
-
-        public int GetFileCount(IntPtr _)
-        {
-            return SteamEmulator.SteamRemoteStorage.GetFileCount();
-        }
-
-        public string GetFileNameAndSize(IntPtr _, int iFile, ref int pnFileSizeInBytes)
-        {
-            return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
-        }
-
-        public bool GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
-        {
-            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
         }
 
         public bool IsCloudEnabledForAccount(IntPtr _)
@@ -161,6 +244,36 @@ namespace SKYNET.Steamworks.Interfaces
         public ulong GetCachedUGCHandle(IntPtr _, int iCachedContent)
         {
             return SteamEmulator.SteamRemoteStorage.GetCachedUGCHandle(iCachedContent);
+        }
+
+        public void GetFileListFromServer(IntPtr _)
+        {
+            SteamEmulator.SteamRemoteStorage.GetFileListFromServer();
+        }
+
+        public bool FileFetch(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.FileFetch(pchFile);
+        }
+
+        public bool FilePersist(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.FilePersist(pchFile);
+        }
+
+        public bool SynchronizeToClient(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToClient();
+        }
+
+        public bool SynchronizeToServer(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToServer();
+        }
+
+        public bool ResetFileRequestState(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.ResetFileRequestState();
         }
 
         public ulong PublishWorkshopFile(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int eWorkshopFileType)
