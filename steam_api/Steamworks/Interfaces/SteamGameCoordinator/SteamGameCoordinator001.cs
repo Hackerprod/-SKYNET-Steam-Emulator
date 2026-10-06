@@ -1,7 +1,5 @@
 ﻿using SKYNET.Steamworks.Implementation;
 using System;
-using System.Runtime.InteropServices;
-using uint32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {

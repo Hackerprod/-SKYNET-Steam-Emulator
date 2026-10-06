@@ -78,7 +78,7 @@ Runtime flow:
 |   |-- Network/                   Legacy and relay-facing networking helpers
 |   |-- Steamworks/Exported/       DllExport entrypoints
 |   |-- Steamworks/Implementation/ Steamworks behavior implementations
-|   |-- Steamworks/Interfaces/     Versioned interface vtables
+|   |-- Steamworks/Interfaces/     Interface classes with declarative vtable layouts
 |   +-- Steamworks/Types/          Native-facing structs, enums, handles, and IDs
 |
 |-- SKYNET server/                 ASP.NET Core backend and admin UI
@@ -107,7 +107,7 @@ Runtime flow:
 The DLL project targets .NET Framework 4.7.2 and uses DllExport to expose native Steam API symbols. Its responsibilities include:
 
 - exporting Steam API entrypoints expected by games
-- constructing versioned Steamworks interface vtables
+- constructing Steamworks interface vtables from declarative `[InterfaceLayout]` attributes
 - preserving native ABI behavior for structs, return buffers, callbacks, and call results
 - translating Steamworks state calls into backend API calls where needed
 - issuing and validating local auth ticket flows through the server
@@ -399,6 +399,7 @@ When changing ABI, callback, auth, networking, lobby, or GC behavior, validate m
 ## Development Notes
 
 - Keep Steamworks interface method order aligned with the SDK. Vtable slot drift can crash the host process before useful logs are written.
+- Interface vtables are declared with `[InterfaceLayout("<SDK version string>", "MethodName", ...)]` on the classes under `steam_api/Steamworks/Interfaces/<Family>/`. The ordered name list is the vtable; `InterfaceManager`/`MemoryManager` resolve each name to exactly one public declared method. Methods that differ between SDK versions are kept as `Name__V###` variants. To add a version, add a layout (and any new method), then run `DeveloperTools/InterfaceLayoutCheck` (see `.codex/skills/skynet-steam-api-dll/SKILL.md`). Never regenerate its goldens unless a layout change is deliberate.
 - Keep native-facing structs layout-compatible with the SDK: packing, field size, hidden return buffers, and callback payload sizes matter.
 - Prefer server-owned state for identity, friends, lobbies, stats, storage, tickets, and GC context.
 - Keep game-specific GC logic in `SKYNET server/GC/<appid>` instead of embedding it in the DLL.

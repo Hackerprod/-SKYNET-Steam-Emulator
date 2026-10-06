@@ -207,7 +207,7 @@ namespace SKYNET.Steamworks.Interfaces
         "RemoveContentDescriptor__V021", "SetRequiredGameVersions__V021", "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021",
         "SetUserItemVote__V021", "GetUserItemVote__V021", "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021",
         "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems__V021", "GetSubscribedItems__V021",
-        "GetItemState__V021", "GetItemInstallInfo__V021", "GetItemDownloadInfo__V021", "DownloadItem__V021",
+        "GetItemState", "GetItemInstallInfo", "GetItemDownloadInfo__V021", "DownloadItem__V021",
         "BInitWorkshopForGameServer__V021", "SuspendDownloads__V021", "StartPlaytimeTracking__V021", "StopPlaytimeTracking__V021",
         "StopPlaytimeTrackingForAllItems__V021", "AddDependency__V021", "RemoveDependency__V021", "AddAppDependency__V021",
         "RemoveAppDependency__V021", "GetAppDependencies__V021", "DeleteItem__V021", "ShowWorkshopEULA__V021",
@@ -379,10 +379,6 @@ namespace SKYNET.Steamworks.Interfaces
         public uint GetNumSubscribedItems__V021(IntPtr _, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetNumSubscribedItems(bIncludeLocallyDisabled); }
 
         public uint GetSubscribedItems__V021(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled); }
-
-        public uint GetItemState__V021(IntPtr _, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.GetItemState(nPublishedFileID); }
-
-        public bool GetItemInstallInfo__V021(IntPtr _, ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp) { return SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, punTimeStamp); }
 
         public bool GetItemDownloadInfo__V021(IntPtr _, ulong nPublishedFileID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
         {

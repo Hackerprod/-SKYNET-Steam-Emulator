@@ -1,9 +1,5 @@
 using System;
 
-using SteamNetworkingPOPID = System.UInt32;
-using HSteamNetConnection = System.UInt32;
-using HSteamListenSocket = System.UInt32;
-using HSteamNetPollGroup = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {

@@ -1,10 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
 
 using SteamItemInstanceID_t = System.UInt64;
 using SteamInventoryResult_t = System.Int32;
 using SteamItemDef_t = System.Int32;
-using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {

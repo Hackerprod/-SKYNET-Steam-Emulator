@@ -1,15 +1,11 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks.Types;
-using System.Runtime.InteropServices;
 using System;
 
 using AppId_t = System.UInt32;
-using CGameID = System.UInt64;
 using HAuthTicket = System.UInt32;
 using HSteamUser = System.UInt32;
 using SteamAPICall_t = System.UInt64;
-using uint16 = System.UInt16;
-using uint32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
