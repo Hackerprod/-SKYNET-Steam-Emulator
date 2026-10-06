@@ -1,0 +1,10 @@
+0|RequestUserStats|System.UInt64|System.IntPtr,System.UInt64
+1|GetUserStatFloat|System.Boolean|System.IntPtr,System.UInt64,System.String,System.IntPtr
+2|GetUserStatInt32|System.Boolean|System.IntPtr,System.UInt64,System.String,System.IntPtr
+3|GetUserAchievement|System.Boolean|System.IntPtr,System.UInt64,System.String,System.IntPtr
+4|SetUserStatFloat|System.Boolean|System.IntPtr,System.UInt64,System.String,System.Single
+5|SetUserStatInt32|System.Boolean|System.IntPtr,System.UInt64,System.String,System.Int32
+6|UpdateUserAvgRateStat|System.Boolean|System.IntPtr,System.UInt64,System.String,System.Single,System.Double
+7|SetUserAchievement|System.Boolean|System.IntPtr,System.UInt64,System.String
+8|ClearUserAchievement|System.Boolean|System.IntPtr,System.UInt64,System.String
+9|StoreUserStats|System.UInt64|System.IntPtr,System.UInt64

@@ -1,0 +1,11 @@
+0|SendP2PRendezvous|System.Void|System.IntPtr,System.UInt64,System.UInt32,System.IntPtr,System.UInt32
+1|SendP2PConnectionFailure|System.Void|System.IntPtr,System.UInt64,System.UInt32,System.UInt32,System.String
+2|GetCertAsync|System.UInt64|System.IntPtr
+3|GetNetworkConfigJSON|System.Int32|System.IntPtr,System.IntPtr,System.UInt32,System.String
+4|CacheRelayTicket|System.Void|System.IntPtr,System.IntPtr,System.UInt32
+5|GetCachedRelayTicketCount|System.UInt32|System.IntPtr
+6|GetCachedRelayTicket|System.Int32|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32
+7|PostConnectionStateMsg|System.Void|System.IntPtr,System.IntPtr,System.UInt32
+8|GetSTUNServer|System.Boolean|System.IntPtr,System.Int32,System.IntPtr,System.Int32
+9|BAllowDirectConnectToPeer|System.Boolean|System.IntPtr,System.IntPtr
+10|BeginAsyncRequestFakeIP|System.Int32|System.IntPtr,System.Int32

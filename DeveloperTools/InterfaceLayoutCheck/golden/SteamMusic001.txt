@@ -1,0 +1,9 @@
+0|BIsEnabled|System.Boolean|System.IntPtr
+1|BIsPlaying|System.Boolean|System.IntPtr
+2|GetPlaybackStatus|System.Int32|System.IntPtr
+3|Play|System.Void|System.IntPtr
+4|Pause|System.Void|System.IntPtr
+5|PlayPrevious|System.Void|System.IntPtr
+6|PlayNext|System.Void|System.IntPtr
+7|SetVolume|System.Void|System.IntPtr,System.Single
+8|GetVolume|System.Single|System.IntPtr

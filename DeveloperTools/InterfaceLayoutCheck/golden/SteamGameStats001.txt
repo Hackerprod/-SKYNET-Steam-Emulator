@@ -1,0 +1,13 @@
+0|GetNewSession|System.UInt64|System.IntPtr,System.SByte,System.UInt64,System.Int32,System.UInt32
+1|EndSession|System.UInt64|System.IntPtr,System.UInt64,System.UInt32,System.Int32
+2|AddSessionAttributeInt|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Int32
+3|AddSessionAttributeString|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.String
+4|AddSessionAttributeFloat|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Single
+5|AddNewRow|SKYNET.Steamworks.EResult|System.IntPtr,System.IntPtr,System.UInt64,System.String
+6|CommitRow|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64
+7|CommitOutstandingRows|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64
+8|AddRowAttributeInt|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Int32
+9|AddRowAtributeString|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.String
+10|AddRowAttributeFloat|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Single
+11|AddSessionAttributeInt64|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Int64
+12|AddRowAttributeInt64|SKYNET.Steamworks.EResult|System.IntPtr,System.UInt64,System.String,System.Int64

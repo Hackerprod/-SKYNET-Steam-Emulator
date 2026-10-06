@@ -29,6 +29,23 @@ namespace SKYNET.Managers
 
         public static IntPtr CreateInterface(Type type)
         {
+            List<MethodInfo> methods;
+            try
+            {
+                methods = InterfaceMethodsForType(type);
+            }
+            catch (Exception ex)
+            {
+                CleanErrorMessage();
+                ErrorMessage = ex.Message + " " + ex.StackTrace;
+                return IntPtr.Zero;
+            }
+
+            return CreateInterface(type, methods);
+        }
+
+        public static IntPtr CreateInterface(Type type, List<MethodInfo> Methods)
+        {
             CleanErrorMessage();
 
             string Name = type.Name;
@@ -37,8 +54,6 @@ namespace SKYNET.Managers
 
             try
             {
-                var Methods = InterfaceMethodsForType(type);
-
                 foreach (var methodInfo in Methods)
                 {
                     Type DelegateType = CreateDelegate(methodInfo);
@@ -412,6 +427,25 @@ namespace SKYNET.Managers
                 ErrorMessage = ex.Message + " " + ex.StackTrace;
                 return false;
             }
+        }
+
+        public static List<MethodInfo> ResolveLayoutMethods(Type type, string version, string[] methodNames)
+        {
+            var declared = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var resolved = new List<MethodInfo>(methodNames.Length);
+            foreach (var methodName in methodNames)
+            {
+                var matches = declared.Where(method => method.Name == methodName).ToArray();
+                if (matches.Length != 1)
+                {
+                    throw new InvalidOperationException(
+                        $"{type.FullName} layout '{version}' method '{methodName}' resolved to {matches.Length} public methods (expected exactly 1).");
+                }
+
+                resolved.Add(matches[0]);
+            }
+
+            return resolved;
         }
 
         public static List<MethodInfo> InterfaceMethodsForType(Type t)

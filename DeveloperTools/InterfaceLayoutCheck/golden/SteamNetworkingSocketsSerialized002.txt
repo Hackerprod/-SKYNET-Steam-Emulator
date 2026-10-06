@@ -1,0 +1,8 @@
+0|SendP2PRendezvous|System.Void|System.IntPtr,System.UInt64,System.UInt32,System.IntPtr,System.UInt32
+1|SendP2PConnectionFailure|System.Void|System.IntPtr,System.UInt64,System.UInt32,System.UInt32,System.String
+2|GetCertAsync|System.UInt64|System.IntPtr
+3|GetNetworkConfigJSON|System.Int32|System.IntPtr,System.IntPtr,System.UInt32
+4|CacheRelayTicket|System.Void|System.IntPtr,System.IntPtr,System.UInt32
+5|GetCachedRelayTicketCount|System.UInt32|System.IntPtr
+6|GetCachedRelayTicket|System.Int32|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32
+7|PostConnectionStateMsg|System.Void|System.IntPtr,System.IntPtr,System.UInt32

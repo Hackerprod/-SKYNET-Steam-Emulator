@@ -1,0 +1,14 @@
+0|SetActive|System.Void|System.IntPtr,System.Boolean
+1|SetHeartbeatInterval|System.Void|System.IntPtr,System.Int32
+2|HandleIncomingPacket|System.Boolean|System.IntPtr,System.IntPtr,System.Int32,System.UInt32,System.UInt32
+3|GetNextOutgoingPacket|System.Int32|System.IntPtr,System.IntPtr,System.Int32,System.IntPtr,System.IntPtr
+4|SetBasicServerData|System.Void|System.IntPtr,System.UInt32,System.Boolean,System.String,System.String,System.UInt32,System.Boolean,System.String
+5|ClearAllKeyValues|System.Void|System.IntPtr
+6|SetKeyValue|System.Void|System.IntPtr,System.String,System.String
+7|NotifyShutdown|System.Void|System.IntPtr
+8|WasRestartRequested|System.Boolean|System.IntPtr
+9|ForceHeartbeat|System.Void|System.IntPtr
+10|AddMasterServer|System.Boolean|System.IntPtr,System.String
+11|RemoveMasterServer|System.Boolean|System.IntPtr,System.String
+12|GetNumMasterServers|System.Int32|System.IntPtr
+13|GetMasterServerAddress|System.Int32|System.IntPtr,System.Int32,System.IntPtr,System.Int32

@@ -1,0 +1,5 @@
+0|SendMethod|System.UInt64|System.IntPtr,System.String,System.IntPtr,System.UInt32,System.UInt64
+1|GetMethodResponseInfo|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr,System.IntPtr
+2|GetMethodResponseData|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr,System.UInt32,System.Boolean
+3|ReleaseMethod|System.Boolean|System.IntPtr,System.UInt64
+4|SendNotification|System.Boolean|System.IntPtr,System.String,System.IntPtr,System.UInt32

@@ -1,0 +1,7 @@
+0|FileWrite|System.Boolean|System.IntPtr,System.String,System.IntPtr,System.Int32
+1|GetFileSize|System.Int32|System.IntPtr,System.String
+2|FileRead|System.Int32|System.IntPtr,System.String,System.IntPtr,System.Int32
+3|FileExists|System.Boolean|System.IntPtr,System.String
+4|GetFileCount|System.Int32|System.IntPtr
+5|GetFileNameAndSize|System.String|System.IntPtr,System.Int32,System.Int32&
+6|GetQuota|System.Boolean|System.IntPtr,System.IntPtr,System.IntPtr

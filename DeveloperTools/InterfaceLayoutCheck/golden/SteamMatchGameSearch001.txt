@@ -1,0 +1,14 @@
+0|AddGameSearchParams|System.Int32|System.IntPtr,System.String,System.String
+1|SearchForGameWithLobby|System.Int32|System.IntPtr,System.UInt64,System.Int32,System.Int32
+2|SearchForGameSolo|System.Int32|System.IntPtr,System.Int32,System.Int32
+3|AcceptGame|System.Int32|System.IntPtr
+4|DeclineGame|System.Int32|System.IntPtr
+5|RetrieveConnectionDetails|System.Int32|System.IntPtr,System.UInt64,System.IntPtr,System.Int32
+6|EndGameSearch|System.Int32|System.IntPtr
+7|SetGameHostParams|System.Int32|System.IntPtr,System.String,System.String
+8|SetConnectionDetails|System.Int32|System.IntPtr,System.String,System.Int32
+9|RequestPlayersForGame|System.Int32|System.IntPtr,System.Int32,System.Int32,System.Int32
+10|HostConfirmGameStart|System.Int32|System.IntPtr,System.UInt64
+11|CancelRequestPlayersForGame|System.Int32|System.IntPtr
+12|SubmitPlayerResult|System.Int32|System.IntPtr,System.UInt64,System.UInt64,System.Int32
+13|EndGame|System.Int32|System.IntPtr,System.UInt64

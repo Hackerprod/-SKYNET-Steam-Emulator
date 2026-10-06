@@ -1,0 +1,3 @@
+0|SendMessage|System.Int32|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32
+1|IsMessageAvailable|System.Boolean|System.IntPtr,System.UInt32&
+2|RetrieveMessage|System.Int32|System.IntPtr,System.UInt32&,System.IntPtr,System.UInt32,System.UInt32&

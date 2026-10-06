@@ -1,0 +1,6 @@
+0|SendMessageToUser|System.Int32|System.IntPtr,System.IntPtr,System.IntPtr,System.UInt32,System.Int32,System.Int32
+1|ReceiveMessagesOnChannel|System.Int32|System.IntPtr,System.Int32,System.IntPtr,System.Int32
+2|AcceptSessionWithUser|System.Boolean|System.IntPtr,System.IntPtr
+3|CloseSessionWithUser|System.Boolean|System.IntPtr,System.IntPtr
+4|CloseChannelWithUser|System.Boolean|System.IntPtr,System.IntPtr,System.Int32
+5|GetSessionConnectionInfo|System.Int32|System.IntPtr,System.IntPtr,System.IntPtr,System.IntPtr

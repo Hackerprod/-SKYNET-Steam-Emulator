@@ -1,0 +1,6 @@
+0|BIsParentalLockEnabled|System.Boolean|System.IntPtr
+1|BIsParentalLockLocked|System.Boolean|System.IntPtr
+2|BIsAppBlocked|System.Boolean|System.IntPtr,System.UInt32
+3|BIsAppInBlockList|System.Boolean|System.IntPtr,System.UInt32
+4|BIsFeatureBlocked|System.Boolean|System.IntPtr,System.Int32
+5|BIsFeatureInBlockList|System.Boolean|System.IntPtr,System.Int32

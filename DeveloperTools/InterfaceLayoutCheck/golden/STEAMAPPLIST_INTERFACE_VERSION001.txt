@@ -1,0 +1,5 @@
+0|GetNumInstalledApps|System.UInt32|System.IntPtr
+1|GetInstalledApps|System.UInt32|System.IntPtr,System.IntPtr,System.UInt32
+2|GetAppName|System.Int32|System.IntPtr,System.UInt32,System.IntPtr,System.Int32
+3|GetAppInstallDir|System.Int32|System.IntPtr,System.UInt32,System.IntPtr,System.Int32
+4|GetAppBuildId|System.Int32|System.IntPtr,System.UInt32

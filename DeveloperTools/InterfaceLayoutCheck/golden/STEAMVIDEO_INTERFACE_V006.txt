@@ -1,0 +1,4 @@
+0|GetVideoURL|System.Void|System.IntPtr,System.UInt32
+1|IsBroadcasting|System.Boolean|System.IntPtr,System.IntPtr
+2|GetOPFSettings|System.Void|System.IntPtr,System.UInt32
+3|GetOPFStringForApp|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr

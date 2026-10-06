@@ -174,13 +174,6 @@
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Managers\MusicPlayerManager.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient009.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient018.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient019.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient021.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient021Legacy.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient022.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController006.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController007.cs" />
@@ -206,6 +199,8 @@
     <Compile Include="Steamworks\Types\SteamNetworkingNativeTypes.cs" />
     <Compile Include="Steamworks\Types\CSteamID.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
+    <Compile Include="Steamworks\Helpers\InterfaceLayoutAttribute.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClientInterface.cs" />
     <Compile Include="Steamworks\Helpers\MsvcVTableOverloadAttribute.cs" />
     <Compile Include="Managers\CallbackManager.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
@@ -248,7 +243,6 @@
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps008.cs" />
