@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using SteamAPICall_t = System.UInt64;
 using TimelineEventHandle_t = System.UInt64;
@@ -7,6 +8,18 @@ namespace SKYNET.Steamworks.Interfaces
 {
     [InterfaceLayout("STEAMTIMELINE_INTERFACE_V001",
         "SetTimelineStateDescription", "ClearTimelineStateDescription", "AddTimelineEvent", "SetTimelineGameMode")]
+    [InterfaceLayout("STEAMTIMELINE_INTERFACE_V002",
+        "SetTimelineTooltip", "ClearTimelineTooltip", "SetTimelineGameMode", "AddTimelineEvent__V002",
+        "unknown_ret0_1", "unknown_ret0_2", "unknown_nop_3", "RemoveTimelineEvent",
+        "unknown_nop_4", "unknown_nop_5", "unknown_nop_6", "DoesEventRecordingExist",
+        "StartGamePhase", "unknown_nop_7", "EndGamePhase", "SetGamePhaseID",
+        "DoesGamePhaseRecordingExist", "AddGamePhaseTag", "OpenOverlayToGamePhase", "OpenOverlayToTimelineEvent")]
+    [InterfaceLayout("STEAMTIMELINE_INTERFACE_V003",
+        "SetTimelineTooltip", "ClearTimelineTooltip", "SetTimelineGameMode", "AddTimelineEvent__V002",
+        "unknown_ret0_1", "unknown_ret0_2", "unknown_nop_3", "RemoveTimelineEvent",
+        "unknown_nop_4", "unknown_nop_5", "unknown_nop_6", "DoesEventRecordingExist",
+        "StartGamePhase", "EndGamePhase", "SetGamePhaseID", "DoesGamePhaseRecordingExist",
+        "AddGamePhaseTag", "SetGamePhaseAttribute", "OpenOverlayToGamePhase", "OpenOverlayToTimelineEvent")]
     [InterfaceLayout("STEAMTIMELINE_INTERFACE_V004",
         "SetTimelineTooltip", "ClearTimelineTooltip", "SetTimelineGameMode", "AddInstantaneousTimelineEvent",
         "AddRangeTimelineEvent", "StartRangeTimelineEvent", "UpdateRangeTimelineEvent", "EndRangeTimelineEvent",
@@ -126,5 +139,48 @@ namespace SKYNET.Steamworks.Interfaces
                 SteamEmulator.SteamTimeline.AddInstantaneousTimelineEvent(pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, ePossibleClip);
             }
         }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamTimeline", method + " not implemented");
+        }
+
+        public TimelineEventHandle_t AddTimelineEvent__V002(IntPtr _, string pchTitle, string pchDescription, string pchIcon, uint unIconPriority, float flStartOffsetSeconds, float flDurationSeconds, int ePossibleClip)
+        {
+            if (flDurationSeconds > 0f)
+            {
+                return SteamEmulator.SteamTimeline.AddRangeTimelineEvent(pchTitle, pchDescription, pchIcon, unIconPriority, flStartOffsetSeconds, flDurationSeconds, ePossibleClip);
+            }
+
+            return SteamEmulator.SteamTimeline.AddInstantaneousTimelineEvent(pchTitle, pchDescription, pchIcon, unIconPriority, flStartOffsetSeconds, ePossibleClip);
+        }
+
+        public uint unknown_ret0_1(IntPtr _)
+        {
+            LogStub("unknown_ret0_1");
+            return 0;
+        }
+
+        public uint unknown_ret0_2(IntPtr _)
+        {
+            LogStub("unknown_ret0_2");
+            return 0;
+        }
+
+        public void unknown_nop_3(IntPtr _) => LogStub("unknown_nop_3");
+        public void unknown_nop_4(IntPtr _) => LogStub("unknown_nop_4");
+        public void unknown_nop_5(IntPtr _) => LogStub("unknown_nop_5");
+        public void unknown_nop_6(IntPtr _) => LogStub("unknown_nop_6");
+        public void unknown_nop_7(IntPtr _) => LogStub("unknown_nop_7");
     }
 }

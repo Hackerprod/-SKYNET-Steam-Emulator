@@ -237,6 +237,7 @@
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamAppsInterface.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppTicket\SteamAppTicket001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamBilling\SteamBilling002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriendsInterface.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServerInterface.cs" />
