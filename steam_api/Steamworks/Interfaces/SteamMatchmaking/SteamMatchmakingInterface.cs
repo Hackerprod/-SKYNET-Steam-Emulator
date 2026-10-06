@@ -1,10 +1,50 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
+using System.Collections.Generic;
 
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamMatchMaking002",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyListOld", "GetLobbyByIndex", "CreateLobby__V002", "JoinLobbyOld",
+        "LeaveLobby", "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex",
+        "GetLobbyData", "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData",
+        "SendLobbyChatMsg", "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer")]
+    [InterfaceLayout("SteamMatchMaking003",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyListOld", "AddRequestLobbyListFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListSlotsAvailableFilter",
+        "GetLobbyByIndex", "CreateLobby__V002", "JoinLobbyOld", "LeaveLobby",
+        "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData",
+        "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData", "SendLobbyChatMsg",
+        "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer", "GetLobbyGameServer",
+        "SetLobbyMemberLimit", "GetLobbyMemberLimit", "SetLobbyVoiceEnabled", "RequestFriendsLobbies")]
+    [InterfaceLayout("SteamMatchMaking004",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyListOld", "AddRequestLobbyListFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListSlotsAvailableFilter",
+        "GetLobbyByIndex", "CreateLobby__V002", "JoinLobbyOld", "LeaveLobby",
+        "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData",
+        "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData", "SendLobbyChatMsg",
+        "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer", "GetLobbyGameServer",
+        "SetLobbyMemberLimit", "GetLobbyMemberLimit", "RequestFriendsLobbies")]
+    [InterfaceLayout("SteamMatchMaking005",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyListOld", "AddRequestLobbyListFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListSlotsAvailableFilter",
+        "AddRequestLobbyListNearValueFilter", "GetLobbyByIndex", "CreateLobbyOld", "JoinLobbyOld",
+        "LeaveLobby", "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex",
+        "GetLobbyData", "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData",
+        "SendLobbyChatMsg", "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer",
+        "GetLobbyGameServer", "SetLobbyMemberLimit", "GetLobbyMemberLimit", "RequestFriendsLobbies",
+        "SetLobbyType", "GetLobbyOwner", "GetLobbyDistance")]
+    [InterfaceLayout("SteamMatchMaking006",
+        "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
+        "RequestLobbyList", "AddRequestLobbyListFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListNearValueFilter",
+        "GetLobbyByIndex", "CreateLobby__V006", "JoinLobby", "LeaveLobby",
+        "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData",
+        "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData", "SendLobbyChatMsg",
+        "GetLobbyChatEntry", "RequestLobbyData", "SetLobbyGameServer", "GetLobbyGameServer",
+        "SetLobbyMemberLimit", "GetLobbyMemberLimit", "SetLobbyType", "GetLobbyOwner")]
     [InterfaceLayout("SteamMatchMaking007",
         "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
         "RequestLobbyList", "AddRequestLobbyListStringFilter", "AddRequestLobbyListNumericalFilter", "AddRequestLobbyListNearValueFilter",
@@ -226,6 +266,78 @@ namespace SKYNET.Steamworks.Interfaces
         public bool SetLinkedLobby(IntPtr _, ulong steamIDLobby, ulong steamIDLobbyDependent)
         {
             return SteamEmulator.SteamMatchmaking.SetLinkedLobby(steamIDLobby, steamIDLobbyDependent);
+        }
+
+        private const int LegacyLobbyMaxMembers = 250;
+        private const int LobbyTypePrivate = 0;
+        private const int LobbyTypePublic = 2;
+        private const int LobbyComparisonEqual = 0;
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamMatchmaking", method + " not implemented");
+        }
+
+        public void RequestLobbyListOld(IntPtr _)
+        {
+            SteamEmulator.SteamMatchmaking.RequestLobbyList();
+        }
+
+        public void CreateLobby__V002(IntPtr _, bool bPrivate)
+        {
+            SteamEmulator.SteamMatchmaking.CreateLobby(bPrivate ? LobbyTypePrivate : LobbyTypePublic, LegacyLobbyMaxMembers);
+        }
+
+        public void CreateLobbyOld(IntPtr _, int eLobbyType)
+        {
+            SteamEmulator.SteamMatchmaking.CreateLobby(eLobbyType, LegacyLobbyMaxMembers);
+        }
+
+        public ulong CreateLobby__V006(IntPtr _, int eLobbyType)
+        {
+            return SteamEmulator.SteamMatchmaking.CreateLobby(eLobbyType, LegacyLobbyMaxMembers);
+        }
+
+        public void JoinLobbyOld(IntPtr _, ulong steamIDLobby)
+        {
+            SteamEmulator.SteamMatchmaking.JoinLobby(steamIDLobby);
+        }
+
+        public void AddRequestLobbyListFilter(IntPtr _, string pchKeyToMatch, string pchValueToMatch)
+        {
+            SteamEmulator.SteamMatchmaking.AddRequestLobbyListStringFilter(pchKeyToMatch, pchValueToMatch, LobbyComparisonEqual);
+        }
+
+        public void AddRequestLobbyListSlotsAvailableFilter(IntPtr _)
+        {
+            SteamEmulator.SteamMatchmaking.AddRequestLobbyListFilterSlotsAvailable(1);
+        }
+
+        public void SetLobbyVoiceEnabled(IntPtr _, ulong steamIDLobby, bool bVoiceEnabled)
+        {
+            LogStub("SetLobbyVoiceEnabled");
+        }
+
+        public bool RequestFriendsLobbies(IntPtr _)
+        {
+            LogStub("RequestFriendsLobbies");
+            return false;
+        }
+
+        public float GetLobbyDistance(IntPtr _, ulong steamIDLobby)
+        {
+            LogStub("GetLobbyDistance");
+            return 0f;
         }
     }
 }

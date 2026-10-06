@@ -1,0 +1,17 @@
+0|LogOn|System.Void|System.IntPtr
+1|LogOff|System.Void|System.IntPtr
+2|BLoggedOn|System.Boolean|System.IntPtr
+3|BSecure|System.Boolean|System.IntPtr
+4|GetSteamID|System.IntPtr|System.IntPtr,System.IntPtr
+5|SendUserConnectAndAuthenticate|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+6|CreateUnauthenticatedUserConnection|System.IntPtr|System.IntPtr,System.IntPtr
+7|SendUserDisconnect|System.Void|System.IntPtr,System.UInt64
+8|BUpdateUserData|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr,System.UInt32
+9|BSetServerType|System.Boolean|System.IntPtr,System.UInt32,System.UInt32,System.UInt16,System.UInt16,System.UInt16,System.IntPtr,System.IntPtr,System.Boolean
+10|UpdateServerStatus|System.Void|System.IntPtr,System.Int32,System.Int32,System.Int32,System.IntPtr,System.IntPtr,System.IntPtr
+11|UpdateSpectatorPort|System.Void|System.IntPtr,System.UInt16
+12|SetGameType|System.Void|System.IntPtr,System.IntPtr
+13|BGetUserAchievementStatus|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr
+14|GetGameplayStats|System.Void|System.IntPtr
+15|RequestUserGroupStatus|System.Boolean|System.IntPtr,System.UInt64,System.UInt64
+16|GetPublicIP_old|System.UInt32|System.IntPtr

@@ -8,12 +8,47 @@ using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamGameServer004",
+        "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
+        "GetSteamID", "SendUserConnectAndAuthenticate__V004", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
+        "BUpdateUserData__V009", "BSetServerType__V004", "UpdateServerStatus", "UpdateSpectatorPort",
+        "SetGameType", "BGetUserAchievementStatus")]
+    [InterfaceLayout("SteamGameServer005",
+        "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
+        "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
+        "BUpdateUserData__V009", "BSetServerType", "UpdateServerStatus", "UpdateSpectatorPort",
+        "SetGameType", "BGetUserAchievementStatus")]
+    [InterfaceLayout("SteamGameServer008",
+        "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
+        "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
+        "BUpdateUserData__V009", "BSetServerType", "UpdateServerStatus", "UpdateSpectatorPort",
+        "SetGameType", "BGetUserAchievementStatus", "GetGameplayStats", "RequestUserGroupStatus",
+        "GetPublicIP_old")]
     [InterfaceLayout("SteamGameServer009",
         "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
         "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
         "BUpdateUserData__V009", "BSetServerType", "UpdateServerStatus", "UpdateSpectatorPort",
         "SetGameType", "BGetUserAchievementStatus", "GetGameplayStats", "RequestUserGroupStatus",
         "GetPublicIP_old", "SetGameData__V009", "UserHasLicenseForApp")]
+    [InterfaceLayout("SteamGameServer010",
+        "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
+        "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
+        "BUpdateUserData__V009", "BSetServerType", "UpdateServerStatus", "UpdateSpectatorPort",
+        "SetGameTags", "GetGameplayStats", "GetServerReputation", "RequestUserGroupStatus",
+        "GetPublicIP_old", "SetGameData__V009", "UserHasLicenseForApp", "GetAuthSessionTicket",
+        "BeginAuthSession", "EndAuthSession", "CancelAuthTicket")]
+    [InterfaceLayout("SteamGameServer011",
+        "InitGameServer", "SetProduct", "SetGameDescription", "SetModDir",
+        "SetDedicatedServer", "LogOn__V011", "LogOnAnonymous", "LogOff",
+        "BLoggedOn", "BSecure", "GetSteamID", "WasRestartRequested",
+        "SetMaxPlayerCount", "SetBotPlayerCount", "SetServerName", "SetMapName",
+        "SetPasswordProtected", "SetSpectatorPort", "SetSpectatorServerName", "ClearAllKeyValues",
+        "SetKeyValue", "SetGameTags", "SetGameData", "SetRegion",
+        "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect", "BUpdateUserData",
+        "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession", "CancelAuthTicket",
+        "UserHasLicenseForApp", "RequestUserGroupStatus", "GetGameplayStats", "GetServerReputation",
+        "GetPublicIP_old", "HandleIncomingPacket", "GetNextOutgoingPacket", "EnableHeartbeats",
+        "SetHeartbeatInterval", "ForceHeartbeat", "AssociateWithClan", "ComputeNewPlayerCompatibility")]
     [InterfaceLayout("SteamGameServer012",
         "InitGameServer", "SetProduct", "SetGameDescription", "SetModDir",
         "SetDedicatedServer", "LogOn", "LogOnAnonymous", "LogOff",
@@ -363,6 +398,44 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.SetModDir(ReadAnsi(pchGameDir));
             SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
             return result;
+        }
+
+        public bool BSetServerType__V004(
+            IntPtr _,
+            int nGameAppId,
+            uint unServerFlags,
+            uint unGameIP,
+            ushort unGamePort,
+            ushort unSpectatorPort,
+            ushort usQueryPort,
+            IntPtr pchGameDir,
+            IntPtr pchVersion,
+            bool bLANMode)
+        {
+            SteamEmulator.Write(
+                "SteamGameServer004",
+                $"BSetServerType appId={nGameAppId} flags={unServerFlags} ip={unGameIP} gamePort={unGamePort} spectatorPort={unSpectatorPort} queryPort={usQueryPort} gameDir=0x{pchGameDir.ToInt64():X} version=0x{pchVersion.ToInt64():X} lan={bLANMode}");
+            bool result = SteamEmulator.SteamGameServer.InitGameServer(
+                unGameIP,
+                unGamePort,
+                usQueryPort,
+                unServerFlags,
+                unchecked((uint)nGameAppId),
+                ReadAnsi(pchVersion));
+            SteamEmulator.SteamGameServer.SetModDir(ReadAnsi(pchGameDir));
+            SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
+            return result;
+        }
+
+        public void SendUserConnectAndAuthenticate__V004(IntPtr _, ulong steamIDUser, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize)
+        {
+            SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, out ulong _authenticatedUser);
+        }
+
+        public void LogOn__V011(IntPtr _, string pszAccountName, string pszPassword)
+        {
+            // Account/password logon cannot be validated here, so it is treated as an anonymous logon.
+            SteamEmulator.SteamGameServer.LogOnAnonymous();
         }
 
         public void UpdateServerStatus(

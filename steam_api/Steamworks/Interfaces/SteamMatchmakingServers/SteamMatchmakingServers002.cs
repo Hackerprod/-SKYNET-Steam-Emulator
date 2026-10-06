@@ -1,8 +1,14 @@
 using System;
+using System.Collections.Generic;
 
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamMatchMakingServers001",
+        "RequestInternetServerList__V001", "RequestLANServerList__V001", "RequestFriendsServerList__V001", "RequestFavoritesServerList__V001",
+        "RequestHistoryServerList__V001", "RequestSpectatorServerList__V001", "GetServerDetails__V001", "CancelQuery__V001",
+        "RefreshQuery__V001", "IsRefreshing__V001", "GetServerCount__V001", "RefreshServer__V001",
+        "PingServer", "PlayerDetails", "ServerRules", "CancelServerQuery")]
     [InterfaceLayout("SteamMatchMakingServers002",
         "RequestInternetServerList", "RequestLANServerList", "RequestFriendsServerList", "RequestFavoritesServerList",
         "RequestHistoryServerList", "RequestSpectatorServerList", "ReleaseRequest", "GetServerDetails",
@@ -94,6 +100,85 @@ namespace SKYNET.Steamworks.Interfaces
         public void CancelServerQuery(IntPtr _, int hServerQuery)
         {
             SteamEmulator.SteamMatchMakingServers.CancelServerQuery(hServerQuery);
+        }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamMatchMakingServers", method + " not implemented");
+        }
+
+        // SteamMatchMakingServers001 lists are keyed by EMatchMakingType and use the 001 response vtable, which the emulator core cannot call back.
+        public void RequestInternetServerList__V001(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestInternetServerList");
+        }
+
+        public void RequestLANServerList__V001(IntPtr _, uint iApp, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestLANServerList");
+        }
+
+        public void RequestFriendsServerList__V001(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestFriendsServerList");
+        }
+
+        public void RequestFavoritesServerList__V001(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestFavoritesServerList");
+        }
+
+        public void RequestHistoryServerList__V001(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestHistoryServerList");
+        }
+
+        public void RequestSpectatorServerList__V001(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        {
+            LogStub("RequestSpectatorServerList");
+        }
+
+        public IntPtr GetServerDetails__V001(IntPtr _, int eType, int iServer)
+        {
+            LogStub("GetServerDetails");
+            return IntPtr.Zero;
+        }
+
+        public void CancelQuery__V001(IntPtr _, int eType)
+        {
+            LogStub("CancelQuery");
+        }
+
+        public void RefreshQuery__V001(IntPtr _, int eType)
+        {
+            LogStub("RefreshQuery");
+        }
+
+        public bool IsRefreshing__V001(IntPtr _, int eType)
+        {
+            LogStub("IsRefreshing");
+            return false;
+        }
+
+        public int GetServerCount__V001(IntPtr _, int eType)
+        {
+            LogStub("GetServerCount");
+            return 0;
+        }
+
+        public void RefreshServer__V001(IntPtr _, int eType, int iServer)
+        {
+            LogStub("RefreshServer");
         }
 
 

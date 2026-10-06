@@ -10,6 +10,18 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamFriends003",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendAvatar__V003", "GetFriendGamePlayed__V003", "GetFriendPersonaNameHistory", "HasFriend",
+        "GetClanCount", "GetClanByIndex", "GetClanName", "GetFriendCountFromSource",
+        "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay")]
+    [InterfaceLayout("SteamFriends004",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendAvatar", "GetFriendGamePlayed__V003", "GetFriendPersonaNameHistory", "HasFriend",
+        "GetClanCount", "GetClanByIndex", "GetClanName", "GetFriendCountFromSource",
+        "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay")]
     [InterfaceLayout("SteamFriends005",
         "GetPersonaName__V005", "SetPersonaNameOld", "GetPersonaState__V005", "GetFriendCount",
         "GetFriendByIndex", "GetFriendRelationship__V005", "GetFriendPersonaState__V005", "GetFriendPersonaName__V005",
@@ -17,6 +29,129 @@ namespace SKYNET.Steamworks.Interfaces
         "GetClanCount", "GetClanByIndex", "GetClanName__V005", "GetFriendCountFromSource",
         "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay",
         "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore__V005", "SetPlayedWith")]
+    [InterfaceLayout("SteamFriends006",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendAvatar", "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend",
+        "GetClanCount", "GetClanByIndex", "GetClanName", "GetClanTag",
+        "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking",
+        "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore__V005",
+        "SetPlayedWith", "ActivateGameOverlayInviteDialog")]
+    [InterfaceLayout("SteamFriends007",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetFriendCountFromSource",
+        "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay",
+        "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore__V005", "SetPlayedWith",
+        "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar", "GetMediumFriendAvatar", "GetLargeFriendAvatar",
+        "RequestUserInformation")]
+    [InterfaceLayout("SteamFriends008",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetFriendCountFromSource",
+        "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay",
+        "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore__V005", "SetPlayedWith",
+        "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar", "GetMediumFriendAvatar", "GetLargeFriendAvatar",
+        "RequestUserInformation", "RequestClanOfficerList", "GetClanOwner", "GetClanOfficerCount",
+        "GetClanOfficerByIndex", "GetUserRestrictionsOld")]
+    [InterfaceLayout("SteamFriends009",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetFriendCountFromSource",
+        "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay",
+        "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore__V005", "SetPlayedWith",
+        "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar", "GetMediumFriendAvatar", "GetLargeFriendAvatar",
+        "RequestUserInformation", "RequestClanOfficerList", "GetClanOwner", "GetClanOfficerCount",
+        "GetClanOfficerByIndex", "GetUserRestrictionsOld", "SetRichPresence", "ClearRichPresence",
+        "GetFriendRichPresence", "GetFriendRichPresenceKeyCount", "GetFriendRichPresenceKeyByIndex", "InviteUserToGame",
+        "GetCoplayFriendCount", "GetCoplayFriend", "GetFriendCoplayTime", "GetFriendCoplayGame")]
+    [InterfaceLayout("SteamFriends010",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetClanActivityCounts",
+        "DownloadClanActivityCounts", "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource",
+        "SetInGameVoiceSpeaking", "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005",
+        "ActivateGameOverlayToStore__V005", "SetPlayedWith", "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar",
+        "GetMediumFriendAvatar", "GetLargeFriendAvatar", "RequestUserInformation", "RequestClanOfficerList",
+        "GetClanOwner", "GetClanOfficerCount", "GetClanOfficerByIndex", "GetUserRestrictionsOld",
+        "SetRichPresence", "ClearRichPresence", "GetFriendRichPresence", "GetFriendRichPresenceKeyCount",
+        "GetFriendRichPresenceKeyByIndex", "InviteUserToGame", "GetCoplayFriendCount", "GetCoplayFriend",
+        "GetFriendCoplayTime", "GetFriendCoplayGame", "JoinClanChatRoom", "LeaveClanChatRoom",
+        "GetClanChatMemberCount", "GetChatMemberByIndex", "SendClanChatMessage", "GetClanChatMessage",
+        "IsClanChatAdmin", "IsClanChatWindowOpenInSteam", "OpenClanChatWindowInSteam", "CloseClanChatWindowInSteam",
+        "SetListenForFriendsMessages", "ReplyToFriendMessage", "GetFriendMessage")]
+    [InterfaceLayout("SteamFriends011",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetClanActivityCounts",
+        "DownloadClanActivityCounts", "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource",
+        "SetInGameVoiceSpeaking", "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005",
+        "ActivateGameOverlayToStore__V005", "SetPlayedWith", "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar",
+        "GetMediumFriendAvatar", "GetLargeFriendAvatar", "RequestUserInformation", "RequestClanOfficerList",
+        "GetClanOwner", "GetClanOfficerCount", "GetClanOfficerByIndex", "GetUserRestrictionsOld",
+        "SetRichPresence", "ClearRichPresence", "GetFriendRichPresence", "GetFriendRichPresenceKeyCount",
+        "GetFriendRichPresenceKeyByIndex", "RequestFriendRichPresence", "InviteUserToGame", "GetCoplayFriendCount",
+        "GetCoplayFriend", "GetFriendCoplayTime", "GetFriendCoplayGame", "JoinClanChatRoom",
+        "LeaveClanChatRoom", "GetClanChatMemberCount", "GetChatMemberByIndex", "SendClanChatMessage",
+        "GetClanChatMessage", "IsClanChatAdmin", "IsClanChatWindowOpenInSteam", "OpenClanChatWindowInSteam",
+        "CloseClanChatWindowInSteam", "SetListenForFriendsMessages", "ReplyToFriendMessage", "GetFriendMessage",
+        "GetFollowerCount", "IsFollowing", "EnumerateFollowingList")]
+    [InterfaceLayout("SteamFriends012",
+        "GetPersonaName", "SetPersonaName", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetClanActivityCounts",
+        "DownloadClanActivityCounts", "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource",
+        "SetInGameVoiceSpeaking", "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005",
+        "ActivateGameOverlayToStore__V005", "SetPlayedWith", "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar",
+        "GetMediumFriendAvatar", "GetLargeFriendAvatar", "RequestUserInformation", "RequestClanOfficerList",
+        "GetClanOwner", "GetClanOfficerCount", "GetClanOfficerByIndex", "GetUserRestrictionsOld",
+        "SetRichPresence", "ClearRichPresence", "GetFriendRichPresence", "GetFriendRichPresenceKeyCount",
+        "GetFriendRichPresenceKeyByIndex", "RequestFriendRichPresence", "InviteUserToGame", "GetCoplayFriendCount",
+        "GetCoplayFriend", "GetFriendCoplayTime", "GetFriendCoplayGame", "JoinClanChatRoom",
+        "LeaveClanChatRoom", "GetClanChatMemberCount", "GetChatMemberByIndex", "SendClanChatMessage",
+        "GetClanChatMessage", "IsClanChatAdmin", "IsClanChatWindowOpenInSteam", "OpenClanChatWindowInSteam",
+        "CloseClanChatWindowInSteam", "SetListenForFriendsMessages", "ReplyToFriendMessage", "GetFriendMessage",
+        "GetFollowerCount", "IsFollowing", "EnumerateFollowingList")]
+    [InterfaceLayout("SteamFriends013",
+        "GetPersonaName", "SetPersonaName", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "HasFriend", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "GetClanTag", "GetClanActivityCounts",
+        "DownloadClanActivityCounts", "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource",
+        "SetInGameVoiceSpeaking", "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005",
+        "ActivateGameOverlayToStore", "SetPlayedWith", "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar",
+        "GetMediumFriendAvatar", "GetLargeFriendAvatar", "RequestUserInformation", "RequestClanOfficerList",
+        "GetClanOwner", "GetClanOfficerCount", "GetClanOfficerByIndex", "GetUserRestrictionsOld",
+        "SetRichPresence", "ClearRichPresence", "GetFriendRichPresence", "GetFriendRichPresenceKeyCount",
+        "GetFriendRichPresenceKeyByIndex", "RequestFriendRichPresence", "InviteUserToGame", "GetCoplayFriendCount",
+        "GetCoplayFriend", "GetFriendCoplayTime", "GetFriendCoplayGame", "JoinClanChatRoom",
+        "LeaveClanChatRoom", "GetClanChatMemberCount", "GetChatMemberByIndex", "SendClanChatMessage",
+        "GetClanChatMessage", "IsClanChatAdmin", "IsClanChatWindowOpenInSteam", "OpenClanChatWindowInSteam",
+        "CloseClanChatWindowInSteam", "SetListenForFriendsMessages", "ReplyToFriendMessage", "GetFriendMessage",
+        "GetFollowerCount", "IsFollowing", "EnumerateFollowingList")]
+    [InterfaceLayout("SteamFriends014",
+        "GetPersonaName", "SetPersonaName", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "GetPlayerNickname", "HasFriend",
+        "GetClanCount", "GetClanByIndex", "GetClanName", "GetClanTag",
+        "GetClanActivityCounts", "DownloadClanActivityCounts", "GetFriendCountFromSource", "GetFriendFromSourceByIndex",
+        "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay", "ActivateGameOverlayToUser",
+        "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore", "SetPlayedWith", "ActivateGameOverlayInviteDialog",
+        "GetSmallFriendAvatar", "GetMediumFriendAvatar", "GetLargeFriendAvatar", "RequestUserInformation",
+        "RequestClanOfficerList", "GetClanOwner", "GetClanOfficerCount", "GetClanOfficerByIndex",
+        "GetUserRestrictions", "SetRichPresence", "ClearRichPresence", "GetFriendRichPresence",
+        "GetFriendRichPresenceKeyCount", "GetFriendRichPresenceKeyByIndex", "RequestFriendRichPresence", "InviteUserToGame",
+        "GetCoplayFriendCount", "GetCoplayFriend", "GetFriendCoplayTime", "GetFriendCoplayGame",
+        "JoinClanChatRoom", "LeaveClanChatRoom", "GetClanChatMemberCount", "GetChatMemberByIndex",
+        "SendClanChatMessage", "GetClanChatMessage", "IsClanChatAdmin", "IsClanChatWindowOpenInSteam",
+        "OpenClanChatWindowInSteam", "CloseClanChatWindowInSteam", "SetListenForFriendsMessages", "ReplyToFriendMessage",
+        "GetFriendMessage", "GetFollowerCount", "IsFollowing", "EnumerateFollowingList")]
     [InterfaceLayout("SteamFriends015",
         "GetPersonaName__V005", "SetPersonaName", "GetPersonaState__V005", "GetFriendCount",
         "GetFriendByIndex", "GetFriendRelationship__V015", "GetFriendPersonaState__V015", "GetFriendPersonaName__V015",
@@ -36,6 +171,26 @@ namespace SKYNET.Steamworks.Interfaces
         "IsClanChatAdmin__V015", "IsClanChatWindowOpenInSteam__V015", "OpenClanChatWindowInSteam__V015", "CloseClanChatWindowInSteam__V015",
         "SetListenForFriendsMessages", "ReplyToFriendMessage__V015", "GetFriendMessage__V015", "GetFollowerCount__V015",
         "IsFollowing__V015", "EnumerateFollowingList", "IsClanPublic__V015", "IsClanOfficialGameGroup__V015")]
+    [InterfaceLayout("SteamFriends016",
+        "GetPersonaName", "SetPersonaName", "GetPersonaState", "GetFriendCount",
+        "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
+        "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "GetFriendSteamLevel", "GetPlayerNickname",
+        "GetFriendsGroupCount", "GetFriendsGroupIDByIndex", "GetFriendsGroupName", "GetFriendsGroupMembersCount",
+        "GetFriendsGroupMembersList__V018", "HasFriend", "GetClanCount", "GetClanByIndex",
+        "GetClanName", "GetClanTag", "GetClanActivityCounts", "DownloadClanActivityCounts",
+        "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking",
+        "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore",
+        "SetPlayedWith", "ActivateGameOverlayInviteDialog", "GetSmallFriendAvatar", "GetMediumFriendAvatar",
+        "GetLargeFriendAvatar", "RequestUserInformation", "RequestClanOfficerList", "GetClanOwner",
+        "GetClanOfficerCount", "GetClanOfficerByIndex", "GetUserRestrictions", "SetRichPresence",
+        "ClearRichPresence", "GetFriendRichPresence", "GetFriendRichPresenceKeyCount", "GetFriendRichPresenceKeyByIndex",
+        "RequestFriendRichPresence", "InviteUserToGame", "GetCoplayFriendCount", "GetCoplayFriend",
+        "GetFriendCoplayTime", "GetFriendCoplayGame", "JoinClanChatRoom", "LeaveClanChatRoom",
+        "GetClanChatMemberCount", "GetChatMemberByIndex", "SendClanChatMessage", "GetClanChatMessage",
+        "IsClanChatAdmin", "IsClanChatWindowOpenInSteam", "OpenClanChatWindowInSteam", "CloseClanChatWindowInSteam",
+        "SetListenForFriendsMessages", "ReplyToFriendMessage", "GetFriendMessage", "GetFollowerCount",
+        "IsFollowing", "EnumerateFollowingList", "IsClanPublic", "IsClanOfficialGameGroup",
+        "GetNumChatsWithUnreadPriorityMessages")]
     [InterfaceLayout("SteamFriends017",
         "GetPersonaName", "SetPersonaName", "GetPersonaState", "GetFriendCount",
         "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
@@ -377,6 +532,33 @@ namespace SKYNET.Steamworks.Interfaces
         public UInt32 GetUserRestrictions(IntPtr _)
         {
             return SteamFriends.Instance.GetUserRestrictions();
+        }
+
+        public UInt32 GetUserRestrictionsOld(IntPtr _)
+        {
+            return SteamFriends.Instance.GetUserRestrictions();
+        }
+
+        public int GetFriendAvatar__V003(IntPtr _, ulong steamIDFriend)
+        {
+            return SteamFriends.Instance.GetSmallFriendAvatar(steamIDFriend);
+        }
+
+        public bool GetFriendGamePlayed__V003(IntPtr _, ulong steamIDFriend, IntPtr pulGameID, IntPtr punGameIP, IntPtr pusGamePort, IntPtr pusQueryPort)
+        {
+            FriendGameInfo_t info = default(FriendGameInfo_t);
+            bool result = SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, ref info);
+            WriteUInt64(pulGameID, info.GameID);
+            WriteInt32(punGameIP, unchecked((int)info.GameIP));
+            if (pusGamePort != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(pusGamePort, unchecked((short)info.GamePort));
+            }
+            if (pusQueryPort != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(pusQueryPort, unchecked((short)info.QueryPort));
+            }
+            return result;
         }
 
         public bool SetRichPresence(IntPtr _, string pchKey, string pchValue) { return SteamFriends.Instance.SetRichPresence(pchKey, pchValue); }

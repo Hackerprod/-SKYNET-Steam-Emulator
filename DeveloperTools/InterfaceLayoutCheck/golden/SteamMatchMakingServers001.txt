@@ -1,0 +1,16 @@
+0|RequestInternetServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+1|RequestLANServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr
+2|RequestFriendsServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+3|RequestFavoritesServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+4|RequestHistoryServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+5|RequestSpectatorServerList|System.Void|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+6|GetServerDetails|System.IntPtr|System.IntPtr,System.Int32,System.Int32
+7|CancelQuery|System.Void|System.IntPtr,System.Int32
+8|RefreshQuery|System.Void|System.IntPtr,System.Int32
+9|IsRefreshing|System.Boolean|System.IntPtr,System.Int32
+10|GetServerCount|System.Int32|System.IntPtr,System.Int32
+11|RefreshServer|System.Void|System.IntPtr,System.Int32,System.Int32
+12|PingServer|System.Int32|System.IntPtr,System.UInt32,System.UInt16,System.IntPtr
+13|PlayerDetails|System.Int32|System.IntPtr,System.UInt32,System.UInt16,System.IntPtr
+14|ServerRules|System.Int32|System.IntPtr,System.UInt32,System.UInt16,System.IntPtr
+15|CancelServerQuery|System.Void|System.IntPtr,System.Int32
