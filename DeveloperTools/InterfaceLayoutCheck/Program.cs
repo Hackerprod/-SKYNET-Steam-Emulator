@@ -10,7 +10,7 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        if (args.Length < 3 || (args[0] != "generate" && args[0] != "verify" && args[0] != "verify-headers" && args[0] != "generate-new"))
+        if (args.Length < 3 || (args[0] != "generate" && args[0] != "verify" && args[0] != "verify-headers" && args[0] != "generate-new" && args[0] != "verify-vtables"))
         {
             Console.Error.WriteLine("usage: InterfaceLayoutCheck generate|verify <steam_api.dll> <goldenDir> [versionPrefix]");
             Console.Error.WriteLine("       InterfaceLayoutCheck verify-headers <steam_api.dll> <header-spec-dir> [versionPrefix]");
@@ -40,6 +40,8 @@ internal static class Program
         }
 
         if (mode == "verify-headers") return VerifyHeaders(actual, goldenDir, prefix);
+
+        if (mode == "verify-vtables") return VerifyVtables(asm, interfaceManager, typeMap, resolveRuntime, versions);
 
         if (mode == "generate-new")
         {
@@ -99,6 +101,40 @@ internal static class Program
         Console.WriteLine(failures == 0
             ? "OK: " + actual.Count + " interface versions match golden"
             : "FAIL: " + failures + " mismatches");
+        return failures == 0 ? 0 : 1;
+    }
+
+    // Builds every registered vtable for real and checks that each slot got a native function pointer.
+    private static int VerifyVtables(Assembly asm, Type interfaceManager, System.Collections.IDictionary typeMap, MethodInfo resolveRuntime, List<string> versions)
+    {
+        Type memoryManager = asm.GetType("SKYNET.Managers.MemoryManager", true);
+        MethodInfo create = memoryManager.GetMethod("CreateInterface", Static, null, new[] { typeof(Type), typeof(List<MethodInfo>) }, null);
+        int failures = 0;
+        foreach (string version in versions)
+        {
+            try
+            {
+                var methods = (List<MethodInfo>)resolveRuntime.Invoke(null, new object[] { version });
+                IntPtr context = (IntPtr)create.Invoke(null, new object[] { (Type)typeMap[version], methods });
+                if (context == IntPtr.Zero) throw new InvalidOperationException("CreateInterface returned null");
+                IntPtr vtable = System.Runtime.InteropServices.Marshal.ReadIntPtr(context);
+                for (int i = 0; i < methods.Count; i++)
+                {
+                    if (System.Runtime.InteropServices.Marshal.ReadIntPtr(vtable, i * IntPtr.Size) == IntPtr.Zero)
+                        throw new InvalidOperationException("slot " + i + " (" + methods[i].Name + ") has no native pointer");
+                }
+            }
+            catch (Exception ex)
+            {
+                var inner = ex is TargetInvocationException && ex.InnerException != null ? ex.InnerException : ex;
+                Console.WriteLine("VTABLE   " + version + ": " + inner.Message);
+                failures++;
+            }
+        }
+
+        Console.WriteLine(failures == 0
+            ? "OK: " + versions.Count + " vtables built with a native pointer in every slot"
+            : "FAIL: " + failures + " vtables failed to build");
         return failures == 0 ? 0 : 1;
     }
 
