@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using SKYNET.Steamworks.Interfaces;
 
 namespace SKYNET.Managers
 {
@@ -18,30 +16,6 @@ namespace SKYNET.Managers
         static MemoryManager()
         {
             StoredDelegates = new List<Delegate>();
-        }
-
-        public static T CreateInterface<T>(out IntPtr MemoryAddress)
-        {
-            var (instance, memoryAddress) = CreateInterface<T>();
-            MemoryAddress = memoryAddress;
-            return (T)instance;
-        }
-
-        public static IntPtr CreateInterface(Type type)
-        {
-            List<MethodInfo> methods;
-            try
-            {
-                methods = InterfaceMethodsForType(type);
-            }
-            catch (Exception ex)
-            {
-                CleanErrorMessage();
-                ErrorMessage = ex.Message + " " + ex.StackTrace;
-                return IntPtr.Zero;
-            }
-
-            return CreateInterface(type, methods);
         }
 
         public static IntPtr CreateInterface(Type type, List<MethodInfo> Methods)
@@ -107,22 +81,6 @@ namespace SKYNET.Managers
             return IntPtr.Zero;
         }
 
-        public static MethodInfo GetMethodInfo(string MethodName)
-        {
-            Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceManager));
-            foreach (var type in currentAssembly.GetTypes())
-            {
-                foreach (var method in InterfaceMethodsForType(type))
-                {
-                    if (method.Name == MethodName)
-                    {
-                        return method;
-                    }
-                }
-            }
-            return null;
-        }
-
         public static IntPtr CreateMethod(Object Instance, MethodInfo methodInfo)
         {
             Type type = Instance.GetType();
@@ -169,193 +127,6 @@ namespace SKYNET.Managers
             return new_context;
         }
 
-        public static (T, IntPtr) CreateInterface<T>()
-        {
-            CleanErrorMessage();
-
-            Type type = typeof(T);
-            string Name = type.Name;
-            var Instance = Activator.CreateInstance(type);
-            var new_delegates = new List<System.Delegate>();
-
-            try
-            {
-                var Methods = InterfaceMethodsForType(type);
-
-                foreach (var methodInfo in Methods)
-                {
-                    Type DelegateType = CreateDelegate(methodInfo);
-
-                    System.Delegate new_delegate = null;
-                    try
-                    {
-                        new_delegate = System.Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
-                        new_delegates.Add(new_delegate);
-                    }
-                    catch (Exception e)
-                    {
-                        ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        SteamEmulator.Write("MemoryManager", ErrorMessage);
-                        return (default, IntPtr.Zero);
-                    }
-                }
-
-                var ptr_size = Marshal.SizeOf(typeof(IntPtr));
-
-                var vtable = Marshal.AllocHGlobal(Methods.Count * ptr_size);
-
-                for (var i = 0; i < new_delegates.Count; i++)
-                {
-                    try
-                    {
-                        Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                        SteamEmulator.Write("MemoryManager", ErrorMessage);
-                    }
-                }
-
-                var new_context = Marshal.AllocHGlobal(ptr_size);
-
-                Marshal.WriteIntPtr(new_context, vtable);
-
-                StoredDelegates.AddRange(new_delegates);
-
-                return ((T)Instance, new_context);
-
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message + " " + ex.StackTrace;
-            }
-
-            return ((T)Instance, IntPtr.Zero);
-        }
-
-        public static T CreateInterface<T>(IntPtr Address)
-        {
-            CleanErrorMessage();
-
-            Type type = typeof(T);
-            string Name = type.Name;
-            var Instance = Activator.CreateInstance(type);
-            var new_delegates = new List<System.Delegate>();
-
-            try
-            {
-                var Methods = InterfaceMethodsForType(type);
-
-                foreach (var methodInfo in Methods)
-                {
-                    Type DelegateType = CreateDelegate(methodInfo);
-
-                    System.Delegate new_delegate = null;
-                    try
-                    {
-                        new_delegate = System.Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
-                        new_delegates.Add(new_delegate);
-                    }
-                    catch (Exception e)
-                    {
-                        ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        return default;
-                    }
-                }
-
-                var ptr_size = Marshal.SizeOf(typeof(IntPtr));
-
-                var vtable = Marshal.AllocHGlobal(Methods.Count * ptr_size);
-
-                for (var i = 0; i < new_delegates.Count; i++)
-                {
-                    try
-                    {
-                        Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
-                    }
-                    catch (Exception)
-                    {
-                        ErrorMessage += $"Error Injecting Delegate {new_delegates[i]}\n";
-                    }
-                }
-
-                Marshal.WriteIntPtr(Address, vtable);
-
-                StoredDelegates.AddRange(new_delegates);
-
-                return (T)Instance;
-
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message + " " + ex.StackTrace;
-            }
-
-            return default;
-        }
-        public static bool CreateInterface(object Instance, IntPtr Address)
-        {
-            CleanErrorMessage();
-            bool successResult = true;
-
-            Type type = Instance.GetType();
-            string Name = type.Name;
-            var new_delegates = new List<System.Delegate>();
-
-            try
-            {
-                var Methods = InterfaceMethodsForType(type);
-
-                foreach (var methodInfo in Methods)
-                {
-                    Type DelegateType = CreateDelegate(methodInfo);
-
-                    System.Delegate new_delegate = null;
-                    try
-                    {
-                        new_delegate = System.Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
-                        new_delegates.Add(new_delegate);
-                    }
-                    catch (Exception e)
-                    {
-                        ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                    }
-                }
-
-                var ptr_size = Marshal.SizeOf(typeof(IntPtr));
-
-                var vtable = Marshal.AllocHGlobal(Methods.Count * ptr_size);
-
-                for (var i = 0; i < new_delegates.Count; i++)
-                {
-                    try
-                    {
-                        Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorMessage += $"Error Injecting Delegate {new_delegates[i]}: {ex.Message}\n";
-                        successResult = false;
-                    }
-                }
-
-                Marshal.WriteIntPtr(Address, vtable);
-
-                StoredDelegates.AddRange(new_delegates);
-
-                return successResult;
-
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message + " " + ex.StackTrace;
-            }
-
-            return false;
-        }
-
-
         public static T GetFromMemory<T>(IntPtr mAddress) where T : struct
         {
             try
@@ -391,44 +162,6 @@ namespace SKYNET.Managers
             return del.CreateType();
         }
 
-        public static bool SaveDelegates(Type type, string filename)
-        {
-            try
-            {
-                string Name = type.Name;
-                AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(Name), AssemblyBuilderAccess.RunAndSave);
-                ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(Name, Name + ".dll");
-
-                var Methods = InterfaceMethodsForType(type);
-
-                foreach (var methodInfo in Methods)
-                {
-                    TypeBuilder del = moduleBuilder.DefineType(methodInfo.Name, TypeAttributes.Class | TypeAttributes.Sealed, typeof(MulticastDelegate));
-
-                    CustomAttributeBuilder unmanagedPointer = new CustomAttributeBuilder(typeof(UnmanagedFunctionPointerAttribute).GetConstructor(new[] { typeof(CallingConvention) }), new object[] { CallingConvention.ThisCall });
-                    del.SetCustomAttribute(unmanagedPointer);
-
-                    MethodAttributes ctorAttr = MethodAttributes.RTSpecialName | MethodAttributes.Public;
-                    ConstructorBuilder ctor = del.DefineConstructor(ctorAttr, CallingConventions.Standard, new Type[] { typeof(object), typeof(System.IntPtr) });
-                    ctor.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-
-                    Type[] parameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
-
-                    MethodBuilder invokeMethod = del.DefineMethod("Invoke", methodInfo.Attributes & ~MethodAttributes.Abstract, methodInfo.ReturnType, parameterTypes);
-                    invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-                    del.CreateType();
-                }
-                asmBuilder.Save(Name + ".dll");
-                File.Copy(Name + ".dll", filename);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message + " " + ex.StackTrace;
-                return false;
-            }
-        }
-
         public static List<MethodInfo> ResolveLayoutMethods(Type type, string version, string[] methodNames)
         {
             var declared = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -446,78 +179,6 @@ namespace SKYNET.Managers
             }
 
             return resolved;
-        }
-
-        public static List<MethodInfo> InterfaceMethodsForType(Type t)
-        {
-            var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-            all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
-            all_methods.Sort((left, right) => left.MetadataToken.CompareTo(right.MetadataToken));
-            ApplyMsvcOverloadLayout(t, all_methods);
-            return all_methods;
-        }
-
-        private static void ApplyMsvcOverloadLayout(Type interfaceType, List<MethodInfo> methods)
-        {
-            var claimedMethods = new HashSet<MethodInfo>();
-
-            // C# overloads retain their C++ name, so they can be identified
-            // without extra metadata.
-            foreach (var overloadGroup in methods.GroupBy(method => method.Name).Where(group => group.Count() > 1))
-            {
-                ReverseMethodsAtTheirDeclaredSlots(interfaceType, methods, overloadGroup.ToArray(), claimedMethods);
-            }
-
-            // STEAM_FLAT_NAME gives C/C# overloads distinct names. Interface
-            // classes declare the original overload set explicitly here.
-            foreach (var overload in interfaceType.GetCustomAttributes<MsvcVTableOverloadAttribute>())
-            {
-                if (overload.MethodNames.Length < 2)
-                {
-                    throw new InvalidOperationException(
-                        $"{interfaceType.FullName} has an MSVC overload group with fewer than two methods.");
-                }
-
-                var groupMethods = new MethodInfo[overload.MethodNames.Length];
-                for (var i = 0; i < overload.MethodNames.Length; i++)
-                {
-                    string methodName = overload.MethodNames[i];
-                    var matches = methods.Where(method => method.Name == methodName).ToArray();
-                    if (matches.Length != 1)
-                    {
-                        throw new InvalidOperationException(
-                            $"{interfaceType.FullName} MSVC overload member '{methodName}' resolved to {matches.Length} methods.");
-                    }
-
-                    groupMethods[i] = matches[0];
-                }
-
-                ReverseMethodsAtTheirDeclaredSlots(interfaceType, methods, groupMethods, claimedMethods);
-            }
-        }
-
-        private static void ReverseMethodsAtTheirDeclaredSlots(
-            Type interfaceType,
-            List<MethodInfo> methods,
-            MethodInfo[] overloadGroup,
-            HashSet<MethodInfo> claimedMethods)
-        {
-            if (overloadGroup.Any(method => !claimedMethods.Add(method)))
-            {
-                throw new InvalidOperationException(
-                    $"{interfaceType.FullName} defines overlapping MSVC overload groups.");
-            }
-
-            int[] slots = overloadGroup
-                .Select(method => methods.IndexOf(method))
-                .OrderBy(slot => slot)
-                .ToArray();
-
-            MethodInfo[] reversed = overloadGroup.Reverse().ToArray();
-            for (var i = 0; i < slots.Length; i++)
-            {
-                methods[slots[i]] = reversed[i];
-            }
         }
 
         /// <summary>

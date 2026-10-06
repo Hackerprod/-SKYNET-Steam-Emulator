@@ -8,8 +8,7 @@ namespace SKYNET.Callback
 {
     internal static class CallbackBaseInvoker
     {
-        // MSVC reverses these two overloads in the vtable. This is the same
-        // overload-order rule used by MsvcVTableOverloadAttribute elsewhere.
+        // MSVC reverses these two overloads in the vtable.
         private const int RunCallResultVTableSlot = 0;
         private const int RunCallbackVTableSlot = 1;
         private const int GetCallbackSizeVTableSlot = 2;

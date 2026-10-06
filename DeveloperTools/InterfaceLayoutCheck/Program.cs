@@ -23,11 +23,9 @@ internal static class Program
 
         Assembly asm = Assembly.LoadFrom(dll);
         Type interfaceManager = asm.GetType("SKYNET.Managers.InterfaceManager", true);
-        Type memoryManager = asm.GetType("SKYNET.Managers.MemoryManager", true);
         interfaceManager.GetMethod("Initialize", Static).Invoke(null, null);
 
         MethodInfo resolveRuntime = interfaceManager.GetMethod("GetInterfaceMethods", Static);
-        MethodInfo legacyMethods = memoryManager.GetMethod("InterfaceMethodsForType", Static);
         var typeMap = (System.Collections.IDictionary)interfaceManager.GetField("interfaceTypes", Static).GetValue(null);
 
         var versions = new List<string>();
@@ -37,7 +35,7 @@ internal static class Program
         var actual = new Dictionary<string, string>();
         foreach (string version in versions)
         {
-            actual[version] = Dump(version, resolveRuntime, legacyMethods, typeMap);
+            actual[version] = Dump(version, resolveRuntime);
         }
 
         if (mode == "generate")
@@ -85,14 +83,12 @@ internal static class Program
         return failures == 0 ? 0 : 1;
     }
 
-    private static string Dump(string version, MethodInfo resolveRuntime, MethodInfo legacyMethods, System.Collections.IDictionary typeMap)
+    private static string Dump(string version, MethodInfo resolveRuntime)
     {
         var sb = new System.Text.StringBuilder();
         try
         {
-            var methods = resolveRuntime != null
-                ? (List<MethodInfo>)resolveRuntime.Invoke(null, new object[] { version })
-                : (List<MethodInfo>)legacyMethods.Invoke(null, new object[] { (Type)typeMap[version] });
+            var methods = (List<MethodInfo>)resolveRuntime.Invoke(null, new object[] { version });
             for (int i = 0; i < methods.Count; i++)
             {
                 var m = methods[i];
