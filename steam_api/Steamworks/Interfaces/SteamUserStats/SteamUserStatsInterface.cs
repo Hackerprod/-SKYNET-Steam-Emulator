@@ -26,8 +26,7 @@ namespace SKYNET.Steamworks.Interfaces
         "DownloadLeaderboardEntries", "DownloadLeaderboardEntriesForUsers", "GetDownloadedLeaderboardEntry", "UploadLeaderboardScore",
         "AttachLeaderboardUGC", "GetNumberOfCurrentPlayers", "RequestGlobalAchievementPercentages", "GetMostAchievedAchievementInfo",
         "GetNextMostAchievedAchievementInfo", "GetAchievementAchievedPercent", "RequestGlobalStats", "GetGlobalStatDouble",
-        "GetGlobalStatInt64", "GetGlobalStatHistoryDouble", "GetGlobalStatHistoryInt64", "InstallPS3Trophies",
-        "GetTrophySpaceRequiredBeforeInstall", "SetUserStatsData", "GetUserStatsData")]
+        "GetGlobalStatInt64", "GetGlobalStatHistoryDouble", "GetGlobalStatHistoryInt64")]
     [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION012",
         "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
         "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
@@ -267,21 +266,6 @@ namespace SKYNET.Steamworks.Interfaces
         public int GetGlobalStatHistoryDouble(IntPtr _, string pchStatName, IntPtr pData, uint cubData)
         {
             return SteamEmulator.SteamUserStats.GetGlobalStatHistoryDouble(pchStatName, pData, cubData);
-        }
-
-        public bool InstallPS3Trophies(IntPtr _) => false;
-
-        public ulong GetTrophySpaceRequiredBeforeInstall(IntPtr _) => 0;
-
-        public bool SetUserStatsData(IntPtr _, IntPtr pvData, uint cubData) => false;
-
-        public bool GetUserStatsData(IntPtr _, IntPtr pvData, uint cubData, IntPtr pcubWritten)
-        {
-            if (pcubWritten != IntPtr.Zero)
-            {
-                Marshal.WriteInt32(pcubWritten, 0);
-            }
-            return false;
         }
 
         public bool GetAchievementProgressLimitsInt32(IntPtr _, string pchName, IntPtr pnMinProgress, IntPtr pnMaxProgress)

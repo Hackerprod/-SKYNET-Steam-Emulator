@@ -141,7 +141,7 @@ internal static class Program
                     continue;
                 }
                 string[] p = line.Split('|');
-                specNames.Add(p[1]);
+                specNames.Add(p[1].StartsWith("~") ? "Destructor" : p[1]);
             }
 
             string[] rt = Lines(got).Select(l => Normalize(l).Split('|')[1]).ToArray();

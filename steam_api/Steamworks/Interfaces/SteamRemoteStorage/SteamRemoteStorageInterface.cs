@@ -18,8 +18,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount", "GetFileNameAndSize",
         "GetQuota__V013", "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp",
         "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails", "UGCRead",
-        "GetCachedUGCCount", "GetCachedUGCHandle", "GetFileListFromServer", "FileFetch",
-        "FilePersist", "SynchronizeToClient", "SynchronizeToServer", "ResetFileRequestState",
+        "GetCachedUGCCount", "GetCachedUGCHandle",
         "PublishWorkshopFile", "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile",
         "UpdatePublishedFileTitle", "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags",
         "CommitPublishedFileUpdate", "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles",
@@ -35,8 +34,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetFileTimestamp", "GetSyncPlatforms", "GetFileCount", "GetFileNameAndSize",
         "GetQuota", "IsCloudEnabledForAccount", "IsCloudEnabledForApp", "SetCloudEnabledForApp",
         "UGCDownload", "GetUGCDownloadProgress", "GetUGCDetails", "UGCRead",
-        "GetCachedUGCCount", "GetCachedUGCHandle", "GetFileListFromServer", "FileFetch",
-        "FilePersist", "SynchronizeToClient", "SynchronizeToServer", "ResetFileRequestState",
+        "GetCachedUGCCount", "GetCachedUGCHandle",
         "PublishWorkshopFile", "CreatePublishedFileUpdateRequest", "UpdatePublishedFileFile", "UpdatePublishedFilePreviewFile",
         "UpdatePublishedFileTitle", "UpdatePublishedFileDescription", "UpdatePublishedFileVisibility", "UpdatePublishedFileTags",
         "CommitPublishedFileUpdate", "GetPublishedFileDetails", "DeletePublishedFile", "EnumerateUserPublishedFiles",
@@ -241,36 +239,6 @@ namespace SKYNET.Steamworks.Interfaces
         public ulong GetCachedUGCHandle(IntPtr _, int iCachedContent)
         {
             return SteamEmulator.SteamRemoteStorage.GetCachedUGCHandle(iCachedContent);
-        }
-
-        public void GetFileListFromServer(IntPtr _)
-        {
-            SteamEmulator.SteamRemoteStorage.GetFileListFromServer();
-        }
-
-        public bool FileFetch(IntPtr _, string pchFile)
-        {
-            return SteamEmulator.SteamRemoteStorage.FileFetch(pchFile);
-        }
-
-        public bool FilePersist(IntPtr _, string pchFile)
-        {
-            return SteamEmulator.SteamRemoteStorage.FilePersist(pchFile);
-        }
-
-        public bool SynchronizeToClient(IntPtr _)
-        {
-            return SteamEmulator.SteamRemoteStorage.SynchronizeToClient();
-        }
-
-        public bool SynchronizeToServer(IntPtr _)
-        {
-            return SteamEmulator.SteamRemoteStorage.SynchronizeToServer();
-        }
-
-        public bool ResetFileRequestState(IntPtr _)
-        {
-            return SteamEmulator.SteamRemoteStorage.ResetFileRequestState();
         }
 
         public ulong PublishWorkshopFile(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int eWorkshopFileType)

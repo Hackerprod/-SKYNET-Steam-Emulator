@@ -5,7 +5,7 @@ using HHTMLBrowser = System.UInt32;
 namespace SKYNET.Steamworks.Interfaces
 {
     [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_003",
-        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
         "LoadURL", "SetSize", "StopLoad", "Reload",
         "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
         "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "SetBackgroundMode",
         "AllowStartRequest", "JSDialogResponse", "FileLoadDialogResponse")]
     [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_004",
-        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
         "LoadURL", "SetSize", "StopLoad", "Reload",
         "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
         "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
@@ -25,7 +25,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "SetBackgroundMode",
         "SetDPIScalingFactor", "AllowStartRequest", "JSDialogResponse", "FileLoadDialogResponse")]
     [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_005",
-        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
         "LoadURL", "SetSize", "StopLoad", "Reload",
         "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
         "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
@@ -37,6 +37,8 @@ namespace SKYNET.Steamworks.Interfaces
         "FileLoadDialogResponse")]
     public class SteamHTMLSurfaceInterface : ISteamInterface
     {
+        public IntPtr Destructor(IntPtr _, uint flags) => _;
+
         public bool Init(IntPtr _)
         {
             return SteamEmulator.SteamHTMLSurface.Init();

@@ -12,27 +12,24 @@ namespace SKYNET.Steamworks.Interfaces
         "AcceptConnection", "CloseConnection", "CloseListenSocket", "SetConnectionUserData",
         "GetConnectionUserData", "SetConnectionName", "GetConnectionName", "SendMessageToConnection",
         "SendMessages", "FlushMessagesOnConnection", "ReceiveMessagesOnConnection", "GetConnectionInfo",
-        "GetConnectionRealTimeStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
-        "ConfigureConnectionLanes", "GetIdentity", "InitAuthentication", "GetAuthenticationStatus",
+        "GetQuickConnectionStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
+        "GetIdentity", "InitAuthentication", "GetAuthenticationStatus",
         "CreatePollGroup", "DestroyPollGroup", "SetConnectionPollGroup", "ReceiveMessagesOnPollGroup",
         "ReceivedRelayAuthTicket", "FindRelayAuthTicketForServer", "ConnectToHostedDedicatedServer", "GetHostedDedicatedServerPort",
         "GetHostedDedicatedServerPOPID", "GetHostedDedicatedServerAddress", "CreateHostedDedicatedServerListenSocket", "GetGameCoordinatorServerLogin",
-        "ConnectP2PCustomSignaling", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate",
-        "ResetIdentity", "RunCallbacks", "BeginAsyncRequestFakeIP", "GetFakeIP",
-        "CreateListenSocketP2PFakeIP", "GetRemoteFakeIPForConnection", "CreateFakeUDPPort")]
+        "ConnectP2PCustomSignaling__V008", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate")]
     [InterfaceLayout("SteamNetworkingSockets009",
         "CreateListenSocketIP", "ConnectByIPAddress", "CreateListenSocketP2P", "ConnectP2P",
         "AcceptConnection", "CloseConnection", "CloseListenSocket", "SetConnectionUserData",
         "GetConnectionUserData", "SetConnectionName", "GetConnectionName", "SendMessageToConnection",
         "SendMessages", "FlushMessagesOnConnection", "ReceiveMessagesOnConnection", "GetConnectionInfo",
-        "GetConnectionRealTimeStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
-        "ConfigureConnectionLanes", "GetIdentity", "InitAuthentication", "GetAuthenticationStatus",
+        "GetQuickConnectionStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
+        "GetIdentity", "InitAuthentication", "GetAuthenticationStatus",
         "CreatePollGroup", "DestroyPollGroup", "SetConnectionPollGroup", "ReceiveMessagesOnPollGroup",
         "ReceivedRelayAuthTicket", "FindRelayAuthTicketForServer", "ConnectToHostedDedicatedServer", "GetHostedDedicatedServerPort",
         "GetHostedDedicatedServerPOPID", "GetHostedDedicatedServerAddress", "CreateHostedDedicatedServerListenSocket", "GetGameCoordinatorServerLogin",
         "ConnectP2PCustomSignaling", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate",
-        "ResetIdentity", "RunCallbacks", "BeginAsyncRequestFakeIP", "GetFakeIP",
-        "CreateListenSocketP2PFakeIP", "GetRemoteFakeIPForConnection", "CreateFakeUDPPort")]
+        "RunCallbacks")]
     [InterfaceLayout("SteamNetworkingSockets012",
         "CreateListenSocketIP", "ConnectByIPAddress", "CreateListenSocketP2P", "ConnectP2P",
         "AcceptConnection", "CloseConnection", "CloseListenSocket", "SetConnectionUserData",
@@ -225,6 +222,23 @@ namespace SKYNET.Steamworks.Interfaces
         public int GetGameCoordinatorServerLogin(IntPtr _, IntPtr pLoginInfo, IntPtr pcbSignedBlob, IntPtr pBlob)
         {
             return SteamEmulator.SteamNetworkingSockets.GetGameCoordinatorServerLogin(pLoginInfo, pcbSignedBlob, pBlob);
+        }
+
+        private static bool _quickStatusLogged;
+
+        public bool GetQuickConnectionStatus(IntPtr _, HSteamNetConnection hConn, IntPtr pStats)
+        {
+            if (!_quickStatusLogged)
+            {
+                _quickStatusLogged = true;
+                SteamEmulator.Write("SteamNetworkingSockets", "GetQuickConnectionStatus not implemented");
+            }
+            return false;
+        }
+
+        public HSteamNetConnection ConnectP2PCustomSignaling__V008(IntPtr _, IntPtr pSignaling, IntPtr pPeerIdentity, int nOptions, IntPtr pOptions)
+        {
+            return SteamEmulator.SteamNetworkingSockets.ConnectP2PCustomSignaling(pSignaling, pPeerIdentity, 0, nOptions, pOptions);
         }
 
         public HSteamNetConnection ConnectP2PCustomSignaling(IntPtr _, IntPtr pSignaling, IntPtr pPeerIdentity, int nRemoteVirtualPort, int nOptions, IntPtr pOptions)
