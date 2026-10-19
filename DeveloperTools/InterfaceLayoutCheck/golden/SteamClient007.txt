@@ -19,3 +19,4 @@
 18|GetISteamApps|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String
 19|GetISteamNetworking|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String
 20|SetWarningMessageHook|System.Void|System.IntPtr,System.IntPtr
+21|GetISteamRemoteStorage|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String

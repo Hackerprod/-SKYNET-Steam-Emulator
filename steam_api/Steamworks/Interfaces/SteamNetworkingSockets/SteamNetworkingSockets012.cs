@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetConnectionUserData", "SetConnectionName", "GetConnectionName", "SendMessageToConnection__V001",
         "FlushMessagesOnConnection", "ReceiveMessagesOnConnection", "ReceiveMessagesOnListenSocket", "GetConnectionInfo",
         "GetQuickConnectionStatus", "GetDetailedConnectionStatus", "GetListenSocketAddress", "CreateSocketPair",
-        "GetIdentity", "InitAuthentication", "GetAuthenticationStatus", "ReceivedRelayAuthTicket",
+        "GetIdentity", "ReceivedRelayAuthTicket",
         "FindRelayAuthTicketForServer", "ConnectToHostedDedicatedServer__V002", "GetHostedDedicatedServerPort", "GetHostedDedicatedServerPOPID",
         "GetHostedDedicatedServerAddress", "CreateHostedDedicatedServerListenSocket__V001", "GetGameCoordinatorServerLogin")]
     [InterfaceLayout("SteamNetworkingSockets004",
@@ -77,7 +77,7 @@ namespace SKYNET.Steamworks.Interfaces
         "ReceivedRelayAuthTicket", "FindRelayAuthTicketForServer", "ConnectToHostedDedicatedServer", "GetHostedDedicatedServerPort",
         "GetHostedDedicatedServerPOPID", "GetHostedDedicatedServerAddress", "CreateHostedDedicatedServerListenSocket", "GetGameCoordinatorServerLogin",
         "ConnectP2PCustomSignaling", "ReceivedP2PCustomSignal", "GetCertificateRequest", "SetCertificate",
-        "RunCallbacks")]
+        "RunCallbacks", "ResetIdentity")]
     [InterfaceLayout("SteamNetworkingSockets010",
         "CreateListenSocketIP", "ConnectByIPAddress", "CreateListenSocketP2P", "ConnectP2P",
         "AcceptConnection", "CloseConnection", "CloseListenSocket", "SetConnectionUserData",

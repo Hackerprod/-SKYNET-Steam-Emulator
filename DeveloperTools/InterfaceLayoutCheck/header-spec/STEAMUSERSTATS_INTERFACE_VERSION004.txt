@@ -3,6 +3,7 @@
 # overload GetStat slots 1,2
 # overload SetStat slots 3,4
 # overload GetUserStat slots 14,15
+# note: aligned to official vtable (Proton/steamclient64): real client has ResetAllStats as slot 17
 0|RequestCurrentStats|0|bool|
 1|GetStat|2|bool|const char *pchName, float *pData
 2|GetStat|2|bool|const char *pchName, int32 *pData
@@ -20,3 +21,4 @@
 14|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, float *pData
 15|GetUserStat|3|bool|CSteamID steamIDUser, const char *pchName, int32 *pData
 16|GetUserAchievement|3|bool|CSteamID steamIDUser, const char *pchName, bool *pbAchieved
+17|ResetAllStats|1|bool|bool bAchievementsToo

@@ -13,11 +13,11 @@
 12|GetFriendCount|System.Int32|System.IntPtr
 13|GetFriendByIndex|System.IntPtr|System.IntPtr,System.IntPtr,System.Int32
 14|SendMsgToFriend|System.Boolean|System.IntPtr,System.UInt64,System.Int32,System.IntPtr,System.Int32
-15|SetFriendRegValue|System.Void|System.IntPtr,System.UInt64,System.String,System.String
-16|GetFriendRegValue|System.IntPtr|System.IntPtr,System.UInt64,System.String
-17|GetFriendPersonaNameHistory|System.IntPtr|System.IntPtr,System.UInt64,System.Int32
-18|GetChatMessage|System.Int32|System.IntPtr,System.UInt64,System.Int32,System.IntPtr,System.Int32,System.IntPtr
-19|SendMsgToFriend|System.Void|System.IntPtr,System.UInt64,System.Int32,System.String
+15|SendMsgToFriend|System.Void|System.IntPtr,System.UInt64,System.Int32,System.String
+16|SetFriendRegValue|System.Void|System.IntPtr,System.UInt64,System.String,System.String
+17|GetFriendRegValue|System.IntPtr|System.IntPtr,System.UInt64,System.String
+18|GetFriendPersonaNameHistory|System.IntPtr|System.IntPtr,System.UInt64,System.Int32
+19|GetChatMessage|System.Int32|System.IntPtr,System.UInt64,System.Int32,System.IntPtr,System.Int32,System.IntPtr
 20|GetChatIDOfChatHistoryStart|System.Int32|System.IntPtr,System.UInt64
 21|SetChatHistoryStart|System.Void|System.IntPtr,System.UInt64,System.Int32
 22|ClearChatHistory|System.Void|System.IntPtr,System.UInt64

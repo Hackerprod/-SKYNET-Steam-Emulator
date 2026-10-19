@@ -12,3 +12,4 @@
 11|UpdateSpectatorPort|System.Void|System.IntPtr,System.UInt16
 12|SetGameType|System.Void|System.IntPtr,System.IntPtr
 13|BGetUserAchievementStatus|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr
+14|GetGameplayStats|System.Void|System.IntPtr

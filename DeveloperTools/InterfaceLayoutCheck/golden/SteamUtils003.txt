@@ -15,4 +15,3 @@
 14|RunFrame|System.Void|System.IntPtr
 15|GetIPCCallCount|System.UInt32|System.IntPtr
 16|SetWarningMessageHook|System.Void|System.IntPtr,System.IntPtr
-17|IsOverlayEnabled|System.Boolean|System.IntPtr

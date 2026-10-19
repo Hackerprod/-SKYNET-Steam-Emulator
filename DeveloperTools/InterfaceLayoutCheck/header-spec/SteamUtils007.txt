@@ -1,5 +1,6 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamutils007.h (class ISteamUtils007)
 # also: .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamutils.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamutils.h (+3 more)
+# note: aligned to official vtable (Proton/steamclient64): real client has IsSteamInBigPictureMode as slot 26
 0|GetSecondsSinceAppActive|0|uint32|
 1|GetSecondsSinceComputerActive|0|uint32|
 2|GetConnectedUniverse|0|EUniverse|
@@ -26,3 +27,4 @@
 23|GetSteamUILanguage|0|const char *|
 24|IsSteamRunningInVR|0|bool|
 25|SetOverlayNotificationInset|2|void|int nHorizontalInset, int nVerticalInset
+26|IsSteamInBigPictureMode|0|bool|

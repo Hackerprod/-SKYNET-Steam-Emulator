@@ -1,4 +1,5 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamutils003.h (class ISteamUtils003)
+# note: aligned to official vtable (Proton/steamclient64): real client has 17 slots (no IsOverlayEnabled)
 0|GetSecondsSinceAppActive|0|uint32|
 1|GetSecondsSinceComputerActive|0|uint32|
 2|GetConnectedUniverse|0|EUniverse|
@@ -16,4 +17,3 @@
 14|RunFrame|0|void|
 15|GetIPCCallCount|0|uint32|
 16|SetWarningMessageHook|1|void|SteamAPIWarningMessageHook_t pFunction
-17|IsOverlayEnabled|0|bool|

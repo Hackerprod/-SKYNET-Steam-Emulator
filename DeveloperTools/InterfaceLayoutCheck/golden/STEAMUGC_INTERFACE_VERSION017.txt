@@ -87,3 +87,4 @@
 86|DeleteItem|System.UInt64|System.IntPtr,System.UInt64
 87|ShowWorkshopEULA|System.Boolean|System.IntPtr
 88|GetWorkshopEULAStatus|System.UInt64|System.IntPtr
+89|GetUserContentDescriptorPreferences|System.UInt32|System.IntPtr,System.IntPtr,System.UInt32

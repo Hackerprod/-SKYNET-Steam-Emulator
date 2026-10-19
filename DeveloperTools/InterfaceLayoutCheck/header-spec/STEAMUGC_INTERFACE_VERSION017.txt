@@ -2,6 +2,7 @@
 # also: .tmp/SmokeAPI/res/steamworks/156/headers/steam/isteamugc.h, .tmp/goldberg_emulator_ref/sdk_includes/isteamugc.h
 # overload CreateQueryAllUGCRequest slots 1,2
 # overload GetQueryUGCKeyValueTag slots 16,17
+# note: aligned to official vtable (Proton/steamclient64): real client has GetUserContentDescriptorPreferences as slot 89
 0|CreateQueryUserUGCRequest|7|UGCQueryHandle_t|AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
 1|CreateQueryAllUGCRequestCursor|5|UGCQueryHandle_t|EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, const char *pchCursor
 2|CreateQueryAllUGCRequestPage|5|UGCQueryHandle_t|EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage
@@ -91,3 +92,4 @@
 86|DeleteItem|1|SteamAPICall_t|PublishedFileId_t nPublishedFileID
 87|ShowWorkshopEULA|0|bool|
 88|GetWorkshopEULAStatus|0|SteamAPICall_t|
+89|GetUserContentDescriptorPreferences|2|uint32|EUGCContentDescriptorID *pvecDescriptors, uint32 cMaxEntries

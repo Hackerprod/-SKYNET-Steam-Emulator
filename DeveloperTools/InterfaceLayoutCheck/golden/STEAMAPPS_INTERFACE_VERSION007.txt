@@ -22,3 +22,4 @@
 21|GetLaunchQueryParam|System.IntPtr|System.IntPtr,System.String
 22|GetDlcDownloadProgress|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr
 23|GetAppBuildId|System.Int32|System.IntPtr
+24|RequestAllProofOfPurchaseKeys|System.Void|System.IntPtr

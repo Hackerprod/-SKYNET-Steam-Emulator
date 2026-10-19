@@ -46,7 +46,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamContentServer",
         "GetISteamMasterServerUpdater", "GetISteamMatchmakingServers", "GetISteamGenericInterface", "RunFrame",
         "GetIPCCallCount", "GetISteamUserStats", "GetISteamApps", "GetISteamNetworking",
-        "SetWarningMessageHook")]
+        "SetWarningMessageHook", "GetISteamRemoteStorage")]
     [InterfaceLayout("SteamClient008",
         "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
         "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",

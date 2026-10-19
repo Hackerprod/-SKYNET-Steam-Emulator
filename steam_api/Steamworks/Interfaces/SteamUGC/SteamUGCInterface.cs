@@ -290,7 +290,7 @@ namespace SKYNET.Steamworks.Interfaces
         "BInitWorkshopForGameServer", "SuspendDownloads", "StartPlaytimeTracking", "StopPlaytimeTracking",
         "StopPlaytimeTrackingForAllItems", "AddDependency", "RemoveDependency", "AddAppDependency",
         "RemoveAppDependency", "GetAppDependencies", "DeleteItem", "ShowWorkshopEULA",
-        "GetWorkshopEULAStatus")]
+        "GetWorkshopEULAStatus", "GetUserContentDescriptorPreferences")]
     [InterfaceLayout("STEAMUGC_INTERFACE_VERSION018",
         "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestCursor__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021",
         "SendQueryUGCRequest__V021", "GetQueryUGCResult_old", "GetQueryUGCNumTags__V021", "GetQueryUGCTag__V021",

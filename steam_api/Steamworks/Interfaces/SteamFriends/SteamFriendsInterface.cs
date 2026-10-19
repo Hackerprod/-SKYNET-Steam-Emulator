@@ -16,8 +16,8 @@ namespace SKYNET.Steamworks.Interfaces
         "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "SetPersonaState",
         "AddFriend", "RemoveFriend", "HasFriend__V001", "GetFriendRelationship",
         "GetFriendPersonaState", "Deprecated_GetFriendGamePlayed", "GetFriendPersonaName", "AddFriendByName",
-        "GetFriendCount__V001", "GetFriendByIndex__V001", "SendMsgToFriend", "SetFriendRegValue",
-        "GetFriendRegValue", "GetFriendPersonaNameHistory", "GetChatMessage", "SendMsgToFriend__V001",
+        "GetFriendCount__V001", "GetFriendByIndex__V001", "SendMsgToFriend", "SendMsgToFriend__V001",
+        "SetFriendRegValue", "GetFriendRegValue", "GetFriendPersonaNameHistory", "GetChatMessage",
         "GetChatIDOfChatHistoryStart", "SetChatHistoryStart", "ClearChatHistory", "InviteFriendByEmail",
         "GetBlockedFriendCount", "GetFriendGamePlayed__V001", "GetFriendGamePlayed2")]
     [InterfaceLayout("SteamFriends002",

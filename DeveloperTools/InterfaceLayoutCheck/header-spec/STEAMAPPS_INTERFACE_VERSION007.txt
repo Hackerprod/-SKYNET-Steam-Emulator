@@ -1,5 +1,6 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps007.h (class ISteamApps007)
 # also: .tmp/SmokeAPI/res/steamworks/132/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/133b/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/134/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/135/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/135a/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/136/headers/steam/isteamapps.h
+# note: aligned to official vtable (Proton/steamclient64): real client has RequestAllProofOfPurchaseKeys as slot 24
 0|BIsSubscribed|0|bool|
 1|BIsLowViolence|0|bool|
 2|BIsCybercafe|0|bool|
@@ -24,3 +25,4 @@
 21|GetLaunchQueryParam|1|const char *|const char *pchKey
 22|GetDlcDownloadProgress|3|bool|AppId_t nAppID, uint64 *punBytesDownloaded, uint64 *punBytesTotal
 23|GetAppBuildId|0|int|
+24|RequestAllProofOfPurchaseKeys|0|void|

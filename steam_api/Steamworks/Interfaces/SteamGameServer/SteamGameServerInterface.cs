@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Interfaces
         "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
         "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
         "BUpdateUserData__V009", "BSetServerType", "UpdateServerStatus", "UpdateSpectatorPort",
-        "SetGameType", "BGetUserAchievementStatus")]
+        "SetGameType", "BGetUserAchievementStatus", "GetGameplayStats")]
     [InterfaceLayout("SteamGameServer008",
         "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
         "GetSteamID", "SendUserConnectAndAuthenticate", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",

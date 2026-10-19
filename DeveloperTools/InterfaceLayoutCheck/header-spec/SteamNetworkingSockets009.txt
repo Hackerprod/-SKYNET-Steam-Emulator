@@ -1,5 +1,6 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamnetworkingsockets009.h (class ISteamNetworkingSockets009)
 # also: .tmp/SmokeAPI/res/steamworks/150/headers/steam/isteamnetworkingsockets.h, .tmp/SmokeAPI/res/steamworks/151/headers/steam/isteamnetworkingsockets.h, .tmp/SmokeAPI/res/steamworks/152/headers/steam/isteamnetworkingsockets.h
+# note: aligned to official vtable (Proton/steamclient64): real client has a trailing slot 40 (inner ResetIdentity thunk) after RunCallbacks
 0|CreateListenSocketIP|3|HSteamListenSocket|const SteamNetworkingIPAddr &localAddress, int nOptions, const SteamNetworkingConfigValue_t *pOptions
 1|ConnectByIPAddress|3|HSteamNetConnection|const SteamNetworkingIPAddr &address, int nOptions, const SteamNetworkingConfigValue_t *pOptions
 2|CreateListenSocketP2P|3|HSteamListenSocket|int nLocalVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
@@ -40,3 +41,4 @@
 37|GetCertificateRequest|3|bool|int *pcbBlob, void *pBlob, SteamNetworkingErrMsg &errMsg
 38|SetCertificate|3|bool|const void *pCertificate, int cbCertificate, SteamNetworkingErrMsg &errMsg
 39|RunCallbacks|0|void|
+40|ResetIdentity|1|void|const SteamNetworkingIdentity *pIdentity

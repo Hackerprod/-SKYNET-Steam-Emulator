@@ -24,3 +24,4 @@
 23|GetSteamUILanguage|System.String|System.IntPtr
 24|IsSteamRunningInVR|System.Boolean|System.IntPtr
 25|SetOverlayNotificationInset|System.Void|System.IntPtr,System.Int32,System.Int32
+26|IsSteamInBigPictureMode|System.Boolean|System.IntPtr

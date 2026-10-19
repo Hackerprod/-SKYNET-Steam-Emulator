@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetAppData")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION002",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
-        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp")]
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION003",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
         "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled")]
@@ -30,14 +30,15 @@ namespace SKYNET.Steamworks.Interfaces
         "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
         "InstallDLC", "UninstallDLC", "RequestAppProofOfPurchaseKey", "GetCurrentBetaName",
         "MarkContentCorrupt", "GetInstalledDepots", "GetAppInstallDir", "BIsAppInstalled",
-        "GetAppOwner", "GetLaunchQueryParam")]
+        "GetAppOwner", "GetLaunchQueryParam", "GetDlcDownloadProgress")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION007",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
         "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
         "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
         "InstallDLC", "UninstallDLC", "RequestAppProofOfPurchaseKey", "GetCurrentBetaName",
         "MarkContentCorrupt", "GetInstalledDepots", "GetAppInstallDir", "BIsAppInstalled",
-        "GetAppOwner", "GetLaunchQueryParam", "GetDlcDownloadProgress", "GetAppBuildId")]
+        "GetAppOwner", "GetLaunchQueryParam", "GetDlcDownloadProgress", "GetAppBuildId",
+        "RequestAllProofOfPurchaseKeys")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION008",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
         "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",

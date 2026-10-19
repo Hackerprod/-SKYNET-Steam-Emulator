@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Interfaces
         "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
         "ClearAchievement", "StoreStats", "GetAchievementIcon", "GetAchievementDisplayAttribute",
         "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat", "GetUserStatInt32",
-        "GetUserAchievement")]
+        "GetUserAchievement", "ResetAllStats")]
     [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION005",
         "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
         "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",

@@ -1,5 +1,6 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamapps006.h (class ISteamApps006)
 # also: .tmp/SmokeAPI/res/steamworks/126a/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/127/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/128/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/129a/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/130/headers/steam/isteamapps.h, .tmp/SmokeAPI/res/steamworks/131/headers/steam/isteamapps.h
+# note: aligned to official vtable (Proton/steamclient64): real client has GetDlcDownloadProgress as slot 22
 0|BIsSubscribed|0|bool|
 1|BIsLowViolence|0|bool|
 2|BIsCybercafe|0|bool|
@@ -22,3 +23,4 @@
 19|BIsAppInstalled|1|bool|AppId_t appID
 20|GetAppOwner|0|CSteamID|
 21|GetLaunchQueryParam|1|const char *|const char *pchKey
+22|GetDlcDownloadProgress|3|bool|AppId_t nAppID, uint64 *punBytesDownloaded, uint64 *punBytesTotal

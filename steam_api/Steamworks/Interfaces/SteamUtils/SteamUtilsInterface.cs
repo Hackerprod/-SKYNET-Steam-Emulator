@@ -13,14 +13,13 @@ namespace SKYNET.Steamworks.Interfaces
     [InterfaceLayout("SteamUtils002",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
-        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
-        "GetAPICallFailureReason", "GetAPICallResult")]
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition")]
     [InterfaceLayout("SteamUtils003",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
         "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
         "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
-        "SetWarningMessageHook", "IsOverlayEnabled")]
+        "SetWarningMessageHook")]
     [InterfaceLayout("SteamUtils004",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
@@ -49,7 +48,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
         "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
         "ShowGamepadTextInput", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput", "GetSteamUILanguage__V009",
-        "IsSteamRunningInVR", "SetOverlayNotificationInset")]
+        "IsSteamRunningInVR", "SetOverlayNotificationInset", "IsSteamInBigPictureMode")]
     [InterfaceLayout("SteamUtils008",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",

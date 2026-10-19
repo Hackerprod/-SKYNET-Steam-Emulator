@@ -1,5 +1,6 @@
 # source: .tmp/goldberg_emulator_ref/sdk_includes/isteamgameserver005.h (class ISteamGameServer005)
 # also: .tmp/SmokeAPI/res/steamworks/101/headers/steam/isteamgameserver.h, .tmp/SmokeAPI/res/steamworks/102/headers/steam/isteamgameserver.h
+# note: aligned to official vtable (Proton/steamclient64): real client has GetGameplayStats as slot 14
 0|LogOn|0|void|
 1|LogOff|0|void|
 2|BLoggedOn|0|bool|
@@ -14,3 +15,4 @@
 11|UpdateSpectatorPort|1|void|uint16 unSpectatorPort
 12|SetGameType|1|void|const char *pchGameType
 13|BGetUserAchievementStatus|2|bool|CSteamID steamID, const char *pchAchievementName
+14|GetGameplayStats|0|void|
