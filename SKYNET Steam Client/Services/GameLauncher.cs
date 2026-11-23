@@ -71,19 +71,22 @@ public sealed class GameLauncher
         try
         {
             var workDir = string.IsNullOrWhiteSpace(game.ExeFolder) ? Path.GetDirectoryName(game.ExecutablePath)! : game.ExeFolder;
-            // Launch arguments are passed through untouched. VAC/secure behaviour is
-            // handled by the emulated Steam API (SteamGameServer / SteamUser auth),
-            // not by forcing -insecure here.
+            // Launch arguments are passed through untouched; the game is given the same
+            // environment Steam would (SteamPath, see SteamEnvironment) so its own
+            // trusted-launch check can verify the process instead of refusing to join servers.
             var args = string.Join(" ",
                 new[] { game.LaunchArguments, extraArgs }
                     .Where(a => !string.IsNullOrWhiteSpace(a)));
 
             var injectablePayload = PrepareInjectablePayload(payload);
-            proc = DllInjector.LaunchAndInject(
-                game.ExecutablePath,
-                injectablePayload,
-                args,
-                workDir);
+            using (SteamEnvironment.Apply())
+            {
+                proc = DllInjector.LaunchAndInject(
+                    game.ExecutablePath,
+                    injectablePayload,
+                    args,
+                    workDir);
+            }
             proc.EnableRaisingEvents = true;
             proc.Exited += (_, _) => GameExited?.Invoke(game);
             GameWindowActivator.BringToFrontWhenReady(proc);
