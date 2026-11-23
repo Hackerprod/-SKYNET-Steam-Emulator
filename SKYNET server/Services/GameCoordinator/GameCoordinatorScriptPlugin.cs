@@ -1016,7 +1016,9 @@ internal sealed class ScriptExchangeHost
 
     public TsValue SteamId() => TsValue.FromUInt64(_context.SteamId);
 
-    public TsValue AccountId() => TsValue.FromInt32(unchecked((int)_context.AccountId));
+    public TsValue AccountId() => _context.AccountId <= int.MaxValue
+        ? TsValue.FromInt32((int)_context.AccountId)
+        : TsValue.FromInt64(_context.AccountId);
 
     public TsValue PersonaName() => TsValue.FromString(_context.PersonaName);
 
@@ -2242,7 +2244,7 @@ internal sealed class ScriptExchangeHost
 
         var profile = GetStatsProfile(accountId);
         var value = new TsObject("DotaAccountName");
-        value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
+        value.SetField("accountId", ToTsUInt32(profile.AccountId));
         value.SetField("accountName", TsValue.FromString(profile.PersonaName ?? string.Empty));
         return new TsObjectValue(value);
     }
@@ -2268,7 +2270,7 @@ internal sealed class ScriptExchangeHost
 
         var profile = GetStatsProfile(accountId);
         var value = new TsObject("DotaEventPoints");
-        value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
+        value.SetField("accountId", ToTsUInt32(profile.AccountId));
         value.SetField("eventId", TsValue.FromInt32(unchecked((int)eventId)));
         value.SetField("totalPoints", TsValue.FromInt32(unchecked((int)profile.EventPoints)));
         value.SetField("totalPremiumPoints", TsValue.FromInt32(0));
@@ -2767,7 +2769,7 @@ internal sealed class ScriptExchangeHost
         var global = store?.GetGlobalStats(profile.AccountId) ?? new DotaStatsGlobalStats { AccountId = profile.AccountId };
         var conduct = store?.GetConduct(profile.AccountId) ?? new DotaStatsConduct { AccountId = profile.AccountId };
         var value = new TsObject("DotaProfileSnapshot");
-        value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
+        value.SetField("accountId", ToTsUInt32(profile.AccountId));
         value.SetField("steamId", TsValue.FromUInt64(profile.SteamId));
         value.SetField("personaName", TsValue.FromString(profile.PersonaName ?? string.Empty));
         value.SetField(
@@ -2815,7 +2817,7 @@ internal sealed class ScriptExchangeHost
         static double Score(double value, double divisor = 1.0) => 0.5 + Math.Min(1.0, value / divisor) / 2.0;
 
         var value = new TsObject("DotaPlayerStats");
-        value.SetField("accountId", TsValue.FromInt32(unchecked((int)stats.AccountId)));
+        value.SetField("accountId", ToTsUInt32(stats.AccountId));
         value.SetField("matchCount", TsValue.FromInt32(unchecked((int)stats.MatchCount)));
         value.SetField("meanGpm", TsValue.FromFloat64(stats.MediaGpm));
         value.SetField("meanXppm", TsValue.FromFloat64(stats.MediaXpm));
@@ -2965,7 +2967,7 @@ internal sealed class ScriptExchangeHost
     {
         var value = new TsObject("DotaMatchPlayer");
         value.SetField("matchId", TsValue.FromUInt64(player.MatchId));
-        value.SetField("accountId", TsValue.FromInt32(unchecked((int)player.AccountId)));
+        value.SetField("accountId", ToTsUInt32(player.AccountId));
         value.SetField("steamId", TsValue.FromUInt64(player.SteamId));
         value.SetField("personaName", TsValue.FromString(player.PersonaName ?? string.Empty));
         value.SetField("team", TsValue.FromInt32(unchecked((int)player.Team)));
