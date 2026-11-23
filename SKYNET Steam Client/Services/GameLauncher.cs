@@ -71,19 +71,11 @@ public sealed class GameLauncher
         try
         {
             var workDir = string.IsNullOrWhiteSpace(game.ExeFolder) ? Path.GetDirectoryName(game.ExecutablePath)! : game.ExeFolder;
-            // Always insecure, regardless of the SecureNetworking game setting: that
-            // flag only gates the SDR CA certificate patch (steam_api's own concern),
-            // it has nothing to do with VAC. SteamGameServer.ShouldReportSecure() is
-            // hardcoded to false server-side - the emulator can never produce a valid
-            // VAC session - so a game launched without -insecure just ends up
-            // expecting a secure host that will never arrive, which is the
-            // "-insecure"/secure-host mismatch reported in game #21.
-            var insecureArg = !ContainsArgument(game.LaunchArguments, "-insecure") &&
-                !ContainsArgument(extraArgs, "-insecure")
-                    ? "-insecure"
-                    : null;
+            // Launch arguments are passed through untouched. VAC/secure behaviour is
+            // handled by the emulated Steam API (SteamGameServer / SteamUser auth),
+            // not by forcing -insecure here.
             var args = string.Join(" ",
-                new[] { game.LaunchArguments, insecureArg, extraArgs }
+                new[] { game.LaunchArguments, extraArgs }
                     .Where(a => !string.IsNullOrWhiteSpace(a)));
 
             var injectablePayload = PrepareInjectablePayload(payload);

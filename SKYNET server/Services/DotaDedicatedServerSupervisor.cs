@@ -99,10 +99,6 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             {
                 "-dedicated"
             };
-            // Always insecure: the emulator cannot produce a valid VAC session, so a
-            // "secure" dedicated only ever yields the client VAC popup/block. Passing
-            // -insecure keeps dota2 from loading the VAC module at all.
-            arguments.Add("-insecure");
             // Bind explicitly. Recent Dota dedicated builds can otherwise pick a
             // single interface, leaving advertised endpoints black-holed.
             if (TryNormalizeIPv4(settings.DedicatedBindIp, out var bindIp))
@@ -134,8 +130,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 ["SKYNET_DEDICATED_LOBBY_ID"] = lobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["SKYNET_DEDICATED_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["SKYNET_PROCESS_ROLE"] = "dedicated",
-                ["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}",
-                ["SKYNET_DEDICATED_INSECURE"] = "1"
+                ["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}"
             };
 
             try
