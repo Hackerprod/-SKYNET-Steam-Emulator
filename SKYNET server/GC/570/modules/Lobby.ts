@@ -124,7 +124,11 @@ const JOIN_FULL = 9;
 
 const MAX_MEMBERS = 20;
 const LOBBY_TIMEOUT_SECONDS = 3600;
-const POSTGAME_CLEANUP_SECONDS = 45;
+// A dedicated server needs to load the map and complete the GC handshake
+// (4007/4508) before the lobby can leave SERVER_SETUP. Keep this above the
+// supervisor startup timeout (120s) so the lobby is never destroyed while the
+// server is still booting.
+const SERVER_SETUP_TIMEOUT_SECONDS = 180;
 const DEFAULT_PORT = 27015;
 const DEFAULT_GAME_MODE = 1;
 const DEFAULT_LOBBY_NAME = "Room 1";
@@ -629,6 +633,7 @@ export class Lobby {
         publishLobby(ctx.services.lobby, lobby);
 
         let launchResult = SUCCESS;
+        let launchError = "";
         if (lobby.serverRegion !== 0) {
             const map = lobby.customMapName === "" ? "dota" : lobby.customMapName;
             const result = ctx.services.lobby.startDedicatedServer(lobby.lobbyId, map);
@@ -638,9 +643,12 @@ export class Lobby {
                     "dedicated started lobby=" + lobby.lobbyId + " port=" + result.port + " state=" + result.state
                 );
             } else {
+                // Keep the selected region and lan=false: a failed dedicated start
+                // must surface as a generic launch error, not silently turn the
+                // lobby into a local game.
                 lobby.state = LOBBY_UI;
-                lobby.lan = true;
                 launchResult = FAILURE;
+                launchError = "Unable to start the game server. Please try again later.";
                 ctx.logger.info("dedicated start failed lobby=" + lobby.lobbyId + " error=" + (result?.error ?? ""));
             }
 
@@ -649,7 +657,7 @@ export class Lobby {
             publishLobby(ctx.services.lobby, lobby);
         }
 
-        ctx.reply({ eresult: launchResult });
+        ctx.reply(launchError === "" ? { eresult: launchResult } : { eresult: launchResult, debugMessage: launchError });
         return true;
     }
 
@@ -856,7 +864,7 @@ export class Lobby {
         const nowSeconds = Math.floor(new Date().getTime() / 1000);
         const expired: LobbyState[] = [];
         store.lobbies.forEach((lobby) => {
-            const timeout = lobby.state === LOBBY_RUN ? LOBBY_TIMEOUT_SECONDS : POSTGAME_CLEANUP_SECONDS;
+            const timeout = lobby.state === LOBBY_SERVER_SETUP ? SERVER_SETUP_TIMEOUT_SECONDS : LOBBY_TIMEOUT_SECONDS;
             if (nowSeconds - lobby.updatedAt > timeout) {
                 expired.push(lobby);
             }
@@ -2011,9 +2019,11 @@ function ipFromUint32(value: number): string {
         return "";
     }
 
-    const a = value & 255;
-    const b = (value >> 8) & 255;
-    const c = (value >> 16) & 255;
-    const d = (value >> 24) & 255;
+    // Steam/Dota IPv4 values are host-order uint32: the first octet is the
+    // most significant byte (0x01020304 is 1.2.3.4).
+    const a = (value >>> 24) & 255;
+    const b = (value >>> 16) & 255;
+    const c = (value >>> 8) & 255;
+    const d = value & 255;
     return a + "." + b + "." + c + "." + d;
 }
