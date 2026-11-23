@@ -516,15 +516,32 @@ namespace SKYNET.Steamworks.Implementation
             "sdr-relays.ini"
             );
 
-            if (!File.Exists(iniPath))
+            // The server owns and serves the SDR POP list; a local file next to the
+            // executable is only a fallback for offline / server-less runs.
+            string iniText = GetServerSdrIni();
+            string iniSource = "server";
+
+            if (iniText == null)
             {
-                throw new FileNotFoundException(
-                    "SDR relay config not found",
-                    iniPath
-                );
+                if (!File.Exists(iniPath))
+                {
+                    throw new FileNotFoundException(
+                        "SDR relay config not found (server did not provide it and no local file exists)",
+                        iniPath
+                    );
+                }
+
+                iniText = File.ReadAllText(iniPath);
+                iniSource = "local file";
             }
 
-            var values = ParseIni(iniPath);
+            if (!string.Equals(LastSdrIniSource, iniSource, StringComparison.Ordinal))
+            {
+                LastSdrIniSource = iniSource;
+                SteamEmulator.Write("SteamHTTP", $"SDR relay config source: {iniSource}");
+            }
+
+            var values = ParseIni(iniText);
 
             uint revision = 1786739253;
 
@@ -717,10 +734,49 @@ namespace SKYNET.Steamworks.Implementation
             return sb.ToString();
         }
 
+        private static string LastSdrIniSource;
+        private static string CachedServerSdrIni;
+        private static DateTime CachedServerSdrIniUtc = DateTime.MinValue;
+        private static readonly object SdrIniLock = new object();
+
+        // Fetches the generated sdr-relays.ini from the server. A successful answer is
+        // reused for a minute and a failure is not retried for a few seconds, so the
+        // SteamNetworkingSockets config-fetch retry loop cannot stall the game thread.
+        private static string GetServerSdrIni()
+        {
+            lock (SdrIniLock)
+            {
+                var age = DateTime.UtcNow - CachedServerSdrIniUtc;
+                if (CachedServerSdrIni != null && age < TimeSpan.FromSeconds(60))
+                {
+                    return CachedServerSdrIni;
+                }
+
+                if (CachedServerSdrIni == null && age < TimeSpan.FromSeconds(5))
+                {
+                    return null;
+                }
+
+                string fetched = null;
+                try
+                {
+                    fetched = APIClient.GetSdrRelayConfig();
+                }
+                catch (Exception ex)
+                {
+                    SteamEmulator.Write("SteamHTTP", $"SDR relay config fetch from server failed: {ex.Message}");
+                }
+
+                CachedServerSdrIni = fetched ?? CachedServerSdrIni;
+                CachedServerSdrIniUtc = DateTime.UtcNow;
+                return fetched ?? CachedServerSdrIni;
+            }
+        }
+
         private static Dictionary<
             string,
             Dictionary<string, string>
-        > ParseIni(string path)
+        > ParseIni(string text)
         {
             var result =
                 new Dictionary<
@@ -730,7 +786,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Dictionary<string, string> current = null;
 
-            foreach (string rawLine in File.ReadAllLines(path))
+            foreach (string rawLine in text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 string line = rawLine.Trim();
 

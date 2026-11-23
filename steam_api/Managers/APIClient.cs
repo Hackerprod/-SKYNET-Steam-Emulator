@@ -1335,6 +1335,21 @@ namespace SKYNET.Managers
             });
         }
 
+        /// <summary>
+        /// Returns the server's generated sdr-relays.ini text, or null when the server API is
+        /// disabled/unreachable or has not generated it yet.
+        /// </summary>
+        public static string GetSdrRelayConfig()
+        {
+            if (!IsEnabled)
+            {
+                return null;
+            }
+
+            var dto = Send<SdrRelayConfigDto>(HttpMethod.Get, "api/networking/sdr/relays");
+            return string.IsNullOrWhiteSpace(dto?.Ini) ? null : dto.Ini;
+        }
+
         public static ApiGCExchangeResponse ExchangeGCMessage(uint appId, uint messageType, byte[] body, ulong sourceJobId, bool gameServerContext = false)
         {
             if (!IsEnabled)
@@ -3265,6 +3280,11 @@ namespace SKYNET.Managers
         {
             public ulong SteamId { get; set; }
             public uint AppId { get; set; }
+        }
+
+        public sealed class SdrRelayConfigDto
+        {
+            public string Ini { get; set; }
         }
 
         public sealed class SdrCertDto

@@ -26,6 +26,19 @@ public sealed class SdrRelayConfigService
         _iniPath = Path.Combine(dataRoot, "sdr-relays.ini");
     }
 
+    /// <summary>Returns the generated sdr-relays.ini content, or null when it has not been generated yet.</summary>
+    public string? ReadIni()
+    {
+        try
+        {
+            return File.Exists(_iniPath) ? File.ReadAllText(_iniPath) : null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
     public void Generate()
     {
         var relays = LoadRelays();

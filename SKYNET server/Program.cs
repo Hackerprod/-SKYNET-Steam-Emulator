@@ -726,6 +726,13 @@ api.MapGet("/networking/sdr/ca", (SdrCertificateService sdr) => Results.Ok(new A
     CaKeyId = sdr.CaKeyId
 }));
 
+// SDR POP list (sdr-relays.ini). Game processes build their GetSDRConfig answer from this,
+// so a dedicated server started by the supervisor does not need a hand-copied ini.
+api.MapGet("/networking/sdr/relays", (SKYNET_server.Services.Networking.SdrRelayConfigService config) =>
+    config.ReadIni() is { } ini
+        ? Results.Ok(new ApiSdrRelayConfig { Ini = ini })
+        : Results.NotFound());
+
 api.MapPost("/networking/sdr/cert", (HttpRequest request, ApiSdrCertRequest payload, SteamApiStateService state, SdrCertificateService sdr) =>
 {
     if (!state.TryResolveSessionIdentity(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.SteamId, payload.AppId, out var steamId, out var appId))

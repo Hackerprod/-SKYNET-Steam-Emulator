@@ -802,6 +802,12 @@ public sealed class ApiSdrCa
     public ulong CaKeyId { get; set; }
 }
 
+/// <summary>The generated sdr-relays.ini text, served to game processes so they do not need a local copy.</summary>
+public sealed class ApiSdrRelayConfig
+{
+    public string Ini { get; set; } = string.Empty;
+}
+
 public sealed class ApiSdrCertRequest
 {
     public ulong SteamId { get; set; }
