@@ -119,6 +119,14 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             // matchmaking is lenient during loading, so widen the window.
             arguments.Add("+cl_timeout");
             arguments.Add("120");
+            // The dedicated server drops a client whose messages use too much CPU in a burst
+            // ("DISCONNECTING. ProcessMessages has exhausted its CPU time budget", shown to the
+            // player as "Disconnected from Server: Overflow error"). That token bucket is anti-DoS
+            // protection tuned for Valve's hardware; right after hero pick the server loads the hero
+            // and its equipped cosmetics synchronously, which on a cold local machine takes over the
+            // default budget. Widen the burst so a legitimate local player is not dropped.
+            arguments.Add("+net_limit_sv_message_process_time_ms_drop_burst");
+            arguments.Add("10000");
             arguments.Add("+map");
             arguments.Add(map);
             arguments.Add("-console");

@@ -109,7 +109,7 @@ public sealed partial class SteamApiStateService
         _inventoryDropCooldowns = _state.InventoryDropCooldowns;
         _nextInventoryItemId = _state.Inventory.Keys.ToArray().DefaultIfEmpty(0UL).Max();
         NormalizeState();
-        DetectDotaClientVersionIfUnset();
+        SyncDotaClientVersionWithSteamInf();
         StartBackgroundFlusher();
         RequestStateFlush();
         EnsureDefaultAdminAccount();
@@ -187,3 +187,4 @@ public sealed partial class SteamApiStateService
         return Path.Combine(root.FullName, "Data");
     }
 }
+

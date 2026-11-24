@@ -520,35 +520,38 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private void DetectDotaClientVersionIfUnset()
+    /// <summary>
+    /// The installed game's steam.inf is the source of truth for the ClientVersion the GC announces in
+    /// CMsgClientWelcome: a stale stored value makes the client show "Game client is out of date" after
+    /// Dota updates. Run at startup; a value pinned through SetDotaClientVersion only lasts for the session.
+    /// </summary>
+    private void SyncDotaClientVersionWithSteamInf()
     {
         string dotaPath;
+        uint stored;
         lock (_sync)
         {
-            if (_state.DotaCosmetics.ClientVersion != 0 || string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
+            if (string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
             {
                 return;
             }
 
             dotaPath = _state.DotaCosmetics.DotaPath;
+            stored = _state.DotaCosmetics.ClientVersion;
         }
 
-        if (!DotaSteamInfReader.TryReadClientVersion(dotaPath, out var clientVersion, out var steamInfPath, out _))
+        if (!DotaSteamInfReader.TryReadClientVersion(dotaPath, out var clientVersion, out var steamInfPath, out _)
+            || clientVersion == stored)
         {
             return;
         }
 
         lock (_sync)
         {
-            if (_state.DotaCosmetics.ClientVersion != 0)
-            {
-                return;
-            }
-
             _state.DotaCosmetics.ClientVersion = clientVersion;
         }
 
-        _logger.LogInformation("Dota ClientVersion {ClientVersion} initialized from {SteamInfPath}", clientVersion, steamInfPath);
+        _logger.LogInformation("Dota ClientVersion {ClientVersion} read from {SteamInfPath} (was {Stored})", clientVersion, steamInfPath, stored);
     }
 
     private IReadOnlyList<ApiDotaMatch> GetDotaPublishedMatches()
@@ -1848,3 +1851,5 @@ public sealed partial class SteamApiStateService
         }
     }
 }
+
+
