@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace SKYNET.Cli;
+namespace SKYNET.Gc;
 
 internal static class DotaLocator
 {

@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace SKYNET.Cli.Ui;
+namespace SKYNET.Gc.Ui;
 
 /// <summary>
 /// Resolution-independent UI primitives for an agent. Coordinates are fractions (0..1) of the game

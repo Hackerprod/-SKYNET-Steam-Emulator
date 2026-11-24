@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
     The one SKYNET developer CLI (single project, two targets of the same sources):
-      net8.0-windows  skynet-cli.exe   the command line (capture, ui, analyze, ...)
-      net472          skynet-hook.dll  the EasyHook payload injected into dota2.exe by `capture`
+      net8.0-windows  skynet-gc.exe   the command line (capture, ui, analyze, ...)
+      net472          skynet-gc-hook.dll  the EasyHook payload injected into dota2.exe by `capture`
                                        (Capture\GcHookEntryPoint.cs); EasyHook loads managed payloads
                                        through the .NET Framework CLR, exactly like the launcher's
                                        own injector (SKYNET Steam Client\Services\DllInjector.cs).
@@ -15,18 +15,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>SKYNET.Cli</RootNamespace>
+    <RootNamespace>SKYNET.Gc</RootNamespace>
     <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
     <OutputType>Exe</OutputType>
-    <AssemblyName>skynet-cli</AssemblyName>
+    <AssemblyName>skynet-gc</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
     <OutputType>Exe</OutputType>
-    <AssemblyName>skynet-hook</AssemblyName>
+    <AssemblyName>skynet-gc-hook</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,7 +48,7 @@
   <Target Name="BuildAndCopyHook" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net8.0-windows'">
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="TargetFramework=net472;NoRestore=true;Configuration=$(Configuration)" />
     <ItemGroup>
-      <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.exe.config;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
+      <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-gc-hook.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-gc-hook.exe.config;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(HookFiles)" DestinationFolder="$(OutDir)hook" />
 </Target>

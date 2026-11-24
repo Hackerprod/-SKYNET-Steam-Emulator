@@ -1,8 +1,8 @@
-using SKYNET.Cli.Analyze;
-using SKYNET.Cli.Capture;
-using SKYNET.Cli.Ui;
+using SKYNET.Gc.Analyze;
+using SKYNET.Gc.Capture;
+using SKYNET.Gc.Ui;
 
-namespace SKYNET.Cli;
+namespace SKYNET.Gc;
 
 internal static class Program
 {
@@ -16,7 +16,7 @@ internal static class Program
             case "decode": return DecodeCommand.Run(rest);
             case "ui": return UiCommand.Run(rest);
         }
-        Console.WriteLine("skynet-cli");
+        Console.WriteLine("skynet-gc");
         Console.WriteLine("  capture start [--out DIR] [--args \"...\"] [--dota DIR]   launch Dota on real Steam with the GC hook");
         Console.WriteLine("  analyze <capture-dir|gc.jsonl> [out] [--after N --window N --baseline DIR]   decode the flow");
         Console.WriteLine("  decode <gcMessageType> <body.bin> [client|server]                            decode one GC body to JSON");

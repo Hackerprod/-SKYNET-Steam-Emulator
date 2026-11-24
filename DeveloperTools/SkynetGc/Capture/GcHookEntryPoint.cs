@@ -3,12 +3,12 @@ using System.Text;
 using System.Threading;
 using EasyHook;
 
-namespace SKYNET.Cli.Capture;
+namespace SKYNET.Gc.Capture;
 
 /// <summary>
 /// Injected into dota2.exe (real Steam). Hooks the three methods of the real
 /// ISteamGameCoordinator and appends every GC message, already decrypted by Steam, to a
-/// JSON-lines file. Nothing else Steam does is recorded, unlike NetHook.
+/// JSON-lines file. Nothing else Steam does is recorded.
 /// Record: {"t":ms,"dir":"send|recv","type":N,"proto":bool,"size":N,"b64":"..."}
 /// where b64 is the exact buffer handed to / received from the interface
 /// (8-byte or 18-byte GC header + protobuf body).
@@ -122,4 +122,5 @@ public sealed class GcHookEntryPoint : IEntryPoint
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetModuleHandle(string name);
     [DllImport("kernel32.dll", CharSet = CharSet.Ansi)] private static extern IntPtr GetProcAddress(IntPtr module, string name);
 }
+
 

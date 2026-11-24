@@ -157,7 +157,7 @@ The GC runtime supports:
 - persistent runtime state
 - async sends and game-server poll delivery
 - `/Admin/GcConsole` for live GC traces
-- real-GC capture, flow analysis and decoding through `DeveloperTools/SkynetCli`
+- real-GC capture, flow analysis and decoding through `DeveloperTools/SkynetGc`
 
 See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the TypeScript API and capture workflow.
 
@@ -405,7 +405,7 @@ When changing ABI, callback, auth, networking, lobby, or GC behavior, validate m
 - Keep game-specific GC logic in `SKYNET server/GC/<appid>` instead of embedding it in the DLL.
 - Keep memory patching disabled unless there is concrete evidence it is required. The current SDR CA flow is disk-patch oriented.
 - Avoid marking a game server as VAC secure unless the secure policy path is real.
-- Treat NetHook captures as evidence, not automatically trusted behavior.
+- Treat GC captures as evidence, not automatically trusted behavior.
 
 ## Contributing
 
@@ -441,4 +441,5 @@ This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
 Contributions are welcome. If you want to improve compatibility, documentation, diagnostics, UI, Game Coordinator behavior, or platform support, please open a focused pull request with a clear description of the change and the validation performed.
 
 If you want to help maintain the project financially, donation and sponsorship information is available on the maintainer profile: [github.com/Hackerprod](https://github.com/Hackerprod/).
+
 

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -6,15 +6,13 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using ProtoBuf;
 
-namespace SKYNET.Cli.Analyze;
+namespace SKYNET.Gc.Analyze;
 
 internal static class AnalyzeCommand
 {
     public static int Run(string[] args)
     {
         const uint ProtoMask = 0x80000000;
-        const uint ClientToGcOuterMessage = 5452;
-        const uint ClientFromGcOuterMessage = 5453;
         const ulong InvalidJobId = ulong.MaxValue;
 
         var repoRoot = FindRepoRoot(AppContext.BaseDirectory);
@@ -23,9 +21,13 @@ internal static class AnalyzeCommand
         var windowSize = (int)(TryReadUIntOption(optionArgs, "--window") ?? 10);
         var baselinePath = TryReadStringOption(optionArgs, "--baseline");
 
-        var inputPath = args.Length > 0
-            ? Path.GetFullPath(args[0])
-            : Path.GetFullPath(Path.Combine(repoRoot, ".tmp", "Lobby", "nethook"));
+        if (args.Length == 0)
+        {
+            Console.Error.WriteLine("Usage: skynet-gc analyze <capture-dir | gc.jsonl | decoded-json-dir> [out] [--after N --window N --baseline DIR]");
+            return 2;
+        }
+
+        var inputPath = Path.GetFullPath(args[0]);
         string? jsonlPath = null;
         if (File.Exists(inputPath) && inputPath.EndsWith(".jsonl", StringComparison.OrdinalIgnoreCase))
         {
@@ -54,12 +56,6 @@ internal static class AnalyzeCommand
             generatedAssembly,
             Path.GetFullPath(Path.Combine(repoRoot, "SKYNET server", "GC", "570", "contracts")));
 
-        var dumpFiles = Directory.EnumerateFiles(inputPath, "*.bin", SearchOption.AllDirectories)
-            .Where(path => Path.GetFileName(path).Contains("_5452_", StringComparison.OrdinalIgnoreCase) ||
-                           Path.GetFileName(path).Contains("_5453_", StringComparison.OrdinalIgnoreCase))
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
         var options = new JsonSerializerOptions
         {
             WriteIndented = true
@@ -67,11 +63,9 @@ internal static class AnalyzeCommand
 
         var records = jsonlPath != null
             ? DecodeCaptureLog(jsonlPath, outputPath, resolver, options)
-            : dumpFiles.Count > 0
-                ? DecodeDumpFiles(dumpFiles, inputPath, outputPath, resolver, options)
-                : LoadDecodedJsonFiles(inputPath);
+            : LoadDecodedJsonFiles(inputPath);
 
-        if (dumpFiles.Count == 0 && jsonlPath == null)
+        if (jsonlPath == null)
         {
             foreach (var record in records)
             {
@@ -125,15 +119,15 @@ internal static class AnalyzeCommand
 
         File.WriteAllText(Path.Combine(outputPath, "summary.json"), JsonSerializer.Serialize(summary, options), Encoding.UTF8);
         WriteForensicOutputs(outputPath, records, options, windowSize, queryAfter, baselinePath);
-        Console.WriteLine(dumpFiles.Count > 0
-            ? $"Decoded {records.Count} GameCoordinator wrapper dumps."
+        Console.WriteLine(jsonlPath != null
+            ? $"Decoded {records.Count} GameCoordinator messages from {Path.GetFileName(jsonlPath)}."
             : $"Loaded {records.Count} decoded GameCoordinator JSON records.");
         Console.WriteLine($"JSON output: {outputPath}");
         Console.WriteLine($"Decoded payloads: {summary.decodedPayloads}; undecoded payloads: {summary.undecodedPayloads}");
         Console.WriteLine("Forensic outputs: timeline.json, message-index.json, jobs.json, conversation-flows.json, transitions.json, after-windows.json, protocol-graph.json, pattern-summary.json, entities.json, graph-signature.json, graph-diff.json, flow-report.html, forensic-report.md");
         return summary.undecodedPayloads == records.Count ? 1 : 0;
 
-        // Records written by `skynet-cli capture start` (Capture\GcHookEntryPoint.cs): one JSON object per
+        // Records written by `skynet-gc capture start` (Capture\GcHookEntryPoint.cs): one JSON object per
         // line holding the exact ISteamGameCoordinator buffer (GC header + protobuf body).
         static List<DecodedGcRecord> DecodeCaptureLog(
             string logPath,
@@ -205,30 +199,6 @@ internal static class AnalyzeCommand
 
                 records.Add(record);
                 File.WriteAllText(Path.Combine(outputPath, record.File), JsonSerializer.Serialize(record, options), Encoding.UTF8);
-            }
-
-            return records;
-        }
-
-        static List<DecodedGcRecord> DecodeDumpFiles(
-            IReadOnlyList<string> dumpFiles,
-            string inputPath,
-            string outputPath,
-            GcTypeResolver resolver,
-            JsonSerializerOptions options)
-        {
-            var records = new List<DecodedGcRecord>();
-            foreach (var file in dumpFiles)
-            {
-                var record = DecodeFile(file, inputPath, resolver);
-                records.Add(record);
-
-                var safeName = Path.GetRelativePath(inputPath, file)
-                    .Replace(Path.DirectorySeparatorChar, '_')
-                    .Replace(Path.AltDirectorySeparatorChar, '_');
-                safeName = Path.ChangeExtension(safeName, ".json");
-                var destination = Path.Combine(outputPath, safeName);
-                File.WriteAllText(destination, JsonSerializer.Serialize(record, options), Encoding.UTF8);
             }
 
             return records;
@@ -333,109 +303,6 @@ internal static class AnalyzeCommand
             throw new InvalidOperationException($"Could not locate SKYNET repo root from {start}");
         }
 
-        static DecodedGcRecord DecodeFile(string file, string root, GcTypeResolver resolver)
-        {
-            var bytes = File.ReadAllBytes(file);
-            var record = new DecodedGcRecord
-            {
-                File = Path.GetRelativePath(root, file),
-                SourceFile = file,
-                Size = bytes.Length,
-                Sequence = TryReadSequence(file),
-                Direction = Path.GetFileName(file).Contains("_out_", StringComparison.OrdinalIgnoreCase) ? "client" : "server",
-                PayloadBase64 = Convert.ToBase64String(bytes)
-            };
-
-            try
-            {
-                if (bytes.Length < 8)
-                {
-                    record.DecodeError = "Steam message is too short to contain a protobuf header.";
-                    return record;
-                }
-
-                var rawOuter = BitConverter.ToUInt32(bytes, 0);
-                record.OuterRawMessageType = rawOuter;
-                record.OuterMessageType = rawOuter & ~ProtoMask;
-                record.OuterProtobuf = (rawOuter & ProtoMask) != 0;
-                if (!record.OuterProtobuf)
-                {
-                    record.DecodeError = $"Outer Steam message {record.OuterMessageType} is not protobuf encoded.";
-                    return record;
-                }
-
-                if (record.OuterMessageType is not (ClientToGcOuterMessage or ClientFromGcOuterMessage))
-                {
-                    record.DecodeError = $"Outer Steam message {record.OuterMessageType} is not GameCoordinator traffic.";
-                    return record;
-                }
-
-                var headerLength = checked((int)BitConverter.ToUInt32(bytes, 4));
-                record.HeaderLength = headerLength;
-                if (headerLength < 0 || 8 + headerLength > bytes.Length)
-                {
-                    record.DecodeError = $"Invalid Steam protobuf header length {headerLength}.";
-                    return record;
-                }
-
-                var headerBytes = bytes.AsSpan(8, headerLength).ToArray();
-                using (var headerStream = new MemoryStream(headerBytes))
-                {
-                    var header = Serializer.Deserialize<CMsgProtoBufHeader>(headerStream);
-                    record.ClientSteamId = header.ShouldSerializeClientSteamId() ? header.ClientSteamId : null;
-                    record.SourceAppId = header.ShouldSerializeSourceAppId() ? header.SourceAppId : null;
-                    record.SourceJobId = NormalizeJobId(header.ShouldSerializeJobIdSource() ? header.JobIdSource : null);
-                    record.TargetJobId = NormalizeJobId(header.ShouldSerializeJobIdTarget() ? header.JobIdTarget : null);
-                    record.Header = ProtoJson.ToJsonObject(header, resolver);
-                }
-
-                var bodyBytes = bytes.AsSpan(8 + headerLength).ToArray();
-                record.EnvelopeLength = bodyBytes.Length;
-                using var envelopeStream = new MemoryStream(bodyBytes);
-                var envelope = Serializer.Deserialize<SteamGcEnvelope>(envelopeStream);
-                record.AppId = envelope.Appid;
-                var gcPacket = DecodeGcPacket(envelope.Msgtype, envelope.Payload ?? Array.Empty<byte>(), resolver);
-                record.GcRawMessageType = gcPacket.RawMessageType;
-                record.GcMessageType = gcPacket.MessageType;
-                record.GcProtobuf = gcPacket.Protobuf;
-                record.GcHeaderLength = gcPacket.HeaderLength;
-                record.GcHeader = gcPacket.Header;
-                record.PayloadLength = gcPacket.Body.Length;
-                record.PayloadBase64 = Convert.ToBase64String(gcPacket.Body);
-                record.GcPacketLength = envelope.Payload?.Length ?? 0;
-                record.GcPacketBase64 = Convert.ToBase64String(envelope.Payload ?? Array.Empty<byte>());
-                record.SourceJobId ??= gcPacket.HeaderSourceJobId;
-                record.TargetJobId ??= gcPacket.HeaderTargetJobId;
-                record.GcMessageName = resolver.GetMessageName(record.GcMessageType);
-                record.ProtoType = resolver.ResolveProtoType(record.GcMessageType, record.Direction)?.Name;
-
-                if (gcPacket.Body.Length == 0)
-                {
-                    record.Decoded = new Dictionary<string, object?> { ["empty"] = true };
-                    record.RoundtripMatches = true;
-                    return record;
-                }
-
-                var protoType = resolver.ResolveProtoType(record.GcMessageType, record.Direction);
-                if (protoType == null)
-                {
-                    record.DecodeError = $"No protobuf contract mapped for GC message {record.GcMessageType} ({record.GcMessageName}).";
-                    return record;
-                }
-
-                using var payloadStream = new MemoryStream(gcPacket.Body);
-                var decoded = Serializer.NonGeneric.Deserialize(protoType, payloadStream);
-                record.Decoded = ProtoJson.ToJsonObject(decoded, resolver);
-                record.RoundtripMatches = RoundtripMatches(protoType, decoded, gcPacket.Body);
-            }
-            catch (Exception ex)
-            {
-                record.DecodeError = ex.GetType().Name + ": " + ex.Message;
-            }
-
-            return record;
-        }
-
         static DecodedGcPacket DecodeGcPacket(uint envelopeMessageType, byte[] payload, GcTypeResolver resolver)
         {
             if (payload.Length < 8)
@@ -511,12 +378,6 @@ internal static class AnalyzeCommand
         static ulong? NormalizeJobId(ulong? value)
         {
             return value is null or InvalidJobId ? null : value;
-        }
-
-        static int TryReadSequence(string file)
-        {
-            var match = Regex.Match(Path.GetFileName(file), @"^(\d+)_", RegexOptions.CultureInvariant);
-            return match.Success && int.TryParse(match.Groups[1].Value, out var sequence) ? sequence : -1;
         }
 
         static bool RoundtripMatches(Type type, object value, byte[] original)
@@ -1650,7 +1511,7 @@ internal static class AnalyzeCommand
         {
             var unmatched = jobs.Where(job => job.ClientRequests.Count > 0 && job.ServerResponses.Count == 0).ToList();
             var report = new StringBuilder();
-            report.AppendLine("# NetHook GC Forensic Report");
+            report.AppendLine("# GC Flow Report");
             report.AppendLine();
             report.AppendLine($"Generated UTC: `{DateTime.UtcNow:O}`");
             report.AppendLine($"Records: `{ordered.Count}`");
@@ -1911,7 +1772,7 @@ internal static class AnalyzeCommand
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>NetHook GC Communication Flow</title>
+        <title>GC Communication Flow</title>
         <style>
         :root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--muted:#8b949e;--text:#e6edf3;--client:#3b82f6;--server:#10b981;--so:#f59e0b;--job:#a855f7;--imm:#94a3b8;--entity:#ec4899;}
         *{box-sizing:border-box}
@@ -1948,7 +1809,7 @@ internal static class AnalyzeCommand
         </head>
         <body>
         <header>
-        <h1>NetHook GC Communication Flow</h1>
+        <h1>GC Communication Flow</h1>
         <div class="stats" id="stats"></div>
         </header>
         <div class="layout">
@@ -2046,9 +1907,9 @@ internal static class AnalyzeCommand
             const nm=(en.names||[]).join('/');
             const seqs=en.occ.map(o=>o.seq).join(', ');
             return '<div class="entRow" data-i="'+ix+'" style="padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer">'+
-              '<code>'+esc(en.value.length>22?en.value.slice(0,22)+'…':en.value)+'</code> '+
+              '<code>'+esc(en.value.length>22?en.value.slice(0,22)+'â€¦':en.value)+'</code> '+
               '<span class="muted">'+esc(nm)+'</span><br>'+
-              '<span class="muted" style="font-size:11px">'+en.count+' msgs &middot; span '+(en.last-en.first)+' &middot; seq '+esc(seqs.length>60?seqs.slice(0,60)+'…':seqs)+'</span></div>';
+              '<span class="muted" style="font-size:11px">'+en.count+' msgs &middot; span '+(en.last-en.first)+' &middot; seq '+esc(seqs.length>60?seqs.slice(0,60)+'â€¦':seqs)+'</span></div>';
           }).join('');
           eb.querySelectorAll('.entRow').forEach(el=>{ el.addEventListener('click',()=>{ const en=entities[+el.dataset.i]; const first=en.occ[0]; const m=rows.find(r=>r.seq===first.seq); if(m){ selected=m; linkedIds=linkedIdsFor(m); renderDetail(m); scrollToRow(m); draw(); } }); });
         }
@@ -2171,12 +2032,12 @@ internal static class AnalyzeCommand
           if(soMut.length) it+=' It '+(soMut.some(x=>x.e.kind==='creates_so')?'creates/':'')+'updates '+soMut.length+' SharedObject(s): '+soMut.map(x=>'<b>'+esc(x.so.label||('type '+x.so.typeId))+'</b>').join(', ')+'.';
           h+='<div class="interp" style="margin:10px 0">'+it+'</div>';
           if(soMut.length) h+='<h2>SO cache effects</h2><ul class="mini">'+soMut.map(x=>'<li>'+(x.e.kind==='creates_so'?'create':'update')+' &middot; '+esc(x.so.label||('type '+x.so.typeId))+' &middot; owner '+(x.so.ownerType==null?'?':x.so.ownerType)+(x.so.ownerId?(' ('+esc(x.so.ownerId)+')'):'')+'</li>').join('')+'</ul>';
-          if(m.kv&&m.kv.length) h+='<h2>Key IDs</h2><div>'+m.kv.map(k=>'<span class=chip title="'+esc(k.path)+'">'+esc(k.name)+'=<b>'+esc(k.value.length>18?k.value.slice(0,18)+'…':k.value)+'</b></span>').join('')+'</div>';
+          if(m.kv&&m.kv.length) h+='<h2>Key IDs</h2><div>'+m.kv.map(k=>'<span class=chip title="'+esc(k.path)+'">'+esc(k.name)+'=<b>'+esc(k.value.length>18?k.value.slice(0,18)+'â€¦':k.value)+'</b></span>').join('')+'</div>';
           // Value correlation: every other message that carries one of this message's ids.
           const corr=[];
           for(const k of (m.kv||[])){ for(const o of (valueMap.get(k.value)||[])){ if(o.id===m.id||weakPair(k,o)) continue; corr.push({o,k}); } }
           if(corr.length){ corr.sort((a,b)=>a.o.seq-b.o.seq);
-            h+='<h2>Same id in other messages</h2><ul class="mini">'+corr.slice(0,24).map(c=>{ const d=c.o.seq-m.seq; const rel=d===0?'same':(d>0?('+'+d+' later'):(d+' earlier')); return '<li>#'+c.o.seq+' <b>'+esc(byId.get(c.o.id)?(byId.get(c.o.id).name||('msg '+byId.get(c.o.id).type)):'?')+'</b> <span class=muted>('+rel+' seq)</span><br><span class=muted>'+esc(c.k.name)+'='+esc(c.k.value.length>18?c.k.value.slice(0,18)+'…':c.k.value)+' &rarr; '+esc(c.o.field)+'</span></li>'; }).join('')+'</ul>'; }
+            h+='<h2>Same id in other messages</h2><ul class="mini">'+corr.slice(0,24).map(c=>{ const d=c.o.seq-m.seq; const rel=d===0?'same':(d>0?('+'+d+' later'):(d+' earlier')); return '<li>#'+c.o.seq+' <b>'+esc(byId.get(c.o.id)?(byId.get(c.o.id).name||('msg '+byId.get(c.o.id).type)):'?')+'</b> <span class=muted>('+rel+' seq)</span><br><span class=muted>'+esc(c.k.name)+'='+esc(c.k.value.length>18?c.k.value.slice(0,18)+'â€¦':c.k.value)+' &rarr; '+esc(c.o.field)+'</span></li>'; }).join('')+'</ul>'; }
           if(m.sum&&m.sum.length) h+='<h2>Contains (payload digest)</h2><div>'+m.sum.slice(0,16).map(f=>'<span class=chip>'+esc(f)+'</span>').join('')+'</div>';
           if(m.hints&&m.hints.length) h+='<h2>Entity hints</h2><div>'+m.hints.slice(0,20).map(x=>'<span class=chip>'+esc(x)+'</span>').join('')+'</div>';
           if(ent.length) h+='<h2>Same entity</h2><div class=interp>'+ent.slice(0,12).map(r=>'#'+r.seq+' '+esc(r.name||('msg '+r.type))).join('<br>')+'</div>';
@@ -2201,19 +2062,6 @@ internal static class AnalyzeCommand
     }
 }
 
-[ProtoContract]
-public sealed class SteamGcEnvelope
-{
-    [ProtoMember(1, Name = "appid")]
-    public uint Appid { get; set; }
-
-    [ProtoMember(2, Name = "msgtype")]
-    public uint Msgtype { get; set; }
-
-    [ProtoMember(3, Name = "payload")]
-    public byte[] Payload { get; set; } = Array.Empty<byte>();
-}
-
 public sealed class DecodedGcRecord
 {
     public int Sequence { get; set; }
@@ -2221,16 +2069,9 @@ public sealed class DecodedGcRecord
     public string SourceFile { get; set; } = string.Empty;
     public string Direction { get; set; } = string.Empty;
     public int Size { get; set; }
-    public uint OuterRawMessageType { get; set; }
-    public uint OuterMessageType { get; set; }
-    public bool OuterProtobuf { get; set; }
-    public int HeaderLength { get; set; }
-    public int EnvelopeLength { get; set; }
     public ulong? ClientSteamId { get; set; }
-    public uint? SourceAppId { get; set; }
     public ulong? SourceJobId { get; set; }
     public ulong? TargetJobId { get; set; }
-    public object? Header { get; set; }
     public uint AppId { get; set; }
     public uint GcRawMessageType { get; set; }
     public uint GcMessageType { get; set; }

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ProtoBuf;
 
-namespace SKYNET.Cli.Analyze;
+namespace SKYNET.Gc.Analyze;
 
 /// <summary>decode TYPE FILE [client|server]: decodes one GC message body (protobuf) to JSON.</summary>
 internal static class DecodeCommand
@@ -10,7 +10,7 @@ internal static class DecodeCommand
     {
         if (args.Length < 2 || !uint.TryParse(args[0], out var messageType))
         {
-            Console.Error.WriteLine("Usage: skynet-cli decode <gcMessageType> <body.bin> [client|server]");
+            Console.Error.WriteLine("Usage: skynet-gc decode <gcMessageType> <body.bin> [client|server]");
             return 2;
         }
 

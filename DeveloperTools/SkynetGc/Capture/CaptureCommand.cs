@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using EasyHook;
 
-namespace SKYNET.Cli.Capture;
+namespace SKYNET.Gc.Capture;
 
 /// <summary>
 /// capture start [--out dir] [--args "extra dota args"]
