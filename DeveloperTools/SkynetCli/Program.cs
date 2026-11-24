@@ -11,7 +11,7 @@ internal static class Program
         var rest = args.Skip(1).ToArray();
         switch (args.Length > 0 ? args[0] : "")
         {
-            case "capture" when rest.Length > 0 && rest[0] == "start": return CaptureCommand.Run(rest.Skip(1).ToArray());
+            case "capture" when rest.Length > 0 && rest[0] == "start": return CaptureProxy.Run(rest.Skip(1).ToArray());
             case "analyze": return AnalyzeCommand.Run(rest);
             case "decode": return DecodeCommand.Run(rest);
             case "ui": return UiCommand.Run(rest);
@@ -24,5 +24,6 @@ internal static class Program
         return 1;
     }
 }
+
 
 

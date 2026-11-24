@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +17,7 @@ internal static class AnalyzeCommand
         const uint ClientFromGcOuterMessage = 5453;
         const ulong InvalidJobId = ulong.MaxValue;
 
-        var repoRoot = FindRepoRoot(Directory.GetCurrentDirectory());
+        var repoRoot = FindRepoRoot(AppContext.BaseDirectory);
         var optionArgs = args.Skip(2).ToArray();
         var queryAfter = TryReadUIntOption(optionArgs, "--after");
         var windowSize = (int)(TryReadUIntOption(optionArgs, "--window") ?? 10);
@@ -2046,9 +2046,9 @@ internal static class AnalyzeCommand
             const nm=(en.names||[]).join('/');
             const seqs=en.occ.map(o=>o.seq).join(', ');
             return '<div class="entRow" data-i="'+ix+'" style="padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer">'+
-              '<code>'+esc(en.value.length>22?en.value.slice(0,22)+'â€¦':en.value)+'</code> '+
+              '<code>'+esc(en.value.length>22?en.value.slice(0,22)+'…':en.value)+'</code> '+
               '<span class="muted">'+esc(nm)+'</span><br>'+
-              '<span class="muted" style="font-size:11px">'+en.count+' msgs &middot; span '+(en.last-en.first)+' &middot; seq '+esc(seqs.length>60?seqs.slice(0,60)+'â€¦':seqs)+'</span></div>';
+              '<span class="muted" style="font-size:11px">'+en.count+' msgs &middot; span '+(en.last-en.first)+' &middot; seq '+esc(seqs.length>60?seqs.slice(0,60)+'…':seqs)+'</span></div>';
           }).join('');
           eb.querySelectorAll('.entRow').forEach(el=>{ el.addEventListener('click',()=>{ const en=entities[+el.dataset.i]; const first=en.occ[0]; const m=rows.find(r=>r.seq===first.seq); if(m){ selected=m; linkedIds=linkedIdsFor(m); renderDetail(m); scrollToRow(m); draw(); } }); });
         }
@@ -2171,12 +2171,12 @@ internal static class AnalyzeCommand
           if(soMut.length) it+=' It '+(soMut.some(x=>x.e.kind==='creates_so')?'creates/':'')+'updates '+soMut.length+' SharedObject(s): '+soMut.map(x=>'<b>'+esc(x.so.label||('type '+x.so.typeId))+'</b>').join(', ')+'.';
           h+='<div class="interp" style="margin:10px 0">'+it+'</div>';
           if(soMut.length) h+='<h2>SO cache effects</h2><ul class="mini">'+soMut.map(x=>'<li>'+(x.e.kind==='creates_so'?'create':'update')+' &middot; '+esc(x.so.label||('type '+x.so.typeId))+' &middot; owner '+(x.so.ownerType==null?'?':x.so.ownerType)+(x.so.ownerId?(' ('+esc(x.so.ownerId)+')'):'')+'</li>').join('')+'</ul>';
-          if(m.kv&&m.kv.length) h+='<h2>Key IDs</h2><div>'+m.kv.map(k=>'<span class=chip title="'+esc(k.path)+'">'+esc(k.name)+'=<b>'+esc(k.value.length>18?k.value.slice(0,18)+'â€¦':k.value)+'</b></span>').join('')+'</div>';
+          if(m.kv&&m.kv.length) h+='<h2>Key IDs</h2><div>'+m.kv.map(k=>'<span class=chip title="'+esc(k.path)+'">'+esc(k.name)+'=<b>'+esc(k.value.length>18?k.value.slice(0,18)+'…':k.value)+'</b></span>').join('')+'</div>';
           // Value correlation: every other message that carries one of this message's ids.
           const corr=[];
           for(const k of (m.kv||[])){ for(const o of (valueMap.get(k.value)||[])){ if(o.id===m.id||weakPair(k,o)) continue; corr.push({o,k}); } }
           if(corr.length){ corr.sort((a,b)=>a.o.seq-b.o.seq);
-            h+='<h2>Same id in other messages</h2><ul class="mini">'+corr.slice(0,24).map(c=>{ const d=c.o.seq-m.seq; const rel=d===0?'same':(d>0?('+'+d+' later'):(d+' earlier')); return '<li>#'+c.o.seq+' <b>'+esc(byId.get(c.o.id)?(byId.get(c.o.id).name||('msg '+byId.get(c.o.id).type)):'?')+'</b> <span class=muted>('+rel+' seq)</span><br><span class=muted>'+esc(c.k.name)+'='+esc(c.k.value.length>18?c.k.value.slice(0,18)+'â€¦':c.k.value)+' &rarr; '+esc(c.o.field)+'</span></li>'; }).join('')+'</ul>'; }
+            h+='<h2>Same id in other messages</h2><ul class="mini">'+corr.slice(0,24).map(c=>{ const d=c.o.seq-m.seq; const rel=d===0?'same':(d>0?('+'+d+' later'):(d+' earlier')); return '<li>#'+c.o.seq+' <b>'+esc(byId.get(c.o.id)?(byId.get(c.o.id).name||('msg '+byId.get(c.o.id).type)):'?')+'</b> <span class=muted>('+rel+' seq)</span><br><span class=muted>'+esc(c.k.name)+'='+esc(c.k.value.length>18?c.k.value.slice(0,18)+'…':c.k.value)+' &rarr; '+esc(c.o.field)+'</span></li>'; }).join('')+'</ul>'; }
           if(m.sum&&m.sum.length) h+='<h2>Contains (payload digest)</h2><div>'+m.sum.slice(0,16).map(f=>'<span class=chip>'+esc(f)+'</span>').join('')+'</div>';
           if(m.hints&&m.hints.length) h+='<h2>Entity hints</h2><div>'+m.hints.slice(0,20).map(x=>'<span class=chip>'+esc(x)+'</span>').join('')+'</div>';
           if(ent.length) h+='<h2>Same entity</h2><div class=interp>'+ent.slice(0,12).map(r=>'#'+r.seq+' '+esc(r.name||('msg '+r.type))).join('<br>')+'</div>';
@@ -2997,6 +2997,7 @@ public static class ProtoJson
             : protoName;
     }
 }
+
 
 
 

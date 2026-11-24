@@ -25,7 +25,7 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AssemblyName>skynet-hook</AssemblyName>
   </PropertyGroup>
 
@@ -37,25 +37,22 @@
     <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <ProjectReference Include="..\..\SKYNET server\SKYNET server.csproj" />
-    <Compile Remove="Capture\GcHookEntryPoint.cs" />
+    <Compile Remove="Capture\GcHookEntryPoint.cs;Capture\HookMain.cs;Capture\CaptureCommand.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Compile Remove="**\*.cs" />
-    <Compile Include="Capture\GcHookEntryPoint.cs" />
+    <Compile Include="Capture\GcHookEntryPoint.cs;Capture\HookMain.cs;Capture\CaptureCommand.cs;DotaLocator.cs" />
   </ItemGroup>
 
   <Target Name="BuildAndCopyHook" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net8.0-windows'">
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="TargetFramework=net472;NoRestore=true;Configuration=$(Configuration)" />
     <ItemGroup>
-      <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook.dll" />
+      <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.exe.config;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(HookFiles)" DestinationFolder="$(OutDir)hook" />
-    <ItemGroup>
-      <EasyHookNative Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
-    </ItemGroup>
-    <Copy SourceFiles="@(EasyHookNative)" DestinationFolder="$(OutDir)" />
-  </Target>
+</Target>
 </Project>
+
 
 
