@@ -19,6 +19,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SKYNETEMU</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -127,9 +128,7 @@
         <header class="h-16 bg-skynet-black border-b border-skynet-border flex items-center justify-between px-4 md:px-8 z-20 shrink-0">
             <div class="flex items-center md:space-x-12">
                 <a asp-page="/Index" class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
-                        <i class="fas fa-microchip text-skynet-black text-lg"></i>
-                    </div>
+                    <img src="~/img/skynet-logo.png" alt="SKYNET" class="w-8 h-8 object-contain" />
                     <span class="font-bold tracking-tighter text-lg">SKYNET<span class="text-skynet-accent">EMU</span></span>
                 </a>
                 <nav class="hidden md:flex space-x-1 h-16">
@@ -257,3 +256,5 @@
     </div>
 </body>
 </html>
+
+

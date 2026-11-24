@@ -1,4 +1,4 @@
-<Window x:Class="SKYNET.Client.Views.OptionsWindow"
+<Window x:Class="SKYNET.Client.Views.OptionsWindow" Icon="pack://application:,,,/Assets/skynet.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Options" Height="Auto" Width="480" SizeToContent="Height"
@@ -78,3 +78,4 @@
         </StackPanel>
     </Border>
 </Window>
+

@@ -1,7 +1,7 @@
 <Window x:Class="SKYNET.Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SKYNET Steam Client" Height="740" Width="1120"
+        Title="SKYNET Steam Client" Icon="pack://application:,,,/Assets/skynet.ico" Height="740" Width="1120"
         WindowStyle="None" ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         Background="{StaticResource SkynetBlack}" Foreground="{StaticResource SkynetText}"
         FontFamily="{StaticResource SkynetFont}" TextOptions.TextFormattingMode="Ideal"
@@ -40,10 +40,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="28" Height="28" CornerRadius="6" Background="White">
-                            <TextBlock Text="&#xf2db;" FontFamily="Segoe UI Symbol" Foreground="{StaticResource SkynetBlack}"
-                                       FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
+                        <Image Source="pack://application:,,,/Assets/skynet.png" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
                         <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16" FontWeight="Bold">
                             <Run Text="SKYNET" Foreground="{StaticResource SkynetText}" /><Run Text="EMU" Foreground="{StaticResource SkynetAccent}" />
                         </TextBlock>
@@ -378,3 +375,5 @@
             </Grid>
         </Grid>
 </Window>
+
+

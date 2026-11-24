@@ -1,4 +1,4 @@
-<Window x:Class="SKYNET.Client.Views.GameSettingsWindow"
+<Window x:Class="SKYNET.Client.Views.GameSettingsWindow" Icon="pack://application:,,,/Assets/skynet.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Game settings" Height="640" Width="560"
@@ -104,3 +104,4 @@
         </Grid>
     </Border>
 </Window>
+

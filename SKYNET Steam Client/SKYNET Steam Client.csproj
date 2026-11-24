@@ -10,6 +10,7 @@
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
     <AssemblyName>SKYNET Steam Client</AssemblyName>
+    <ApplicationIcon>Assets\skynet.ico</ApplicationIcon>
     <RootNamespace>SKYNET.Client</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -30,6 +31,11 @@
 
   <ItemGroup>
     <Using Include="System.IO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\skynet.ico" />
+    <Resource Include="Assets\skynet.png" />
   </ItemGroup>
 
   <!-- SKYNET Hook Bootstrap is its own SDK-style project nested under this one
@@ -84,3 +90,5 @@
   </ItemGroup>
 
 </Project>
+
+
