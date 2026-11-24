@@ -12,6 +12,83 @@ namespace SKYNET.Client.Services;
 /// <c>-steampath</c>) that Steam sets when it starts a game. Without it the Steam list
 /// stays empty, the check never reaches its final stage and the client refuses to join
 /// a server with "Valve Anti-Cheat was unable to verify that your machine is secure".
+///
+/// ===========================================================================
+/// VAC POPUP POST-MORTEM  (keep this: the symptom is easy to misdiagnose)
+/// ===========================================================================
+///
+/// SYMPTOM
+///   Creating a Dota lobby on a regional server (e.g. US West) and pressing START GAME
+///   showed "Valve Anti-Cheat (VAC) - Valve Anti-Cheat was unable to verify that your
+///   machine is secure". The dedicated server started and registered with the GC, but the
+///   client never opened a connection to it, so the dedicated sat in
+///   "Player 0 has connection state 1" for 180 s and then quit (PlayerFailedToConnect).
+///   The same lobby with "Local Host" (lan=true) worked, because the client then uses its
+///   own listen server and never takes the code path that shows the popup.
+///
+/// WHAT IT WAS NOT (each of these was investigated and ruled out)
+///   - Not the GC: the popup text (#DOTA_VAC_Warning_Header_Solo) is built locally by
+///     client.dll; the GC never sends CMsgDOTAPopup / VAC_NOT_VERIFIED / GCToClientVACReminder.
+///   - Not -insecure: the engine flags and the check below are identical with and without it
+///     (the launcher used to force -insecure, which only hid nothing). Do NOT add it back.
+///   - Not a steam_api call: nothing in the emulated Steam API is consulted. dota2.exe reads
+///     the SteamPath environment variable (or -steampath) directly at startup.
+///   - Not the network: with a direct "+connect ip:port" the handshake, auth and match work;
+///     the SDR/cert problem described in SteamHTTP.BuildSdrConfigJson was a separate bug.
+///
+/// ROOT CAUSE
+///   client.dll calls the pre-join check client+0x22E82A0 from FINDMATCH_JOIN
+///   (client+0x232F560, call at +0x232F611) when a lobby with a remote server goes to
+///   SERVERSETUP. That check shows the VAC popup and aborts the join when
+///   BSecureAllowed() is false. client.dll resolves BSecureAllowed (plus
+///   GetTotalFilesLoaded / CountFilesNeedTrustCheck / CountFilesCompletedTrustCheck /
+///   CountItemsToReport) with GetProcAddress from the main module: they are exports of
+///   dota2.exe itself. In dota2.exe, BSecureAllowed returns true only if the global trust
+///   object (dota2.exe+0x3D000) holds   [+0x24]==1, [+0x28]==1, [+0x2C] in {1,2},
+///   [+0x30] in {1,2}, [+0x44]==9.   [+0x44] is a stage counter written by the
+///   initialiser at dota2.exe+0x5050/+0x5644 (1..9; 9 = it hooked NtOpenFile,
+///   LoadLibraryExW and PeekMessageW and installed its exception handler).
+///   [+0x24..+0x30] are the verification status of four file lists:
+///     obj+0xC0  the game's own manifest (dota.signatures, 98 files)      -> was OK
+///     obj+0xC8  &lt;SteamPath&gt;\steam.signatures (Steam client files)       -> WAS EMPTY (status 2)
+///     obj+0xD0  system files (system.signatures, %WINDIR%)             -> OK
+///     obj+0xD8  foreign.signatures                                       -> OK
+///   Our launcher did not define SteamPath, so list obj+0xC8 stayed empty, [+0x28] was 2
+///   instead of 1 and the stage counter stopped at 1. Result: BSecureAllowed()==false for
+///   every launch, the popup, and no connection.
+///
+/// FIX (this class)
+///   Define SteamPath for the launched process only (it inherits the launcher environment):
+///   the real Steam directory from the registry, or - on a machine without a Steam client -
+///   a launcher-owned folder holding a minimal steam.signatures (see EnsureStandaloneSteamDirectory).
+///   Verified results of the trust object after the fix: +0x28==1, +0x44==9, 37 entries in
+///   list B with real Steam, 1 entry with the standalone folder.
+///
+/// WHAT THE CHECK ACCEPTS (measured, not assumed)
+///   SteamPath -> real Steam dir ................ passes
+///   SteamPath -> dir with only steam.signatures  passes (the listed DLLs need not exist)
+///   SteamPath -> dir with a 1-line manifest ..... passes
+///   SteamPath -> dir with a 0-byte manifest ..... FAILS (list stays empty)
+///   SteamPath -> empty dir / unset ............... FAILS
+///
+/// HOW TO RE-VERIFY IF THE POPUP EVER COMES BACK
+///   1. Launch the client through the launcher (never the exe directly) and read, in
+///      dota2.exe, the dwords at module base + 0x3D000 + {0x24,0x28,0x2C,0x30,0x44}.
+///      Healthy values: 1, 1, 1|2, 1|2, 9. If +0x44 is not 9 the initialiser stopped
+///      early: 1 = the environment/list check failed (this bug), 2..8 = hooking a system
+///      API failed (look for another injector/overlay hooking NtOpenFile, LoadLibraryExW
+///      or PeekMessageW, or a missing ntdll/kernelbase/user32 export).
+///   2. If +0x28 != 1, check that SteamPath is set in the game process environment and
+///      that the folder it names contains a non-empty steam.signatures.
+///   3. A game update can change this: re-check that BSecureAllowed is still exported by
+///      dota2.exe and that client.dll still resolves it. Offsets above are for build 6989
+///      (dota\steam.inf ClientVersion/ServerVersion 6989); the logic, not the addresses,
+///      is what to look for.
+///
+/// RELATED
+///   SKYNET_IGNORE_INSTALLED_STEAM=1 forces the standalone folder (used to test a Steam-less
+///   machine). The dedicated server started by DotaDedicatedServerSupervisor does not need
+///   SteamPath: the popup only exists on the client join path.
 /// </summary>
 internal static class SteamEnvironment
 {
