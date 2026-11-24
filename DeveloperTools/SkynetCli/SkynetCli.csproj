@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The one SKYNET developer CLI. net472 + x64 on purpose: the same assembly is both the
+    command line (Program.cs) and the EasyHook payload that capture mode injects into
+    dota2.exe (Capture\GcHookEntryPoint.cs), exactly like the launcher's own injector
+    (SKYNET Steam Client\Services\DllInjector.cs), so there is a single project to build.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>skynet-cli</AssemblyName>
+    <RootNamespace>SKYNET.Cli</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <PackageReference Include="EasyHook" Version="2.7.7097" />
+  </ItemGroup>
+</Project>
