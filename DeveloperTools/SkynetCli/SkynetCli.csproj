@@ -1,24 +1,61 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    The one SKYNET developer CLI. net472 + x64 on purpose: the same assembly is both the
-    command line (Program.cs) and the EasyHook payload that capture mode injects into
-    dota2.exe (Capture\GcHookEntryPoint.cs), exactly like the launcher's own injector
-    (SKYNET Steam Client\Services\DllInjector.cs), so there is a single project to build.
+    The one SKYNET developer CLI (single project, two targets of the same sources):
+      net8.0-windows  skynet-cli.exe   the command line (capture, ui, analyze, ...)
+      net472          skynet-hook.dll  the EasyHook payload injected into dota2.exe by `capture`
+                                       (Capture\GcHookEntryPoint.cs); EasyHook loads managed payloads
+                                       through the .NET Framework CLR, exactly like the launcher's
+                                       own injector (SKYNET Steam Client\Services\DllInjector.cs).
+    Building the CLI also builds the hook and copies it to hook\ next to the exe.
   -->
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFrameworks>net8.0-windows;net472</TargetFrameworks>
     <PlatformTarget>x64</PlatformTarget>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>skynet-cli</AssemblyName>
     <RootNamespace>SKYNET.Cli</RootNamespace>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <OutputType>Exe</OutputType>
+    <AssemblyName>skynet-cli</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
+    <OutputType>Library</OutputType>
+    <AssemblyName>skynet-hook</AssemblyName>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <PackageReference Include="EasyHook" Version="2.7.7097" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <ProjectReference Include="..\..\SKYNET server\SKYNET server.csproj" />
+    <Compile Remove="Capture\GcHookEntryPoint.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Compile Remove="**\*.cs" />
+    <Compile Include="Capture\GcHookEntryPoint.cs" />
+  </ItemGroup>
+
+  <Target Name="BuildAndCopyHook" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="TargetFramework=net472;NoRestore=true;Configuration=$(Configuration)" />
+    <ItemGroup>
+      <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-hook.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(HookFiles)" DestinationFolder="$(OutDir)hook" />
+    <ItemGroup>
+      <EasyHookNative Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(EasyHookNative)" DestinationFolder="$(OutDir)" />
+  </Target>
 </Project>
+
+

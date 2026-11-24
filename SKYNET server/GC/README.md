@@ -178,10 +178,9 @@ runtime.
   protobuf contract sources.
 - `SKYNET server/GC/<appId>/tools/verify-gc-ts-boundaries.ps1`: app-specific
   boundary checks for TypeScript modules.
-- `DeveloperTools/NetHookGcJson`: decodes NetHook GC captures into reports,
-  timelines, message indexes, job correlations, and per-record JSON.
-- `DeveloperTools/DecodeGcBody`: decodes an individual GC message body when
-  focused inspection is faster than a whole-capture run.
+- `DeveloperTools/SkynetCli`: records the real GC flow from Dota on real Steam (`capture`),
+  turns it into timelines, job correlations and entity chains (`analyze`), decodes single
+  bodies (`decode`) and drives the game window (`ui`).
 
 Keep raw captures and local binary tools outside the repository unless they are
 small, reusable source artifacts.
@@ -219,3 +218,4 @@ Captures are evidence, not implementation. When a message flow is unclear:
 3. Identify message ids, protobuf types, response order, and required fields.
 4. Update protobuf contracts if needed.
 5. Implement a typed handler in TypeScript.
+

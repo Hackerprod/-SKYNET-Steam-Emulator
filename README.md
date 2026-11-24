@@ -157,7 +157,7 @@ The GC runtime supports:
 - persistent runtime state
 - async sends and game-server poll delivery
 - `/Admin/GcConsole` for live GC traces
-- NetHook forensic decoding through `DeveloperTools/NetHookGcJson`
+- real-GC capture, flow analysis and decoding through `DeveloperTools/SkynetCli`
 
 See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the TypeScript API and capture workflow.
 
@@ -441,3 +441,4 @@ This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
 Contributions are welcome. If you want to improve compatibility, documentation, diagnostics, UI, Game Coordinator behavior, or platform support, please open a focused pull request with a clear description of the change and the validation performed.
 
 If you want to help maintain the project financially, donation and sponsorship information is available on the maintainer profile: [github.com/Hackerprod](https://github.com/Hackerprod/).
+

@@ -21,7 +21,8 @@ internal static class CaptureCommand
         Directory.CreateDirectory(outDir);
         var log = Path.Combine(outDir, "gc.jsonl");
         var exe = Path.Combine(win64, "dota2.exe");
-        var self = typeof(CaptureCommand).Assembly.Location;
+        var hook = Path.Combine(AppContext.BaseDirectory, "hook", "skynet-hook.dll");
+        if (!File.Exists(hook)) { Console.Error.WriteLine("hook payload missing: " + hook); return 2; }
 
         // What Steam itself provides when it starts a game.
         Environment.SetEnvironmentVariable("SteamAppId", "570");
@@ -32,7 +33,7 @@ internal static class CaptureCommand
         Console.WriteLine("capture dir : " + outDir);
         Console.WriteLine("launching   : " + exe);
         RemoteHooking.CreateAndInject(exe, ("-steam -console -novid " + extra).Trim(), 0, InjectionOptions.Default,
-            self, self, out var pid, log);
+            hook, hook, out var pid, log);
         Console.WriteLine("dota2 pid   : " + pid);
 
         Process? proc = null;
@@ -81,3 +82,4 @@ internal static class CaptureCommand
         return null;
     }
 }
+
