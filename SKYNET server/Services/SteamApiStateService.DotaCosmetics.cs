@@ -91,7 +91,7 @@ public sealed partial class SteamApiStateService
         {
             var pakPath = ResolvePakPath(importPath);
             var itemsText = VpkTextReader.ReadText(pakPath, "scripts/items/items_game.txt");
-            var heroesText = VpkTextReader.ReadText(pakPath, "scripts/npc/npc_heroes.txt");
+            var heroesText = ReadHeroesText(pakPath);
             var heroIds = DotaItemsGameParser.ParseHeroIds(heroesText);
             var heroSlots = DotaItemsGameParser.ParseHeroSlots(heroesText);
             var items = DotaItemsGameParser.ParseItems(itemsText, heroIds);
@@ -452,6 +452,58 @@ public sealed partial class SteamApiStateService
                 ? SerializeDotaMatchForScript(match)
                 : string.Empty;
         }
+    }
+
+    /// <summary>
+    /// npc_heroes.txt used to define every hero. Current Dota builds keep it as an index of
+    /// <c>#base "heroes/npc_dota_hero_x.txt"</c> includes, one file per hero, each wrapped in its own
+    /// "DOTAHeroes" section. Merge them back into a single section so the parsers see every hero.
+    /// A file without includes (older builds) is returned unchanged.
+    /// </summary>
+    private static string ReadHeroesText(string pakPath)
+    {
+        return MergeHeroIncludes(
+            VpkTextReader.ReadText(pakPath, "scripts/npc/npc_heroes.txt"),
+            path =>
+            {
+                try
+                {
+                    return VpkTextReader.ReadText(pakPath, "scripts/npc/" + path);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            });
+    }
+
+    private static string MergeHeroIncludes(string index, Func<string, string?> readFile)
+    {
+        var includes = System.Text.RegularExpressions.Regex.Matches(index, "^\\s*#base\\s+\"([^\"]+)\"", System.Text.RegularExpressions.RegexOptions.Multiline);
+        if (includes.Count == 0)
+        {
+            return index;
+        }
+
+        var merged = new System.Text.StringBuilder("\"DOTAHeroes\"\n{\n");
+        foreach (System.Text.RegularExpressions.Match include in includes)
+        {
+            var heroText = readFile(include.Groups[1].Value);
+            if (heroText == null)
+            {
+                continue;
+            }
+
+            var section = heroText.IndexOf("DOTAHeroes", StringComparison.OrdinalIgnoreCase);
+            var open = section < 0 ? -1 : heroText.IndexOf('{', section);
+            var close = heroText.LastIndexOf('}');
+            if (open >= 0 && close > open)
+            {
+                merged.Append(heroText, open + 1, close - open - 1).Append('\n');
+            }
+        }
+
+        return merged.Append("}\n").ToString();
     }
 
     public ApiDotaClientVersionResult AutoDetectDotaClientVersion(string token)
@@ -991,7 +1043,7 @@ public sealed partial class SteamApiStateService
                 ? DefaultDotaPath
                 : _state.DotaCosmetics.DotaPath;
             var pakPath = ResolvePakPath(ResolveDotaContentPath(dotaPath));
-            var heroesText = VpkTextReader.ReadText(pakPath, "scripts/npc/npc_heroes.txt");
+            var heroesText = ReadHeroesText(pakPath);
             _state.DotaHeroSlots = DotaItemsGameParser.ParseHeroSlots(heroesText);
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or FileNotFoundException)
@@ -1057,6 +1109,18 @@ public sealed partial class SteamApiStateService
         {
             ["npc_dota_hero_phantom_assassin"] = 44
         };
+
+        // Current Dota keeps npc_heroes.txt as an index of per-hero #base files.
+        var heroIndex = "#base \"heroes/a.txt\"\n#base \"heroes/b.txt\"\n";
+        var mergedHeroes = MergeHeroIncludes(heroIndex, path => path.EndsWith("a.txt")
+            ? "\"DOTAHeroes\"\n{\n\"npc_dota_hero_a\"\n{\n\"HeroID\" \"7\"\n}\n}"
+            : "\"DOTAHeroes\"\n{\n\"npc_dota_hero_b\"\n{\n\"HeroID\" \"9\"\n}\n}");
+        var mergedIds = DotaItemsGameParser.ParseHeroIds(mergedHeroes);
+        if (mergedIds.Count != 2 || mergedIds["npc_dota_hero_b"] != 9)
+        {
+            write?.Invoke("FAIL: #base hero files were not merged");
+            return false;
+        }
 
         const string itemsText = """
             "items"
@@ -1851,5 +1915,7 @@ public sealed partial class SteamApiStateService
         }
     }
 }
+
+
 
 
