@@ -862,6 +862,46 @@ public sealed partial class SteamApiStateService
         return string.Join(' ', ordered.Take(2));
     }
 
+    // Local (region 0) games run inside a player's own client, so the endpoint to
+    // advertise is that host's address: the IP the GC message arrived from, then
+    // the game-reported private/public addresses. The SKYNET server's own
+    // Server:AdvertisedIp / NICs are only valid when the host client shares the
+    // SKYNET machine (loopback client).
+    private string ResolveDotaLocalGameConnectIps(
+        string clientIp,
+        string publicIpValue,
+        string privateIpValue,
+        string fallbackIp)
+    {
+        if (IsLoopbackClient(clientIp))
+        {
+            // Host runs on the SKYNET machine itself: server-side resolution is correct.
+            return ResolveDotaGameServerConnectIps(clientIp, publicIpValue, privateIpValue, fallbackIp);
+        }
+
+        var ordered = new List<string>();
+
+        void Add(string? value)
+        {
+            if (TryNormalizeUsableIPv4(value, out var ip) && !ordered.Contains(ip))
+            {
+                ordered.Add(ip);
+            }
+        }
+
+        Add(clientIp);
+        Add(privateIpValue);
+        Add(publicIpValue);
+        Add(fallbackIp);
+
+        if (ordered.Count == 0)
+        {
+            return string.IsNullOrWhiteSpace(fallbackIp) ? "127.0.0.1" : fallbackIp.Trim();
+        }
+
+        return string.Join(' ', ordered.Take(2));
+    }
+
     private static IEnumerable<string> EnumerateUsableHostIPv4()
     {
         var result = new List<string>();
