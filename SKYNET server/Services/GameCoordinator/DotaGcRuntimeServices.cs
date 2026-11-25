@@ -25,6 +25,7 @@ public static class DotaGcRuntimeServices
     public static Func<ulong, bool>? UserOnlineProvider { get; set; }
     public static Func<string, string, string, string, string>? GameServerConnectIpResolver { get; set; }
     public static Func<string, string, string, string, string>? GameServerConnectIpsResolver { get; set; }
+    public static Func<string, string, string, string, string>? LocalGameConnectIpsResolver { get; set; }
     public static Action<ulong, string, string>? GameServerChangeRequested { get; set; }
     public static Func<ulong, string, DotaDedicatedServerSupervisor.DedicatedLaunchResult>? DedicatedServerStart { get; set; }
     public static Func<ulong, uint, string>? DedicatedServerClaim { get; set; }

@@ -31,7 +31,7 @@ declare global {
     function dotaStartDedicatedServer(lobbyId: bigint, map: string): unknown;
     function dotaReleaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
     function dotaResolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string;
-    function dotaResolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string;
+    function dotaResolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string, local: boolean): string;
     function dotaProfile(accountId: number): unknown;
     function dotaSaveProfileSlots(slots: unknown[]): boolean;
     function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;

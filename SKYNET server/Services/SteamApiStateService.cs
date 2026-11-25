@@ -143,6 +143,7 @@ public sealed partial class SteamApiStateService
         DotaGcRuntimeServices.UserOnlineProvider = IsOnlineDotaUser;
         DotaGcRuntimeServices.GameServerConnectIpResolver = ResolveDotaGameServerConnectIp;
         DotaGcRuntimeServices.GameServerConnectIpsResolver = ResolveDotaGameServerConnectIps;
+        DotaGcRuntimeServices.LocalGameConnectIpsResolver = ResolveDotaLocalGameConnectIps;
         DotaGcRuntimeServices.GameServerChangeRequested = EnqueueGameServerChangeRequestedEvent;
         DotaGcRuntimeServices.DedicatedServerStart = (lobbyId, map) => _dotaDedicatedServers.Start(lobbyId, map);
         DotaGcRuntimeServices.DedicatedServerClaim = (gameServerSteamId, port) => _dotaDedicatedServers.ClaimLobby(gameServerSteamId, port);

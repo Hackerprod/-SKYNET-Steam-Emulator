@@ -1462,11 +1462,18 @@ internal sealed class ScriptExchangeHost
         var publicIp = ToString(args[0]);
         var privateIp = ToString(args[1]);
         var fallbackIp = ToString(args[2]);
-        var resolved = DotaGcRuntimeServices.GameServerConnectIpsResolver?.Invoke(
-            _context.ClientIp,
-            publicIp,
-            privateIp,
-            fallbackIp);
+        var local = args.Length > 3 && ToBool(args[3], "dotaResolveGameServerConnectIps.local");
+        var resolved = local
+            ? DotaGcRuntimeServices.LocalGameConnectIpsResolver?.Invoke(
+                _context.ClientIp,
+                publicIp,
+                privateIp,
+                fallbackIp)
+            : DotaGcRuntimeServices.GameServerConnectIpsResolver?.Invoke(
+                _context.ClientIp,
+                publicIp,
+                privateIp,
+                fallbackIp);
         if (string.IsNullOrWhiteSpace(resolved))
         {
             resolved = BuildDefaultConnectIps(publicIp, privateIp, fallbackIp);

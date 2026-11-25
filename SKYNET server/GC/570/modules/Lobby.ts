@@ -1412,7 +1412,12 @@ function buildConnectString(services: DotaLobbyService, lobby: LobbyState): stri
     const fallback = lobby.serverPrivateIp === "" ? "127.0.0.1" : lobby.serverPrivateIp;
     // The advertised endpoint is resolved by the server runtime from the central
     // Server:AdvertisedIp setting; the GC only passes the game-reported values.
-    const ips = services.resolveGameServerConnectIps(lobby.serverPublicIp, lobby.serverPrivateIp, fallback).split(" ");
+    // Local (region 0) games are hosted by a player's own client, so the endpoint
+    // must be that host's address, never the SKYNET server's. Dedicated games run
+    // on the SKYNET host and keep the server-side resolution.
+    const ips = services
+        .resolveGameServerConnectIps(lobby.serverPublicIp, lobby.serverPrivateIp, fallback, lobby.lan)
+        .split(" ");
     const endpoints: string[] = [];
     for (let i = 0; i < ips.length; i++) {
         const ip = ips[i].trim();

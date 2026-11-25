@@ -135,7 +135,7 @@ export interface DotaLobbyService {
     startDedicatedServer(lobbyId: bigint, map: string): DotaDedicatedLaunchResult | null;
     releaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
     resolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string;
-    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string;
+    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string, local: boolean): string;
 }
 
 export interface DotaDedicatedLaunchResult {
@@ -1121,8 +1121,8 @@ class GcDotaLobbyService implements DotaLobbyService {
         return dotaResolveGameServerConnectIp(publicIp, privateIp, fallbackIp);
     }
 
-    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string {
-        return dotaResolveGameServerConnectIps(publicIp, privateIp, fallbackIp);
+    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string, local: boolean): string {
+        return dotaResolveGameServerConnectIps(publicIp, privateIp, fallbackIp, local);
     }
 }
 
