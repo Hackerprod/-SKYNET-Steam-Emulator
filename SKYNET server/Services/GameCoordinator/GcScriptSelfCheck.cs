@@ -1500,7 +1500,8 @@ public static class GcScriptSelfCheck
 
     private static uint IpToUInt32(byte a, byte b, byte c, byte d)
     {
-        return (uint)(a | (b << 8) | (c << 16) | (d << 24));
+        // Host-order uint32 as Steam/Dota send it: the first octet is the most significant byte.
+        return (uint)((a << 24) | (b << 16) | (c << 8) | d);
     }
 
     private static ulong BuildDotaItemInstanceId(ulong steamId, uint defIndex)
