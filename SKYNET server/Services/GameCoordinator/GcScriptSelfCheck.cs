@@ -183,6 +183,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8853, 8854, 1, write);
         ok &= ExpectResponse(plugin, context, 8879, 8880, 1, write);
         ok &= ExpectResponse(plugin, context, 8886, 8887, 1, write);
+        ok &= ExpectResponse(plugin, context, 8888, 8889, 1, write);
         ok &= ExpectResponse(plugin, context, 8944, 8945, 1, write);
         ok &= ExpectResponse(plugin, context, 9023, 9024, 1, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);

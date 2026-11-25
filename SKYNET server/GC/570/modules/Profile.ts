@@ -86,6 +86,8 @@ import {
 } from "../generated/dota";
 import { buildEconItem, equipmentForDefIndex } from "./InventorySos";
 import { normalizeConductScorecard } from "./shared/conduct";
+import { buildHeroEquippedEconItems } from "./shared/heroLoadout";
+import { profileStatScore, requestedAccountId } from "./shared/profileStats";
 
 const PROFILE_SLOT_STAT = 1;
 const PROFILE_SLOT_TROPHY = 2;
@@ -721,27 +723,13 @@ function buildFeaturedHeroes<TRequest, TResponse>(
     snapshot: DotaProfileSnapshot
 ): CMsgProfileResponse_FeaturedHero[] {
     const featuredHeroes: CMsgProfileResponse_FeaturedHero[] = [];
-    const inventory = ctx.services.items.getInventory();
     for (let i = 0; i < snapshot.featuredHeroIds.length && i < 3; i++) {
         const heroId = snapshot.featuredHeroIds[i];
-        const equippedEconItems = [];
-        for (let itemIndex = 0; itemIndex < inventory.equipment.length; itemIndex++) {
-            const equipped = inventory.equipment[itemIndex];
-            if (equipped.heroId !== heroId) {
-                continue;
-            }
-
-            const catalogItem = ctx.services.items.getCatalogItem(equipped.defIndex);
-            if (catalogItem !== null) {
-                equippedEconItems.push(
-                    buildEconItem(inventory, catalogItem, equipmentForDefIndex(inventory, equipped.defIndex))
-                );
-            }
-        }
-
         featuredHeroes.push({
             heroId,
-            equippedEconItems,
+            // The equipped items belong to the profile owner, not to the
+            // account asking for the profile.
+            equippedEconItems: buildHeroEquippedEconItems(ctx, snapshot.steamId, heroId),
             manuallySet: true,
             plusHeroXp: (findHeroStats(snapshot, heroId)?.wins ?? 0) * 100
         });
@@ -861,39 +849,6 @@ function normalizeProfileSlots(
     }
 
     return normalized;
-}
-
-function requestedAccountId(value: number | undefined, fallback: number): number {
-    const accountId = value ?? 0;
-    if (accountId === 0) {
-        return fallback;
-    }
-
-    return accountId;
-}
-
-function profileStatScore(snapshot: DotaProfileSnapshot, statId: number): number {
-    if (statId === 3) {
-        return snapshot.globalStats.gamesWon;
-    }
-
-    if (statId === 4) {
-        return snapshot.conduct.commendCount;
-    }
-
-    if (statId === 5) {
-        return snapshot.globalStats.matchCount;
-    }
-
-    if (statId === 6) {
-        return snapshot.firstMatchTime;
-    }
-
-    if (statId === 8) {
-        return snapshot.mvpCount;
-    }
-
-    return 0;
 }
 
 function findHeroStats(snapshot: DotaProfileSnapshot, heroId: number): DotaHeroStats | null {

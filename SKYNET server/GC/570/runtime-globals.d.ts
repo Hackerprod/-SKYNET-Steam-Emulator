@@ -35,6 +35,8 @@ declare global {
     function dotaProfile(accountId: number): unknown;
     function dotaSaveProfileSlots(slots: unknown[]): boolean;
     function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;
+    function dotaShowcaseLayout(accountId: number, showcaseType: number): unknown;
+    function dotaSaveShowcaseLayout(showcaseType: number, layout: unknown): boolean;
     function dotaProfileConductScorecard(): unknown;
     function dotaProfileQuestProgress(questIds: number[]): unknown;
     function dotaProfilePeriodicResource(accountId: number, resourceId: number): unknown;
@@ -107,7 +109,6 @@ declare global {
     function dotaMatchDetails(matchId: bigint): unknown;
     function dotaHeroStatsHistory(accountId: number, heroId: number): unknown;
     function dotaMatchVotes(matchId: bigint): unknown;
-    function dotaShowcaseStats(accountId: number): unknown;
     function dotaRecentAccomplishments(accountId: number): unknown;
     function dotaHeroRecentAccomplishments(accountId: number, heroId: number): unknown;
     function dotaHasMvpVote(matchId: bigint): boolean;

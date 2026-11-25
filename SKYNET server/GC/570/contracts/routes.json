@@ -154,6 +154,13 @@
         "responseProto": "CMsgClientToGCShowcaseGetUserDataResponse"
     },
     {
+        "name": "ShowcaseSetUserData",
+        "requestMessage": "ClientToGCShowcaseSetUserData",
+        "requestProto": "CMsgClientToGCShowcaseSetUserData",
+        "responseMessage": "ClientToGCShowcaseSetUserDataResponse",
+        "responseProto": "CMsgClientToGCShowcaseSetUserDataResponse"
+    },
+    {
         "name": "RequestPlayerRecentAccomplishments",
         "requestMessage": "ClientToGCRequestPlayerRecentAccomplishments",
         "requestProto": "CMsgClientToGCRequestPlayerRecentAccomplishments",

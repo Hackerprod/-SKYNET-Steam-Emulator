@@ -268,6 +268,8 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
             .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
             .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
             .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
+            .RegisterHostFunction("gc", "dotaShowcaseLayout", dispatcher.DotaShowcaseLayout)
+            .RegisterHostFunction("gc", "dotaSaveShowcaseLayout", dispatcher.DotaSaveShowcaseLayout)
             .RegisterHostFunction("gc", "dotaProfileConductScorecard", dispatcher.DotaProfileConductScorecard)
             .RegisterHostFunction("gc", "dotaProfileQuestProgress", dispatcher.DotaProfileQuestProgress)
             .RegisterHostFunction("gc", "dotaProfilePeriodicResource", dispatcher.DotaProfilePeriodicResource)
@@ -321,7 +323,6 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
             .RegisterHostFunction("gc", "dotaMatchDetails", dispatcher.DotaMatchDetails)
             .RegisterHostFunction("gc", "dotaHeroStatsHistory", dispatcher.DotaHeroStatsHistory)
             .RegisterHostFunction("gc", "dotaMatchVotes", dispatcher.DotaMatchVotes)
-            .RegisterHostFunction("gc", "dotaShowcaseStats", dispatcher.DotaShowcaseStats)
             .RegisterHostFunction("gc", "dotaRecentAccomplishments", dispatcher.DotaRecentAccomplishments)
             .RegisterHostFunction("gc", "dotaHeroRecentAccomplishments", dispatcher.DotaHeroRecentAccomplishments)
             .RegisterHostFunction("gc", "dotaHasMvpVote", dispatcher.DotaHasMvpVote)
@@ -498,6 +499,16 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSaveProfileUpdate(TsValue[] args)
     {
         return RequireCurrent().DotaSaveProfileUpdate(args);
+    }
+
+    public TsValue? DotaShowcaseLayout(TsValue[] args)
+    {
+        return RequireCurrent().DotaShowcaseLayout(args);
+    }
+
+    public TsValue? DotaSaveShowcaseLayout(TsValue[] args)
+    {
+        return RequireCurrent().DotaSaveShowcaseLayout(args);
     }
 
     public TsValue? DotaProfileConductScorecard(TsValue[] args)
@@ -760,11 +771,6 @@ internal sealed class ScriptHostDispatcher
         return RequireCurrent().DotaMatchVotes(args);
     }
 
-    public TsValue? DotaShowcaseStats(TsValue[] args)
-    {
-        return RequireCurrent().DotaShowcaseStats(args);
-    }
-
     public TsValue? DotaRecentAccomplishments(TsValue[] args)
     {
         return RequireCurrent().DotaRecentAccomplishments(args);
@@ -984,6 +990,8 @@ internal sealed class ScriptHostDispatcher
 internal sealed class ScriptExchangeHost
 {
     private const uint DotaActiveEventId = 57;
+    // Upper bound for the persisted showcase hero animation name (TypeScript trims to less).
+    private const int MaxShowcaseAnimationNameLength = 256;
     private readonly GameCoordinatorContext _context;
     private readonly ApiGCExchangeRequest _request;
     private readonly GameCoordinatorProtoCodec _codec;
@@ -2427,26 +2435,169 @@ internal sealed class ScriptExchangeHost
         return new TsObjectValue(result);
     }
 
-    public TsValue DotaShowcaseStats(TsValue[] args)
+    // Showcase layouts are opaque to the host: TypeScript decides what is valid
+    // (kinds, ranges, ids, budget) and this method only converts types, clamps
+    // them to the storage columns and persists them for the calling account.
+    // The account is never an argument so a client cannot write another
+    // account's showcase.
+    public TsValue DotaSaveShowcaseLayout(TsValue[] args)
     {
-        var accountId = args.Length > 0
-            ? Convert.ToUInt32(ToNumber(args[0], "dotaShowcaseStats.accountId"))
-            : _context.AccountId;
-        if (accountId == 0)
+        if (args.Length < 2)
         {
-            accountId = _context.AccountId;
+            throw new InvalidOperationException("dotaSaveShowcaseLayout(showcaseType, layout) requires two arguments");
+        }
+
+        var showcaseType = ToUInt32Field(args[0], "dotaSaveShowcaseLayout.showcaseType");
+        if (args[1] is not TsObjectValue layoutValue)
+        {
+            throw new InvalidOperationException("dotaSaveShowcaseLayout.layout: expected object");
+        }
+
+        var layoutObject = layoutValue.Value;
+        var layout = new DotaStatsShowcaseLayout
+        {
+            ShowcaseType = showcaseType,
+            FormatVersion = ToUInt32Field(layoutObject.GetField("formatVersion"), "dotaSaveShowcaseLayout.formatVersion"),
+            BackgroundId = ToUInt32Field(layoutObject.GetField("backgroundId"), "dotaSaveShowcaseLayout.backgroundId"),
+            BackgroundDim = ToUInt32Field(layoutObject.GetField("backgroundDim"), "dotaSaveShowcaseLayout.backgroundDim"),
+            BackgroundBlur = ToUInt32Field(layoutObject.GetField("backgroundBlur"), "dotaSaveShowcaseLayout.backgroundBlur")
+        };
+
+        if (layoutObject.GetField("items") is not TsArrayValue itemsValue)
+        {
+            throw new InvalidOperationException("dotaSaveShowcaseLayout.items: expected array");
+        }
+
+        for (var i = 0; i < itemsValue.Value.Count; i++)
+        {
+            var path = $"dotaSaveShowcaseLayout.items[{i}]";
+            if (itemsValue.Value.Get(i) is not TsObjectValue itemValue)
+            {
+                throw new InvalidOperationException($"{path}: expected object");
+            }
+
+            var item = itemValue.Value;
+            var animationName = ToString(item.GetField("heroAnimationName"));
+            if (animationName.Length > MaxShowcaseAnimationNameLength)
+            {
+                return TsValue.FromBool(false);
+            }
+
+            layout.Items.Add(new DotaStatsShowcaseItem
+            {
+                ShowcaseItemId = ToUInt32Field(item.GetField("showcaseItemId"), $"{path}.showcaseItemId"),
+                Kind = ToUInt32Field(item.GetField("kind"), $"{path}.kind"),
+                RefId = ToUInt32Field(item.GetField("refId"), $"{path}.refId"),
+                PositionX = ToInt32Field(item.GetField("positionX"), $"{path}.positionX"),
+                PositionY = ToInt32Field(item.GetField("positionY"), $"{path}.positionY"),
+                Scale = ToUInt32Field(item.GetField("scale"), $"{path}.scale"),
+                Width = ToUInt32Field(item.GetField("width"), $"{path}.width"),
+                Height = ToUInt32Field(item.GetField("height"), $"{path}.height"),
+                Rotation = ToUInt32Field(item.GetField("rotation"), $"{path}.rotation"),
+                ParentId = ToUInt32Field(item.GetField("parentId"), $"{path}.parentId"),
+                ParentAttachmentPointId = ToUInt32Field(item.GetField("parentAttachmentPointId"), $"{path}.parentAttachmentPointId"),
+                AttachmentAnchorX = ToUInt32Field(item.GetField("attachmentAnchorX"), $"{path}.attachmentAnchorX"),
+                AttachmentAnchorY = ToUInt32Field(item.GetField("attachmentAnchorY"), $"{path}.attachmentAnchorY"),
+                ItemFlags = ToUInt32Field(item.GetField("itemFlags"), $"{path}.itemFlags"),
+                HeroFlags = ToUInt32Field(item.GetField("heroFlags"), $"{path}.heroFlags"),
+                HeroRotation = ToUInt32Field(item.GetField("heroRotation"), $"{path}.heroRotation"),
+                HeroZoom = ToUInt32Field(item.GetField("heroZoom"), $"{path}.heroZoom"),
+                HeroAnimationName = animationName,
+                HeroAnimationPlaybackSpeed = ToUInt32Field(item.GetField("heroAnimationPlaybackSpeed"), $"{path}.heroAnimationPlaybackSpeed"),
+                HeroAnimationOffset = ToUInt32Field(item.GetField("heroAnimationOffset"), $"{path}.heroAnimationOffset"),
+                HeroSlotIndex = ToUInt32Field(item.GetField("heroSlotIndex"), $"{path}.heroSlotIndex"),
+                HeroModelIndex = ToUInt32Field(item.GetField("heroModelIndex"), $"{path}.heroModelIndex")
+            });
         }
 
         var store = DotaGcRuntimeServices.StatsStore;
-        var global = store?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
-        var conduct = store?.GetConduct(accountId) ?? new DotaStatsConduct { AccountId = accountId };
-        var value = new TsObject("DotaShowcaseStats");
-        value.SetField("gamesWon", TsValue.FromInt32(unchecked((int)global.GamesWon)));
-        value.SetField("commendCount", TsValue.FromInt32(unchecked((int)conduct.CommendCount)));
-        value.SetField("mvpCount", TsValue.FromInt32(unchecked((int)(store?.GetMvpCount(accountId) ?? 0))));
+        if (store == null || _context.AccountId == 0)
+        {
+            // Dedicated servers and stores that are not ready have no account to save for.
+            return TsValue.FromBool(false);
+        }
+
+        store.SaveShowcaseLayout(_context.AccountId, showcaseType, layout);
+        return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaShowcaseLayout(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaShowcaseLayout(accountId, showcaseType) requires two arguments");
+        }
+
+        var accountId = ToUInt32Field(args[0], "dotaShowcaseLayout.accountId");
+        var showcaseType = ToUInt32Field(args[1], "dotaShowcaseLayout.showcaseType");
+        var layout = accountId == 0
+            ? null
+            : DotaGcRuntimeServices.StatsStore?.GetShowcaseLayout(accountId, showcaseType);
+        if (layout == null)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaShowcaseLayout");
+        value.SetField("showcaseType", ToTsUInt32(layout.ShowcaseType));
+        value.SetField("formatVersion", ToTsUInt32(layout.FormatVersion));
+        value.SetField("backgroundId", ToTsUInt32(layout.BackgroundId));
+        value.SetField("backgroundDim", ToTsUInt32(layout.BackgroundDim));
+        value.SetField("backgroundBlur", ToTsUInt32(layout.BackgroundBlur));
+        var items = new TsArray();
+        foreach (var item in layout.Items)
+        {
+            var itemValue = new TsObject("DotaShowcaseLayoutItem");
+            itemValue.SetField("showcaseItemId", ToTsUInt32(item.ShowcaseItemId));
+            itemValue.SetField("kind", ToTsUInt32(item.Kind));
+            itemValue.SetField("refId", ToTsUInt32(item.RefId));
+            itemValue.SetField("positionX", TsValue.FromInt32(item.PositionX));
+            itemValue.SetField("positionY", TsValue.FromInt32(item.PositionY));
+            itemValue.SetField("scale", ToTsUInt32(item.Scale));
+            itemValue.SetField("width", ToTsUInt32(item.Width));
+            itemValue.SetField("height", ToTsUInt32(item.Height));
+            itemValue.SetField("rotation", ToTsUInt32(item.Rotation));
+            itemValue.SetField("parentId", ToTsUInt32(item.ParentId));
+            itemValue.SetField("parentAttachmentPointId", ToTsUInt32(item.ParentAttachmentPointId));
+            itemValue.SetField("attachmentAnchorX", ToTsUInt32(item.AttachmentAnchorX));
+            itemValue.SetField("attachmentAnchorY", ToTsUInt32(item.AttachmentAnchorY));
+            itemValue.SetField("itemFlags", ToTsUInt32(item.ItemFlags));
+            itemValue.SetField("heroFlags", ToTsUInt32(item.HeroFlags));
+            itemValue.SetField("heroRotation", ToTsUInt32(item.HeroRotation));
+            itemValue.SetField("heroZoom", ToTsUInt32(item.HeroZoom));
+            itemValue.SetField("heroAnimationName", TsValue.FromString(item.HeroAnimationName));
+            itemValue.SetField("heroAnimationPlaybackSpeed", ToTsUInt32(item.HeroAnimationPlaybackSpeed));
+            itemValue.SetField("heroAnimationOffset", ToTsUInt32(item.HeroAnimationOffset));
+            itemValue.SetField("heroSlotIndex", ToTsUInt32(item.HeroSlotIndex));
+            itemValue.SetField("heroModelIndex", ToTsUInt32(item.HeroModelIndex));
+            items.Add(new TsObjectValue(itemValue));
+        }
+
+        value.SetField("items", new TsArrayValue(items));
         return new TsObjectValue(value);
     }
 
+    private static uint ToUInt32Field(TsValue value, string path)
+    {
+        var number = ToInteger(value, path);
+        if (number < 0 || number > uint.MaxValue)
+        {
+            throw new InvalidOperationException($"{path}: {number} is outside the uint32 range");
+        }
+
+        return (uint)number;
+    }
+
+    private static int ToInt32Field(TsValue value, string path)
+    {
+        var number = ToInteger(value, path);
+        if (number < int.MinValue || number > int.MaxValue)
+        {
+            throw new InvalidOperationException($"{path}: {number} is outside the int32 range");
+        }
+
+        return (int)number;
+    }
     public TsValue DotaRecentAccomplishments(TsValue[] args)
     {
         var accountId = args.Length > 0

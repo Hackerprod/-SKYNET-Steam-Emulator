@@ -526,6 +526,177 @@ public sealed class DotaStatsStore
         }
     }
 
+    /// <summary>
+    /// Returns the saved showcase layout of one type, or null when the account
+    /// never saved one (the GC then serves its generated default layout).
+    /// </summary>
+    public DotaStatsShowcaseLayout? GetShowcaseLayout(uint accountId, uint showcaseType)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var header = connection.CreateCommand();
+            header.CommandText = "SELECT format_version, background_id, background_dim, background_blur FROM showcase_layouts WHERE account_id = $account_id AND showcase_type = $showcase_type";
+            Add(header, "$account_id", accountId);
+            Add(header, "$showcase_type", showcaseType);
+            DotaStatsShowcaseLayout layout;
+            using (var reader = header.ExecuteReader())
+            {
+                if (!reader.Read())
+                {
+                    return null;
+                }
+
+                layout = new DotaStatsShowcaseLayout
+                {
+                    ShowcaseType = showcaseType,
+                    FormatVersion = U32(reader, "format_version"),
+                    BackgroundId = U32(reader, "background_id"),
+                    BackgroundDim = U32(reader, "background_dim"),
+                    BackgroundBlur = U32(reader, "background_blur")
+                };
+            }
+
+            using var items = connection.CreateCommand();
+            items.CommandText = """
+                SELECT showcase_item_id, kind, ref_id, position_x, position_y, scale, width, height, rotation,
+                       parent_id, parent_attachment_point_id, attachment_anchor_x, attachment_anchor_y, item_flags,
+                       hero_flags, hero_rotation, hero_zoom, hero_animation_name, hero_animation_playback_speed,
+                       hero_animation_offset, hero_slot_index, hero_model_index
+                FROM showcase_items
+                WHERE account_id = $account_id AND showcase_type = $showcase_type
+                ORDER BY position ASC
+                """;
+            Add(items, "$account_id", accountId);
+            Add(items, "$showcase_type", showcaseType);
+            using var itemReader = items.ExecuteReader();
+            while (itemReader.Read())
+            {
+                layout.Items.Add(new DotaStatsShowcaseItem
+                {
+                    ShowcaseItemId = U32(itemReader, "showcase_item_id"),
+                    Kind = U32(itemReader, "kind"),
+                    RefId = U32(itemReader, "ref_id"),
+                    PositionX = Convert.ToInt32(itemReader["position_x"]),
+                    PositionY = Convert.ToInt32(itemReader["position_y"]),
+                    Scale = U32(itemReader, "scale"),
+                    Width = U32(itemReader, "width"),
+                    Height = U32(itemReader, "height"),
+                    Rotation = U32(itemReader, "rotation"),
+                    ParentId = U32(itemReader, "parent_id"),
+                    ParentAttachmentPointId = U32(itemReader, "parent_attachment_point_id"),
+                    AttachmentAnchorX = U32(itemReader, "attachment_anchor_x"),
+                    AttachmentAnchorY = U32(itemReader, "attachment_anchor_y"),
+                    ItemFlags = U32(itemReader, "item_flags"),
+                    HeroFlags = U32(itemReader, "hero_flags"),
+                    HeroRotation = U32(itemReader, "hero_rotation"),
+                    HeroZoom = U32(itemReader, "hero_zoom"),
+                    HeroAnimationName = Str(itemReader, "hero_animation_name"),
+                    HeroAnimationPlaybackSpeed = U32(itemReader, "hero_animation_playback_speed"),
+                    HeroAnimationOffset = U32(itemReader, "hero_animation_offset"),
+                    HeroSlotIndex = U32(itemReader, "hero_slot_index"),
+                    HeroModelIndex = U32(itemReader, "hero_model_index")
+                });
+            }
+
+            return layout;
+        }
+    }
+
+    /// <summary>
+    /// Replaces the saved showcase layout of one (account, type) atomically:
+    /// header and items are written in one transaction so a failed save never
+    /// leaves a half-written layout. The caller (TypeScript) has already
+    /// validated the content; this method only persists it.
+    /// </summary>
+    public void SaveShowcaseLayout(uint accountId, uint showcaseType, DotaStatsShowcaseLayout layout)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            using var transaction = connection.BeginTransaction();
+            using (var delete = connection.CreateCommand())
+            {
+                delete.Transaction = transaction;
+                delete.CommandText = "DELETE FROM showcase_items WHERE account_id = $account_id AND showcase_type = $showcase_type";
+                Add(delete, "$account_id", accountId);
+                Add(delete, "$showcase_type", showcaseType);
+                delete.ExecuteNonQuery();
+            }
+
+            using (var header = connection.CreateCommand())
+            {
+                header.Transaction = transaction;
+                header.CommandText = """
+                    INSERT INTO showcase_layouts (account_id, showcase_type, format_version, background_id, background_dim, background_blur, updated_at)
+                    VALUES ($account_id, $showcase_type, $format_version, $background_id, $background_dim, $background_blur, $updated_at)
+                    ON CONFLICT(account_id, showcase_type) DO UPDATE SET
+                        format_version = excluded.format_version,
+                        background_id = excluded.background_id,
+                        background_dim = excluded.background_dim,
+                        background_blur = excluded.background_blur,
+                        updated_at = excluded.updated_at
+                    """;
+                Add(header, "$account_id", accountId);
+                Add(header, "$showcase_type", showcaseType);
+                Add(header, "$format_version", layout.FormatVersion);
+                Add(header, "$background_id", layout.BackgroundId);
+                Add(header, "$background_dim", layout.BackgroundDim);
+                Add(header, "$background_blur", layout.BackgroundBlur);
+                Add(header, "$updated_at", Now());
+                header.ExecuteNonQuery();
+            }
+
+            var position = 0;
+            foreach (var item in layout.Items)
+            {
+                using var insert = connection.CreateCommand();
+                insert.Transaction = transaction;
+                insert.CommandText = """
+                    INSERT INTO showcase_items (
+                        account_id, showcase_type, position, showcase_item_id, kind, ref_id, position_x, position_y,
+                        scale, width, height, rotation, parent_id, parent_attachment_point_id, attachment_anchor_x,
+                        attachment_anchor_y, item_flags, hero_flags, hero_rotation, hero_zoom, hero_animation_name,
+                        hero_animation_playback_speed, hero_animation_offset, hero_slot_index, hero_model_index)
+                    VALUES (
+                        $account_id, $showcase_type, $position, $showcase_item_id, $kind, $ref_id, $position_x, $position_y,
+                        $scale, $width, $height, $rotation, $parent_id, $parent_attachment_point_id, $attachment_anchor_x,
+                        $attachment_anchor_y, $item_flags, $hero_flags, $hero_rotation, $hero_zoom, $hero_animation_name,
+                        $hero_animation_playback_speed, $hero_animation_offset, $hero_slot_index, $hero_model_index)
+                    """;
+                Add(insert, "$account_id", accountId);
+                Add(insert, "$showcase_type", showcaseType);
+                Add(insert, "$position", position++);
+                Add(insert, "$showcase_item_id", item.ShowcaseItemId);
+                Add(insert, "$kind", item.Kind);
+                Add(insert, "$ref_id", item.RefId);
+                Add(insert, "$position_x", item.PositionX);
+                Add(insert, "$position_y", item.PositionY);
+                Add(insert, "$scale", item.Scale);
+                Add(insert, "$width", item.Width);
+                Add(insert, "$height", item.Height);
+                Add(insert, "$rotation", item.Rotation);
+                Add(insert, "$parent_id", item.ParentId);
+                Add(insert, "$parent_attachment_point_id", item.ParentAttachmentPointId);
+                Add(insert, "$attachment_anchor_x", item.AttachmentAnchorX);
+                Add(insert, "$attachment_anchor_y", item.AttachmentAnchorY);
+                Add(insert, "$item_flags", item.ItemFlags);
+                Add(insert, "$hero_flags", item.HeroFlags);
+                Add(insert, "$hero_rotation", item.HeroRotation);
+                Add(insert, "$hero_zoom", item.HeroZoom);
+                Add(insert, "$hero_animation_name", item.HeroAnimationName ?? string.Empty);
+                Add(insert, "$hero_animation_playback_speed", item.HeroAnimationPlaybackSpeed);
+                Add(insert, "$hero_animation_offset", item.HeroAnimationOffset);
+                Add(insert, "$hero_slot_index", item.HeroSlotIndex);
+                Add(insert, "$hero_model_index", item.HeroModelIndex);
+                insert.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+        }
+    }
+
     public void SaveProfileUpdate(uint accountId, ulong? backgroundItemId, IReadOnlyList<uint> featuredHeroIds)
     {
         lock (_sync)
@@ -1680,6 +1851,51 @@ public sealed class DotaStatsStore
                 slot_type INTEGER NOT NULL,
                 slot_value INTEGER NOT NULL,
                 PRIMARY KEY (account_id, slot_id)
+            );
+
+            -- Profile showcase layouts (8888 SetUserData / 8886 GetUserData). No row
+            -- for an (account, type) means the account never saved one and the GC
+            -- serves its generated default layout. A header row with zero items is
+            -- an intentionally emptied showcase. Hero-only columns are zero/empty
+            -- for stat items.
+            CREATE TABLE IF NOT EXISTS showcase_layouts (
+                account_id INTEGER NOT NULL,
+                showcase_type INTEGER NOT NULL,
+                format_version INTEGER NOT NULL DEFAULT 0,
+                background_id INTEGER NOT NULL DEFAULT 0,
+                background_dim INTEGER NOT NULL DEFAULT 0,
+                background_blur INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, showcase_type)
+            );
+
+            CREATE TABLE IF NOT EXISTS showcase_items (
+                account_id INTEGER NOT NULL,
+                showcase_type INTEGER NOT NULL,
+                position INTEGER NOT NULL,
+                showcase_item_id INTEGER NOT NULL,
+                kind INTEGER NOT NULL,
+                ref_id INTEGER NOT NULL DEFAULT 0,
+                position_x INTEGER NOT NULL DEFAULT 0,
+                position_y INTEGER NOT NULL DEFAULT 0,
+                scale INTEGER NOT NULL DEFAULT 0,
+                width INTEGER NOT NULL DEFAULT 0,
+                height INTEGER NOT NULL DEFAULT 0,
+                rotation INTEGER NOT NULL DEFAULT 0,
+                parent_id INTEGER NOT NULL DEFAULT 0,
+                parent_attachment_point_id INTEGER NOT NULL DEFAULT 0,
+                attachment_anchor_x INTEGER NOT NULL DEFAULT 0,
+                attachment_anchor_y INTEGER NOT NULL DEFAULT 0,
+                item_flags INTEGER NOT NULL DEFAULT 0,
+                hero_flags INTEGER NOT NULL DEFAULT 0,
+                hero_rotation INTEGER NOT NULL DEFAULT 0,
+                hero_zoom INTEGER NOT NULL DEFAULT 0,
+                hero_animation_name TEXT NOT NULL DEFAULT '',
+                hero_animation_playback_speed INTEGER NOT NULL DEFAULT 0,
+                hero_animation_offset INTEGER NOT NULL DEFAULT 0,
+                hero_slot_index INTEGER NOT NULL DEFAULT 0,
+                hero_model_index INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (account_id, showcase_type, position)
             );
 
             CREATE TABLE IF NOT EXISTS featured_heroes (
@@ -3343,6 +3559,43 @@ public sealed class DotaStatsProfileSlot
     public uint SlotId { get; init; }
     public uint SlotType { get; init; }
     public ulong SlotValue { get; init; }
+}
+
+public sealed class DotaStatsShowcaseLayout
+{
+    public uint ShowcaseType { get; init; }
+    public uint FormatVersion { get; init; }
+    public uint BackgroundId { get; init; }
+    public uint BackgroundDim { get; init; }
+    public uint BackgroundBlur { get; init; }
+    public List<DotaStatsShowcaseItem> Items { get; } = new();
+}
+
+public sealed class DotaStatsShowcaseItem
+{
+    public uint ShowcaseItemId { get; init; }
+    public uint Kind { get; init; }
+    public uint RefId { get; init; }
+    // Positions are signed in the protocol (CMsgShowcaseItemPosition).
+    public int PositionX { get; init; }
+    public int PositionY { get; init; }
+    public uint Scale { get; init; }
+    public uint Width { get; init; }
+    public uint Height { get; init; }
+    public uint Rotation { get; init; }
+    public uint ParentId { get; init; }
+    public uint ParentAttachmentPointId { get; init; }
+    public uint AttachmentAnchorX { get; init; }
+    public uint AttachmentAnchorY { get; init; }
+    public uint ItemFlags { get; init; }
+    public uint HeroFlags { get; init; }
+    public uint HeroRotation { get; init; }
+    public uint HeroZoom { get; init; }
+    public string HeroAnimationName { get; init; } = string.Empty;
+    public uint HeroAnimationPlaybackSpeed { get; init; }
+    public uint HeroAnimationOffset { get; init; }
+    public uint HeroSlotIndex { get; init; }
+    public uint HeroModelIndex { get; init; }
 }
 
 public sealed class DotaStatsMatchSignOutPermissionAudit

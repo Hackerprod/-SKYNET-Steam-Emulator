@@ -7,7 +7,6 @@ import {
     DotaPlayerRecentCommends,
     DotaPlayerRecentMatchInfo,
     DotaRecentMatchOutcomes,
-    DotaShowcaseStats,
     DotaSignOutMvpPlayer,
     HandlerContext,
     RawMessageContext,
@@ -27,8 +26,6 @@ import {
     CMsgClientToGCRequestPlayerRecentAccomplishments,
     CMsgClientToGCRequestPlayerRecentAccomplishmentsResponse,
     CMsgClientToGCRerollPlayerChallenge,
-    CMsgClientToGCShowcaseGetUserData,
-    CMsgClientToGCShowcaseGetUserDataResponse,
     CMsgClientToGCTeammateStatsRequest,
     CMsgClientToGCTeammateStatsResponse,
     CMsgClientToGCVoteForMVP,
@@ -62,13 +59,12 @@ import {
     CMsgPlayerRecentMatchInfo,
     CMsgPlayerRecentMatchOutcomes,
     CMsgRetrieveMatchVote,
-    CMsgShowcase,
-    CMsgShowcaseItem,
     DOTAMatchVote,
     Msg,
     Proto,
     Routes
 } from "../generated/dota";
+import { requestedAccountId } from "./shared/profileStats";
 
 const STATS_SUCCESS = 1;
 const REROLL_SUCCESS = 0;
@@ -93,7 +89,6 @@ export class Stats {
         gc.on(Routes.HeroGlobalData, (ctx) => this.heroGlobalData(ctx));
         gc.on(Routes.TeammateStats, (ctx) => this.teammateStats(ctx));
         gc.on(Routes.RankRequest, (ctx) => this.rankRequest(ctx));
-        gc.on(Routes.ShowcaseGetUserData, (ctx) => this.showcaseGetUserData(ctx));
         gc.on(Routes.RequestPlayerRecentAccomplishments, (ctx) => this.clientRecentAccomplishments(ctx));
         gc.on(Routes.RequestPlayerHeroRecentAccomplishments, (ctx) => this.clientHeroRecentAccomplishments(ctx));
         gc.on(Routes.HasPlayerVotedForMvp, (ctx) => this.hasPlayerVotedForMvp(ctx));
@@ -246,17 +241,6 @@ export class Stats {
         return true;
     }
 
-    showcaseGetUserData(
-        ctx: HandlerContext<CMsgClientToGCShowcaseGetUserData, CMsgClientToGCShowcaseGetUserDataResponse>
-    ): boolean {
-        const accountId = requestedAccountId(ctx.request.accountId, ctx.accountId);
-        ctx.reply({
-            response: STATS_SUCCESS,
-            showcase: mapShowcase(ctx.services.stats.getShowcaseStats(accountId))
-        });
-        return true;
-    }
-
     clientRecentAccomplishments(
         ctx: HandlerContext<
             CMsgClientToGCRequestPlayerRecentAccomplishments,
@@ -346,11 +330,6 @@ export class Stats {
     }
 }
 
-function requestedAccountId(value: number | undefined, fallback: number): number {
-    const accountId = value ?? 0;
-    return accountId === 0 ? fallback : accountId;
-}
-
 function mapMatchVote(vote: number): number {
     if (vote === DOTAMatchVote.Positive || vote === DOTAMatchVote.Negative) {
         return vote;
@@ -438,39 +417,6 @@ function mapMatchHistory(matches: DotaMatchPlayer[]): CMsgDOTAGetPlayerMatchHist
     }
 
     return mapped;
-}
-
-function mapShowcase(stats: DotaShowcaseStats): CMsgShowcase {
-    return {
-        showcaseItems: [
-            showcaseStat(1, 3, stats.gamesWon, 0, 0),
-            showcaseStat(2, 4, stats.commendCount, 280, 0),
-            showcaseStat(3, 8, stats.mvpCount, 560, 0)
-        ],
-        moderationState: 0
-    };
-}
-
-function showcaseStat(itemId: number, statId: number, score: number, x: number, y: number): CMsgShowcaseItem {
-    return {
-        showcaseItemId: itemId,
-        itemPosition: {
-            positionX: x,
-            positionY: y,
-            scale: 100,
-            width: 240,
-            height: 120
-        },
-        itemData: {
-            stat: {
-                data: {
-                    statScore: score
-                },
-                statId
-            }
-        },
-        state: 0
-    };
 }
 
 function mapPlayerRecentAccomplishments(source: DotaPlayerRecentAccomplishments): CMsgPlayerRecentAccomplishments {

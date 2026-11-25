@@ -25384,6 +25384,12 @@ export const Routes = {
         responseId: Msg.ClientToGCShowcaseGetUserDataResponse,
         response: Proto.CMsgClientToGCShowcaseGetUserDataResponse
     } as GcRoute<CMsgClientToGCShowcaseGetUserData, CMsgClientToGCShowcaseGetUserDataResponse>,
+    ShowcaseSetUserData: {
+        requestId: Msg.ClientToGCShowcaseSetUserData,
+        request: Proto.CMsgClientToGCShowcaseSetUserData,
+        responseId: Msg.ClientToGCShowcaseSetUserDataResponse,
+        response: Proto.CMsgClientToGCShowcaseSetUserDataResponse
+    } as GcRoute<CMsgClientToGCShowcaseSetUserData, CMsgClientToGCShowcaseSetUserDataResponse>,
     SocialFeedPostComment: {
         requestId: Msg.ClientToGCSocialFeedPostCommentRequest,
         request: Proto.CMsgClientToGCSocialFeedPostCommentRequest,

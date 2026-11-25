@@ -67,6 +67,7 @@ export interface GcServices {
     readonly match: DotaMatchService;
     readonly party: DotaPartyService;
     readonly profiles: DotaProfileService;
+    readonly showcase: DotaShowcaseService;
     readonly social: DotaSocialService;
     readonly chat: DotaChatService;
     readonly guilds: DotaGuildService;
@@ -75,6 +76,50 @@ export interface GcServices {
     readonly teams: DotaTeamService;
 }
 
+// Persisted profile showcase layout (one per account and showcase type). The
+// host stores it as opaque numbers/strings; Showcase.ts owns every rule about
+// what a valid layout is. Stat scores are never stored: they are recomputed
+// from the account's data on every read.
+export interface DotaShowcaseService {
+    // Returns null when the account never saved a layout of this type.
+    getLayout(accountId: number, showcaseType: number): DotaShowcaseLayout | null;
+    // Always saves for the calling account. Returns false when nothing was saved.
+    saveLayout(showcaseType: number, layout: DotaShowcaseLayout): boolean;
+}
+
+export interface DotaShowcaseLayout {
+    readonly showcaseType: number;
+    readonly formatVersion: number;
+    readonly backgroundId: number;
+    readonly backgroundDim: number;
+    readonly backgroundBlur: number;
+    readonly items: DotaShowcaseLayoutItem[];
+}
+
+export interface DotaShowcaseLayoutItem {
+    readonly showcaseItemId: number;
+    readonly kind: number;
+    readonly refId: number;
+    readonly positionX: number;
+    readonly positionY: number;
+    readonly scale: number;
+    readonly width: number;
+    readonly height: number;
+    readonly rotation: number;
+    readonly parentId: number;
+    readonly parentAttachmentPointId: number;
+    readonly attachmentAnchorX: number;
+    readonly attachmentAnchorY: number;
+    readonly itemFlags: number;
+    readonly heroFlags: number;
+    readonly heroRotation: number;
+    readonly heroZoom: number;
+    readonly heroAnimationName: string;
+    readonly heroAnimationPlaybackSpeed: number;
+    readonly heroAnimationOffset: number;
+    readonly heroSlotIndex: number;
+    readonly heroModelIndex: number;
+}
 export interface DotaItemService {
     getInventory(steamId?: bigint): DotaRuntimeInventory;
     getCatalogItem(defIndex: number): DotaCatalogItem | null;
@@ -563,7 +608,6 @@ export interface DotaStatsService {
     getMatchDetails(matchId: bigint): DotaMatch | null;
     getHeroStatsHistory(accountId: number, heroId: number): DotaMatchPlayer[];
     getMatchVotes(matchId: bigint): DotaMatchVoteSummary;
-    getShowcaseStats(accountId: number): DotaShowcaseStats;
     getRecentAccomplishments(accountId: number): DotaPlayerRecentAccomplishments;
     getHeroRecentAccomplishments(accountId: number, heroId: number): DotaHeroRecentAccomplishments;
     hasMvpVote(matchId: bigint): boolean;
@@ -929,12 +973,6 @@ export interface DotaMatchPlayer {
     readonly firstBloodTime: number;
 }
 
-export interface DotaShowcaseStats {
-    readonly gamesWon: number;
-    readonly commendCount: number;
-    readonly mvpCount: number;
-}
-
 export interface DotaPlayerRecentAccomplishments {
     readonly recentOutcomes: DotaRecentMatchOutcomes;
     readonly totalRecord: DotaPlayerMatchRecord;
@@ -1217,6 +1255,15 @@ class GcDotaProfileService implements DotaProfileService {
     }
 }
 
+class GcDotaShowcaseService implements DotaShowcaseService {
+    getLayout(accountId: number, showcaseType: number): DotaShowcaseLayout | null {
+        return dotaShowcaseLayout(accountId, showcaseType) as DotaShowcaseLayout | null;
+    }
+
+    saveLayout(showcaseType: number, layout: DotaShowcaseLayout): boolean {
+        return dotaSaveShowcaseLayout(showcaseType, layout);
+    }
+}
 class GcDotaSocialService implements DotaSocialService {
     emoticonAccess(): DotaEmoticonAccess {
         return dotaSocialEmoticonAccess() as DotaEmoticonAccess;
@@ -1491,10 +1538,6 @@ class GcDotaStatsService implements DotaStatsService {
         return dotaMatchVotes(matchId) as DotaMatchVoteSummary;
     }
 
-    getShowcaseStats(accountId: number): DotaShowcaseStats {
-        return dotaShowcaseStats(accountId) as DotaShowcaseStats;
-    }
-
     getRecentAccomplishments(accountId: number): DotaPlayerRecentAccomplishments {
         return dotaRecentAccomplishments(accountId) as DotaPlayerRecentAccomplishments;
     }
@@ -1534,6 +1577,7 @@ class GcServiceContainer implements GcServices {
     match: DotaMatchService;
     party: DotaPartyService;
     profiles: DotaProfileService;
+    showcase: DotaShowcaseService;
     social: DotaSocialService;
     chat: DotaChatService;
     guilds: DotaGuildService;
@@ -1547,6 +1591,7 @@ class GcServiceContainer implements GcServices {
         this.match = new GcDotaMatchService();
         this.party = new GcDotaPartyService();
         this.profiles = new GcDotaProfileService();
+        this.showcase = new GcDotaShowcaseService();
         this.social = new GcDotaSocialService();
         this.chat = new GcDotaChatService();
         this.guilds = new GcDotaGuildService();

@@ -46,6 +46,8 @@
   "8880": { "name": "GCToClientRankResponse", "protoType": "CMsgGCToClientRankResponse" },
   "8886": { "name": "ClientToGCShowcaseGetUserData", "protoType": "CMsgClientToGCShowcaseGetUserData" },
   "8887": { "name": "ClientToGCShowcaseGetUserDataResponse", "protoType": "CMsgClientToGCShowcaseGetUserDataResponse" },
+  "8888": { "name": "ClientToGCShowcaseSetUserData", "protoType": "CMsgClientToGCShowcaseSetUserData" },
+  "8889": { "name": "ClientToGCShowcaseSetUserDataResponse", "protoType": "CMsgClientToGCShowcaseSetUserDataResponse" },
   "8332": { "name": "ClientToGCRequestPlayerRecentAccomplishments", "protoType": "CMsgClientToGCRequestPlayerRecentAccomplishments" },
   "8333": { "name": "ClientToGCRequestPlayerRecentAccomplishmentsResponse", "protoType": "CMsgClientToGCRequestPlayerRecentAccomplishmentsResponse" },
   "8334": { "name": "ClientToGCRequestPlayerHeroRecentAccomplishments", "protoType": "CMsgClientToGCRequestPlayerHeroRecentAccomplishments" },
