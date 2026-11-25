@@ -2804,7 +2804,9 @@ internal sealed class ScriptExchangeHost
             ServerSteamId = U64Field(snapshot, "serverSteamId", "dotaRecordRealtimeStats.snapshot", _context.SteamId),
             MatchId = U64Field(snapshot, "matchId", "dotaRecordRealtimeStats.snapshot"),
             Timestamp = U32Field(snapshot, "timestamp", "dotaRecordRealtimeStats.snapshot"),
-            GameTime = U32Field(snapshot, "gameTime", "dotaRecordRealtimeStats.snapshot"),
+            // Dota reports a negative game time during the pre-game countdown (e.g. -45).
+            // The stats store keeps it unsigned, so the countdown is recorded as 0.
+            GameTime = U32FieldClampedAtZero(snapshot, "gameTime", "dotaRecordRealtimeStats.snapshot"),
             GameState = U32Field(snapshot, "gameState", "dotaRecordRealtimeStats.snapshot"),
             GameMode = U32Field(snapshot, "gameMode", "dotaRecordRealtimeStats.snapshot"),
             LobbyType = U32Field(snapshot, "lobbyType", "dotaRecordRealtimeStats.snapshot"),
@@ -4015,6 +4017,19 @@ internal sealed class ScriptExchangeHost
 
         var fieldPath = $"{path}.{fieldName}";
         return CheckedToUInt32(ToNumber(field, fieldPath), fieldPath);
+    }
+
+    private static uint U32FieldClampedAtZero(TsObject value, string fieldName, string path)
+    {
+        var field = value.GetField(fieldName);
+        if (field is TsNull or TsVoid)
+        {
+            return 0;
+        }
+
+        var fieldPath = $"{path}.{fieldName}";
+        var number = ToNumber(field, fieldPath);
+        return number < 0 ? 0u : CheckedToUInt32(number, fieldPath);
     }
 
     // Convert.ToUInt32(double) throws a bare OverflowException with no indication of

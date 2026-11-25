@@ -491,7 +491,14 @@ public sealed class GameCoordinatorProtoCodec
 
         if (targetType == typeof(uint))
         {
-            result = ConvertInteger(ReadInteger(value), targetType);
+            // The script host hands unsigned 32-bit values (account ids, timestamps)
+            // to scripts as Int32 with unchecked wrap-around, so an account id above
+            // 2^31 arrives negative. An Int32-typed value is that same bit pattern;
+            // reinterpret it instead of rejecting it. Any other numeric type stays
+            // strictly range-checked.
+            result = value is TsInt32Value wrapped
+                ? unchecked((uint)wrapped.Value)
+                : ConvertInteger(ReadInteger(value), targetType);
             return true;
         }
 
