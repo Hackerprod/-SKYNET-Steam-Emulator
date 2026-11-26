@@ -338,11 +338,13 @@ public sealed partial class SteamApiStateService
     {
         if (!IsUserOnlineLocked(clone.SteamId))
         {
-            // Offline: report no game/lobby/rich presence so friends never show
-            // an offline user as "In game". GetFriendGamePlayed on the client is
-            // driven by AppId, so it must be zeroed here.
-            clone.PersonaState = 0;
-            clone.GameState = "offline";
+            // No game running: report no game/lobby/rich presence so friends never
+            // show the user as "In game". GetFriendGamePlayed on the client is
+            // driven by AppId, so it must be zeroed here. A user whose launcher is
+            // open is still ONLINE (as in the real Steam client), just not playing.
+            var launcherOnline = IsLauncherOnlineLocked(clone.SteamId);
+            clone.PersonaState = launcherOnline ? 1 : 0;
+            clone.GameState = launcherOnline ? "online" : "offline";
             clone.HeroId = 0;
             clone.AppId = 0;
             clone.LobbyId = 0;
@@ -435,18 +437,19 @@ public sealed partial class SteamApiStateService
             return;
         }
 
-        var online = IsUserOnlineLocked(relatedSteamId) ? 1 : 0;
+        var gameOnline = IsUserOnlineLocked(relatedSteamId) ? 1 : 0;
+        var online = IsUserVisiblyOnlineLocked(relatedSteamId) ? 1 : 0;
         EnqueueEvent(recipientSteamId, new ApiEvent
         {
             Type = type,
             SteamId = relatedUser.SteamId,
             AccountId = relatedUser.AccountId,
             PersonaName = relatedUser.PersonaName,
-            AppId = online == 1 ? relatedUser.AppId : 0,
-            LobbyId = online == 1 ? relatedUser.LobbyId : 0,
+            AppId = gameOnline == 1 ? relatedUser.AppId : 0,
+            LobbyId = gameOnline == 1 ? relatedUser.LobbyId : 0,
             PersonaState = online,
             ChangeFlags = PersonaChangeRelationship,
-            RichPresence = online == 1
+            RichPresence = gameOnline == 1
                 ? new Dictionary<string, string>(relatedUser.RichPresence)
                 : new Dictionary<string, string>(),
             FriendRelationship = relationship,

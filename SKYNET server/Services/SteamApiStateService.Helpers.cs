@@ -172,7 +172,8 @@ public sealed partial class SteamApiStateService
         // Carry the live presence in every friend event so clients never keep a
         // stale "online / in game" for someone who left. Offline users report no
         // game, lobby or rich presence.
-        var online = IsUserOnlineLocked(steamId) ? 1 : 0;
+        var gameOnline = IsUserOnlineLocked(steamId) ? 1 : 0;
+        var online = IsUserVisiblyOnlineLocked(steamId) ? 1 : 0;
         foreach (var recipient in recipients)
         {
             var relationship = GetRelationshipLocked(recipient, steamId);
@@ -182,14 +183,14 @@ public sealed partial class SteamApiStateService
                 SteamId = steamId,
                 AccountId = user.AccountId,
                 PersonaName = user.PersonaName,
-                AppId = online == 1 ? user.AppId : 0,
-                LobbyId = online == 1 ? user.LobbyId : 0,
-                GameServerSteamId = online == 1 ? user.GameServerSteamId : 0,
-                GameServerIp = online == 1 ? user.GameServerIp : 0,
-                GameServerPort = online == 1 ? user.GameServerPort : (ushort)0,
+                AppId = gameOnline == 1 ? user.AppId : 0,
+                LobbyId = gameOnline == 1 ? user.LobbyId : 0,
+                GameServerSteamId = gameOnline == 1 ? user.GameServerSteamId : 0,
+                GameServerIp = gameOnline == 1 ? user.GameServerIp : 0,
+                GameServerPort = gameOnline == 1 ? user.GameServerPort : (ushort)0,
                 PersonaState = online,
                 ChangeFlags = flags,
-                RichPresence = online == 1
+                RichPresence = gameOnline == 1
                     ? new Dictionary<string, string>(user.RichPresence)
                     : new Dictionary<string, string>(),
                 FriendRelationship = relationship

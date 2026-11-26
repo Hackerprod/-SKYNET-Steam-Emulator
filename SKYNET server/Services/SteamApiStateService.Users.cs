@@ -91,6 +91,10 @@ public sealed partial class SteamApiStateService
         {
             MarkUserOnlineLocked(steamId);
         }
+        else if (processRole == ProcessRoleLauncher && ReconcileUserPresenceLocked(user))
+        {
+            changedUser = true;
+        }
 
         if (changedUser)
         {
@@ -141,6 +145,47 @@ public sealed partial class SteamApiStateService
         return false;
     }
 
+    // What friends see: the game is running OR the launcher is open. Unlike
+    // IsUserOnlineLocked this is NOT used by the Dota GC or lobby liveness.
+    private bool IsUserVisiblyOnlineLocked(ulong steamId) =>
+        IsUserOnlineLocked(steamId) || IsLauncherOnlineLocked(steamId);
+
+    // Brings one user's stored presence in line with live sessions and notifies
+    // friends on any change. Visible presence (game OR launcher) drives
+    // PersonaState; game-only data (rich presence, hero, advertised server) is
+    // dropped as soon as the game session is gone, even if the launcher stays open.
+    private bool ReconcileUserPresenceLocked(ApiUser user)
+    {
+        var gameOnline = IsUserOnlineLocked(user.SteamId);
+        var online = gameOnline || IsLauncherOnlineLocked(user.SteamId) ? 1 : 0;
+        var changed = false;
+
+        if (!gameOnline && (user.RichPresence.Count > 0
+            || user.HeroId != 0
+            || user.GameServerSteamId != 0
+            || !string.Equals(user.GameState, "offline", StringComparison.Ordinal)))
+        {
+            user.RichPresence.Clear();
+            user.HeroId = 0;
+            user.GameState = "offline";
+            ClearAdvertisedGameServer(user);
+            changed = true;
+        }
+
+        if (user.PersonaState != online)
+        {
+            user.PersonaState = online;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            EnqueueFriendEvents(user.SteamId, "persona_state_changed", PersonaChangeStatus);
+        }
+
+        return changed;
+    }
+
     // "in_game" | "online" | "offline". Exposed only through GET /api/users.
     private string GetPresenceLevelLocked(ulong steamId)
     {
@@ -188,21 +233,10 @@ public sealed partial class SteamApiStateService
             var changed = false;
             foreach (var user in _state.Users.Values)
             {
-                var online = IsUserOnlineLocked(user.SteamId) ? 1 : 0;
-                if (user.PersonaState != online)
+                // Going offline also drops stale rich presence so friends don't keep
+                // seeing "in match / hero X" for someone who left.
+                if (ReconcileUserPresenceLocked(user))
                 {
-                    user.PersonaState = online;
-                    if (online == 0)
-                    {
-                        // Going offline: drop stale rich presence so friends don't
-                        // keep seeing "in match / hero X" for someone who left.
-                        user.RichPresence.Clear();
-                        user.HeroId = 0;
-                        user.GameState = "offline";
-                        ClearAdvertisedGameServer(user);
-                    }
-
-                    EnqueueFriendEvents(user.SteamId, "persona_state_changed", PersonaChangeStatus);
                     changed = true;
                 }
             }
@@ -242,6 +276,12 @@ public sealed partial class SteamApiStateService
                     _sessions.Remove(key);
                 }
 
+                // Friends stop seeing the user online unless a game is still running.
+                if (_state.Users.TryGetValue(steamId, out var launcherUser) && ReconcileUserPresenceLocked(launcherUser))
+                {
+                    SaveState();
+                }
+
                 return true;
             }
 
@@ -254,14 +294,11 @@ public sealed partial class SteamApiStateService
                 _sessions.Remove(key);
             }
 
-            if (_state.Users.TryGetValue(steamId, out var user) && user.PersonaState != 0)
+            // Game gone: game data is dropped, but the user stays online for friends
+            // while the launcher is still open.
+            if (_state.Users.TryGetValue(steamId, out var user))
             {
-                user.PersonaState = 0;
-                user.GameState = "offline";
-                user.HeroId = 0;
-                user.RichPresence.Clear();
-                ClearAdvertisedGameServer(user);
-                EnqueueFriendEvents(steamId, "persona_state_changed", PersonaChangeStatus);
+                ReconcileUserPresenceLocked(user);
             }
 
             SaveState();

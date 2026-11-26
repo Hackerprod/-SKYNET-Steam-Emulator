@@ -62,6 +62,15 @@ public sealed partial class SteamApiStateService
             }
         }
 
+        // What a friend (e.g. the in-game friends list) gets from GET /friends.
+        ApiUser FriendView()
+        {
+            lock (service._sync)
+            {
+                return service.CloneUserForViewerLocked(service._state.Users[steamId], 76561197960287931UL);
+            }
+        }
+
         int Count(string role)
         {
             lock (service._sync)
@@ -87,21 +96,43 @@ public sealed partial class SteamApiStateService
         Check(Count("probe") == 1 && Level() == "online" && !service.IsOnlineDotaUser(steamId), "probe counts for nothing");
 
         service.ReconcilePresence();
-        Check(service._state.Users[steamId].PersonaState == 0, "launcher-only leaves PersonaState 0");
+        Check(service._state.Users[steamId].PersonaState == 1, "launcher-only => stored PersonaState 1 (visible to friends)");
+        var launcherOnlyView = FriendView();
+        Check(launcherOnlyView.PersonaState == 1 && launcherOnlyView.GameState == "online",
+            "launcher-only => friends (game friends list) see ONLINE, not offline");
+        Check(launcherOnlyView.AppId == 0 && launcherOnlyView.RichPresence.Count == 0,
+            "launcher-only => friends do not see a game being played");
 
         var game = Start(Request("client", "inst-1", gameAppId))!;
         service.SetPresence(game.AccessToken, "status", "In lobby");
         Check(Level() == "in_game" && service.IsOnlineDotaUser(steamId), "game session => in_game and GC online");
+        var inGameView = FriendView();
+        Check(inGameView.PersonaState == 1 && inGameView.AppId == gameAppId && inGameView.GameState != "online",
+            "game session => friends see the game being played");
         Check(Count("launcher") == 1, "game start keeps launcher session (same ClientInstanceId)");
 
         service.MarkSelfOffline(game.AccessToken);
         Check(Count("launcher") == 1 && Level() == "online" && !service.IsOnlineDotaUser(steamId), "game offline => back to online, launcher survives");
+        var afterGameView = FriendView();
+        Check(afterGameView.PersonaState == 1 && afterGameView.AppId == 0 && afterGameView.RichPresence.Count == 0
+            && service._state.Users[steamId].PersonaState == 1 && service._state.Users[steamId].RichPresence.Count == 0,
+            "game offline => friends still see ONLINE, stale game data cleared");
 
         var game2 = Start(Request("client", "inst-1", gameAppId))!;
         service.MarkSelfOffline(launcherToken);
         Check(Count("launcher") == 0 && Level() == "in_game", "launcher offline while game runs leaves in_game");
         service.MarkSelfOffline(game2.AccessToken);
         Check(Level() == "offline", "all gone => offline");
+        Check(service._state.Users[steamId].PersonaState == 0 && FriendView().PersonaState == 0 && FriendView().GameState == "offline",
+            "all gone => friends see OFFLINE");
+
+        // Same ClientInstanceId as above: a different one would look like an identity
+        // collision to the (non-web) session resolver and remap the SteamId.
+        var closingToken = Start(Request("launcher", "inst-1"))!.AccessToken;
+        Check(FriendView().PersonaState == 1 && Level() == "online", "launcher start => friends see ONLINE immediately");
+        service.MarkSelfOffline(closingToken);
+        Check(service._state.Users[steamId].PersonaState == 0 && FriendView().PersonaState == 0,
+            "launcher exit (no game) => friends see OFFLINE immediately");
 
         Start(Request("launcher", "inst-1"));
         lock (service._sync)
