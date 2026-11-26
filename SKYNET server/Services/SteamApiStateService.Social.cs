@@ -23,7 +23,12 @@ public sealed partial class SteamApiStateService
 
             return _state.Users.Values
                 .OrderBy(u => u.PersonaName)
-                .Select(user => CloneUserForViewerLocked(user, session!.SteamId))
+                .Select(user =>
+                {
+                    var clone = CloneUserForViewerLocked(user, session!.SteamId);
+                    clone.Presence = GetPresenceLevelLocked(user.SteamId);
+                    return clone;
+                })
                 .ToList();
         }
     }

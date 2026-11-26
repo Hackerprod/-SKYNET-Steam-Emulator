@@ -76,14 +76,23 @@ public sealed class ServerClient
         return _baseUrl;
     }
 
-    public async Task<SessionResult> ResolveSessionAsync(AppConfig app)
+    /// <summary>Token of the launcher's current session; empty when there is none.</summary>
+    public string? CurrentToken { get; private set; }
+
+    /// <summary>
+    /// Resolves the active web user and opens a session. With presence=true the session
+    /// is a "launcher" session (heartbeating, shows the user ONLINE); with presence=false
+    /// it is a "probe" (identity lookup only, never counts as presence).
+    /// </summary>
+    public async Task<SessionResult> ResolveSessionAsync(AppConfig app, bool presence = true, bool discover = true)
     {
-        await EnsureServerAsync(app).ConfigureAwait(false);
+        if (discover)
+            await EnsureServerAsync(app).ConfigureAwait(false);
 
         var request = new SessionRequestDto
         {
             ClientInstanceId = app.ClientInstanceId,
-            ProcessRole = "client",
+            ProcessRole = presence ? "launcher" : "probe",
             UseActiveWebUser = true
         };
 
@@ -91,13 +100,19 @@ public sealed class ServerClient
         {
             using var resp = await _http.PostAsJsonAsync(_baseUrl + "api/auth/steam/session", request, Json).ConfigureAwait(false);
             if (resp.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                if (presence) CurrentToken = null;
                 return SessionResult.NotLoggedIn();
+            }
             if (!resp.IsSuccessStatusCode)
                 return SessionResult.Unavailable($"Server returned {(int)resp.StatusCode}");
 
             var dto = await resp.Content.ReadFromJsonAsync<SessionResultDto>(Json).ConfigureAwait(false);
             if (dto?.User == null)
+            {
+                if (presence) CurrentToken = null;
                 return SessionResult.NotLoggedIn();
+            }
 
             var user = new WebUser
             {
@@ -108,15 +123,62 @@ public sealed class ServerClient
                 // present -> show online. (The server's GameState stays "offline"
                 // until a game reports rich presence, which would read as offline here.)
                 Online = true,
+                Level = PresenceLevel.Online,
                 IsAdmin = dto.IsAdmin
             };
             user.AvatarPng = await FetchAvatarAsync(user.AccountId).ConfigureAwait(false);
+            if (presence) CurrentToken = dto.AccessToken;
             return SessionResult.Ok(user, dto.AccessToken);
         }
         catch (Exception ex)
         {
             return SessionResult.Unavailable(ex.Message);
         }
+    }
+
+    /// <summary>Keep-alive for the launcher session: refreshes presence and token expiry.</summary>
+    public async Task<HeartbeatResult> HeartbeatAsync(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return HeartbeatResult.Unauthorized;
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, _baseUrl + "api/users/me");
+            req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            using var resp = await _http.SendAsync(req).ConfigureAwait(false);
+            if (resp.StatusCode == HttpStatusCode.Unauthorized) return HeartbeatResult.Unauthorized;
+            return resp.IsSuccessStatusCode ? HeartbeatResult.Ok : HeartbeatResult.Unavailable;
+        }
+        catch
+        {
+            return HeartbeatResult.Unavailable;
+        }
+    }
+
+    /// <summary>
+    /// Best-effort "launcher closed" notice so friends see us offline right away. Bounded to
+    /// about 2 seconds and never throws; a crash falls back to the server's presence timeout.
+    /// </summary>
+    public void GoOffline()
+    {
+        var token = CurrentToken;
+        CurrentToken = null;
+        if (string.IsNullOrWhiteSpace(token)) return;
+        try
+        {
+            var url = _baseUrl + "api/presence/offline";
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using var cts = new System.Threading.CancellationTokenSource(1500);
+                    using var req = new HttpRequestMessage(HttpMethod.Post, url);
+                    req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    using var resp = await _http.SendAsync(req, cts.Token).ConfigureAwait(false);
+                }
+                catch { }
+            }).Wait(2000);
+        }
+        catch { }
     }
 
     /// <summary>Community users from the server (requires a session token).</summary>
@@ -135,12 +197,16 @@ public sealed class ServerClient
             if (dtos == null) return result;
             foreach (var d in dtos)
             {
+                var level = ToLevel(d);
                 result.Add(new WebUser
                 {
                     AccountId = d.AccountId,
                     SteamId = d.SteamId,
                     DisplayName = string.IsNullOrWhiteSpace(d.PersonaName) ? "Player" : d.PersonaName,
-                    Online = !string.Equals(d.GameState, "offline", StringComparison.OrdinalIgnoreCase)
+                    Level = level,
+                    Online = level != PresenceLevel.Offline,
+                    AppId = d.AppId,
+                    PresenceDetail = ToDetail(d)
                 });
             }
 
@@ -185,6 +251,32 @@ public sealed class ServerClient
         }
     }
 
+    // Older servers send no Presence: fall back to GameState.
+    private static PresenceLevel ToLevel(ApiUserDto d)
+    {
+        switch ((d.Presence ?? "").ToLowerInvariant())
+        {
+            case "in_game": return PresenceLevel.InGame;
+            case "online": return PresenceLevel.Online;
+            case "offline": return PresenceLevel.Offline;
+        }
+        return string.Equals(d.GameState, "offline", StringComparison.OrdinalIgnoreCase)
+            ? PresenceLevel.Offline
+            : PresenceLevel.InGame;
+    }
+
+    private static string ToDetail(ApiUserDto d)
+    {
+        if (d.RichPresence != null)
+        {
+            if (d.RichPresence.TryGetValue("status", out var status) && !string.IsNullOrWhiteSpace(status)) return status;
+            if (d.RichPresence.TryGetValue("steam_display", out var display) && !string.IsNullOrWhiteSpace(display)) return display;
+        }
+        if (string.Equals(d.GameState, "in_match", StringComparison.OrdinalIgnoreCase)) return "In match";
+        if (string.Equals(d.GameState, "menu", StringComparison.OrdinalIgnoreCase)) return "In menu";
+        return "";
+    }
+
     // ---- wire DTOs ----
     private sealed class SessionRequestDto
     {
@@ -212,5 +304,8 @@ public sealed class ServerClient
         public string PersonaName { get; set; } = "";
         public int PersonaState { get; set; }
         public string GameState { get; set; } = "offline";
+        public string? Presence { get; set; }
+        public uint AppId { get; set; }
+        public Dictionary<string, string>? RichPresence { get; set; }
     }
 }

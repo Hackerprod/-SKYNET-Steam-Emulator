@@ -285,8 +285,13 @@
                                                 </Border>
                                                 <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="13" />
-                                                    <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="{Binding StatusBrush}"
-                                                               Margin="0,2,0,0" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                        <Ellipse Width="8" Height="8" Fill="{Binding DotBrush}"
+                                                                 VerticalAlignment="Center" Margin="0,0,6,0" />
+                                                        <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="{Binding StatusBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="170"
+                                                                   ToolTip="{Binding StatusText}" />
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>

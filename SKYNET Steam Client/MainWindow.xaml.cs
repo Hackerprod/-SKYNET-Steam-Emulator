@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using SKYNET.Client.Models;
 using SKYNET.Client.Services;
@@ -20,6 +21,8 @@ public partial class MainWindow : Window
     private string _search = "";
     private SessionResult? _session;
     private bool _loadingSortUi;
+    private readonly DispatcherTimer _presenceTimer = new() { Interval = TimeSpan.FromSeconds(30) };
+    private bool _presenceBusy;
 
     public MainWindow()
     {
@@ -33,8 +36,48 @@ public partial class MainWindow : Window
 
         InitSortUi();
         LoadGames();
-        Loaded += async (_, _) => await RefreshSessionAsync();
+        _presenceTimer.Tick += async (_, _) => await PresenceTickAsync();
+        Loaded += async (_, _) =>
+        {
+            await RefreshSessionAsync();
+            // Keeps running while hidden to tray, like the Steam client.
+            _presenceTimer.Start();
+        };
     }
+
+    /// <summary>
+    /// Presence heartbeat: refreshes the launcher session on the server (so we keep showing
+    /// ONLINE) and re-resolves it when the token is gone (server restart, expiry, not logged in).
+    /// </summary>
+    private async Task PresenceTickAsync()
+    {
+        if (_presenceBusy) return;
+        _presenceBusy = true;
+        try
+        {
+            var token = App.Server.CurrentToken;
+            if (string.IsNullOrEmpty(token) || _session?.Status != SessionStatus.Authenticated)
+            {
+                // No server discovery on timer-driven refreshes: it blocks while the server is down.
+                await RefreshSessionAsync(discover: false);
+            }
+            else
+            {
+                var beat = await App.Server.HeartbeatAsync(token);
+                // A refresh started elsewhere may already have replaced the token.
+                if (beat == HeartbeatResult.Unauthorized && token == App.Server.CurrentToken)
+                    await RefreshSessionAsync(discover: false);
+            }
+
+            if (UsersView.Visibility == Visibility.Visible && _session?.Status == SessionStatus.Authenticated)
+                await LoadUsersAsync();
+        }
+        catch { /* retry on the next tick */ }
+        finally { _presenceBusy = false; }
+    }
+
+    private string? ResolveGameName(uint appId) =>
+        App.Store.Config.Games.FirstOrDefault(g => g.AppId == appId)?.Name;
 
     // ================= views =================
 
@@ -80,7 +123,7 @@ public partial class MainWindow : Window
             users = await App.Server.GetUsersAsync(_session?.AccessToken);
         }
 
-        UsersItems.ItemsSource = users.Select(u => new UserItemVm(u)).ToList();
+        UsersItems.ItemsSource = users.Select(u => new UserItemVm(u, ResolveGameName)).ToList();
         UsersCount.Text = users.Count == 1 ? "1 user" : $"{users.Count} users";
         UsersEmpty.Visibility = users.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -227,9 +270,9 @@ public partial class MainWindow : Window
         });
     }
 
-    private async Task RefreshSessionAsync()
+    private async Task RefreshSessionAsync(bool discover = true)
     {
-        _session = await App.Server.ResolveSessionAsync(App.Store.Config);
+        _session = await App.Server.ResolveSessionAsync(App.Store.Config, presence: true, discover: discover);
         // Persist a server URL that discovery may have updated.
         App.Store.Save();
         BuildUserPanel(_session);
@@ -344,6 +387,12 @@ public partial class MainWindow : Window
         var maximized = WindowState == WindowState.Maximized;
         MaximizeRestoreButton.Content = maximized ? "❐" : "□";
         MaximizeRestoreButton.ToolTip = maximized ? "Restore" : "Maximize";
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _presenceTimer.Stop();
+        base.OnClosed(e);
     }
 
     protected override void OnClosing(CancelEventArgs e)

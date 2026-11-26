@@ -9,47 +9,13 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            ExpireStaleSessionsLocked();
-            var clientInstanceId = NormalizeClientInstanceId(request.ClientInstanceId, request.SteamId, request.AccountId);
-            var processRole = NormalizeProcessRole(request.ProcessRole);
-            var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserForIpLocked(clientIp) : null;
-            if (request.UseActiveWebUser && activeWebUser == null)
+            var session = CreateSessionLocked(request, clientIp, out var user);
+            if (session == null)
             {
                 return null;
             }
 
-            var requestedSteamId = activeWebUser?.SteamId
-                ?? (request.SteamId != 0 ? request.SteamId : ToSteamId(request.AccountId != 0 ? request.AccountId : NextAvailableAccountIdLocked()));
-            var steamId = activeWebUser != null ? requestedSteamId : ResolveSessionSteamIdLocked(requestedSteamId, clientInstanceId);
-            var user = activeWebUser != null
-                ? EnsureUser(steamId, activeWebUser.AccountId, request.AppId != 0 ? request.AppId : activeWebUser.AppId, activeWebUser.PersonaName)
-                : EnsureUser(steamId, SteamIdToAccountId(steamId), request.AppId, request.PersonaName);
-            var changedUser = false;
-            if (activeWebUser != null && !string.Equals(user.PersonaName, activeWebUser.PersonaName, StringComparison.Ordinal))
-            {
-                user.PersonaName = activeWebUser.PersonaName;
-                changedUser = true;
-            }
-
-            var session = new ApiSession
-            {
-                SteamId = steamId,
-                AppId = user.AppId,
-                AccessToken = Guid.NewGuid().ToString("N"),
-                RefreshToken = Guid.NewGuid().ToString("N"),
-                ClientInstanceId = clientInstanceId,
-                ProcessRole = processRole,
-                RemoteIp = clientIp,
-                LastSeenUtc = DateTime.UtcNow
-            };
-
-            _sessions[session.AccessToken] = session;
-            MarkUserOnlineLocked(steamId);
-            if (changedUser)
-            {
-                SaveState();
-            }
-
+            var steamId = session.SteamId;
             var isAdmin = _state.WebAccounts.Values.Any(a => a.SteamId == steamId && a.IsAdmin);
 
             return new ApiSessionResult
@@ -65,14 +31,85 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    // Registers a new session; returns null when the active web user cannot be resolved.
+    private ApiSession? CreateSessionLocked(ApiSessionRequest request, string? clientIp, out ApiUser user)
+    {
+        user = null!;
+        ExpireStaleSessionsLocked();
+        var clientInstanceId = NormalizeClientInstanceId(request.ClientInstanceId, request.SteamId, request.AccountId);
+        var processRole = NormalizeProcessRole(request.ProcessRole);
+        var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserForIpLocked(clientIp) : null;
+        if (request.UseActiveWebUser && activeWebUser == null)
+        {
+            return null;
+        }
+
+        var requestedSteamId = activeWebUser?.SteamId
+            ?? (request.SteamId != 0 ? request.SteamId : ToSteamId(request.AccountId != 0 ? request.AccountId : NextAvailableAccountIdLocked()));
+        var steamId = activeWebUser != null ? requestedSteamId : ResolveSessionSteamIdLocked(requestedSteamId, clientInstanceId);
+        var launcherLevel = IsLauncherLevelRole(processRole);
+        if (processRole == ProcessRoleLauncher)
+        {
+            // Re-resolves must not pile up sessions; only replace launcher sessions.
+            var previous = _sessions
+                .Where(kv => kv.Value.SteamId == steamId
+                    && string.Equals(kv.Value.ProcessRole, ProcessRoleLauncher, StringComparison.Ordinal)
+                    && string.Equals(kv.Value.ClientInstanceId, clientInstanceId, StringComparison.Ordinal))
+                .Select(kv => kv.Key)
+                .ToList();
+            foreach (var key in previous)
+            {
+                _sessions.Remove(key);
+            }
+        }
+
+        // Launcher/probe sessions pass appId 0 so they never overwrite user.AppId.
+        user = activeWebUser != null
+            ? EnsureUser(steamId, activeWebUser.AccountId, launcherLevel ? 0 : (request.AppId != 0 ? request.AppId : activeWebUser.AppId), activeWebUser.PersonaName)
+            : EnsureUser(steamId, SteamIdToAccountId(steamId), launcherLevel ? 0 : request.AppId, request.PersonaName);
+        var changedUser = false;
+        if (activeWebUser != null && !string.Equals(user.PersonaName, activeWebUser.PersonaName, StringComparison.Ordinal))
+        {
+            user.PersonaName = activeWebUser.PersonaName;
+            changedUser = true;
+        }
+
+        var session = new ApiSession
+        {
+            SteamId = steamId,
+            AppId = user.AppId,
+            AccessToken = Guid.NewGuid().ToString("N"),
+            RefreshToken = Guid.NewGuid().ToString("N"),
+            ClientInstanceId = clientInstanceId,
+            ProcessRole = processRole,
+            RemoteIp = clientIp,
+            LastSeenUtc = DateTime.UtcNow
+        };
+
+        _sessions[session.AccessToken] = session;
+        if (!launcherLevel)
+        {
+            MarkUserOnlineLocked(steamId);
+        }
+
+        if (changedUser)
+        {
+            SaveState();
+        }
+
+        return session;
+    }
+
     // True when the user has a live (recently-seen) game session. Web-dashboard
     // sessions do not count as in-game presence.
+    // Game-level presence only: launcher/probe sessions are excluded on purpose.
+    // Do not relax this, the Dota GC depends on it via IsOnlineDotaUser.
     private bool IsUserOnlineLocked(ulong steamId)
     {
         var now = DateTime.UtcNow;
         foreach (var session in _sessions.Values)
         {
-            if (session.SteamId != steamId || session.WebSession)
+            if (session.SteamId != steamId || session.WebSession || IsLauncherLevelRole(session.ProcessRole))
             {
                 continue;
             }
@@ -84,6 +121,35 @@ public sealed partial class SteamApiStateService
         }
 
         return false;
+    }
+
+    // True when the user's launcher is open and heartbeating.
+    private bool IsLauncherOnlineLocked(ulong steamId)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var session in _sessions.Values)
+        {
+            if (session.SteamId == steamId
+                && !session.WebSession
+                && string.Equals(session.ProcessRole, ProcessRoleLauncher, StringComparison.Ordinal)
+                && session.LastSeenUtc >= now - _presenceTimeout)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // "in_game" | "online" | "offline". Exposed only through GET /api/users.
+    private string GetPresenceLevelLocked(ulong steamId)
+    {
+        if (IsUserOnlineLocked(steamId))
+        {
+            return "in_game";
+        }
+
+        return IsLauncherOnlineLocked(steamId) ? "online" : "offline";
     }
 
     private bool IsKnownDotaUser(ulong steamId)
@@ -161,8 +227,26 @@ public sealed partial class SteamApiStateService
             }
 
             var steamId = session!.SteamId;
+            if (string.Equals(session.ProcessRole, ProcessRoleLauncher, StringComparison.Ordinal))
+            {
+                // Launcher closing: only its own launcher sessions go away. A game may
+                // still be running, so persona/game state and friend events are untouched.
+                var launcherSessions = _sessions
+                    .Where(kv => kv.Value.SteamId == steamId
+                        && string.Equals(kv.Value.ProcessRole, ProcessRoleLauncher, StringComparison.Ordinal)
+                        && string.Equals(kv.Value.ClientInstanceId, session.ClientInstanceId, StringComparison.Ordinal))
+                    .Select(kv => kv.Key)
+                    .ToList();
+                foreach (var key in launcherSessions)
+                {
+                    _sessions.Remove(key);
+                }
+
+                return true;
+            }
+
             var gameSessions = _sessions
-                .Where(kv => kv.Value.SteamId == steamId && !kv.Value.WebSession)
+                .Where(kv => kv.Value.SteamId == steamId && !kv.Value.WebSession && !IsLauncherLevelRole(kv.Value.ProcessRole))
                 .Select(kv => kv.Key)
                 .ToList();
             foreach (var key in gameSessions)
@@ -498,8 +582,21 @@ public sealed partial class SteamApiStateService
             "dedicated" => "dedicated",
             "server" => "dedicated",
             "web" => "web",
+            ProcessRoleLauncher => ProcessRoleLauncher,
+            ProcessRoleProbe => ProcessRoleProbe,
+            // Unknown roles map to "client". An older server therefore treats
+            // "launcher"/"probe" as a game-level client session.
             _ => "client"
         };
+    }
+
+    private const string ProcessRoleLauncher = "launcher";
+    private const string ProcessRoleProbe = "probe";
+
+    private static bool IsLauncherLevelRole(string? role)
+    {
+        return string.Equals(role, ProcessRoleLauncher, StringComparison.Ordinal)
+            || string.Equals(role, ProcessRoleProbe, StringComparison.Ordinal);
     }
 
     private static bool IsEventForSession(ApiQueuedEvent queuedEvent, ApiSession session)

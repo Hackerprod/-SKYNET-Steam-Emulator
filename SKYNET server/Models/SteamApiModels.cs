@@ -200,6 +200,9 @@ public sealed class ApiUser
     public uint GameServerIp { get; set; }
     public ushort GameServerPort { get; set; }
     public Dictionary<string, string> RichPresence { get; set; } = new();
+    // Launcher-level presence: "offline" | "online" | "in_game". Filled only by
+    // GET /api/users; empty elsewhere (clients then fall back to GameState).
+    public string Presence { get; set; } = string.Empty;
 }
 
 public sealed class ApiPersonaUpdate

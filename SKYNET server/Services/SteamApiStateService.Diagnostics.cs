@@ -29,6 +29,7 @@ public sealed partial class SteamApiStateService
                         persona = user?.PersonaName ?? string.Empty,
                         appId = user?.AppId ?? 0,
                         online = IsUserOnlineLocked(group.Key),
+                        launcherOnline = IsLauncherOnlineLocked(group.Key),
                         lastSeenSeconds = (int)(now - lastSeen).TotalSeconds
                     };
                 })

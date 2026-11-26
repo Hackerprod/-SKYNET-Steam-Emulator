@@ -98,7 +98,7 @@ public partial class GameSettingsWindow : Window
         App.Store.Save();
 
         WebUser? user = null;
-        try { user = (await App.Server.ResolveSessionAsync(App.Store.Config)).User; }
+        try { user = (await App.Server.ResolveSessionAsync(App.Store.Config, presence: false)).User; }
         catch { }
 
         var result = App.Launcher.Launch(_game, App.Store.Config, user);

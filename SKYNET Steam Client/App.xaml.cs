@@ -124,6 +124,7 @@ public partial class App : Application
 
         Exit += (_, _) =>
         {
+            Server.GoOffline();
             _tray?.Dispose();
             _singleInstance?.Dispose();
         };
@@ -224,7 +225,7 @@ public partial class App : Application
             WebUser? user = null;
             try
             {
-                var session = await Server.ResolveSessionAsync(Store.Config);
+                var session = await Server.ResolveSessionAsync(Store.Config, presence: false);
                 user = session.User;
                 HeadlessLog($"session: {session.Status} user={user?.DisplayName ?? "(none)"}");
             }

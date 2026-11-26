@@ -46,6 +46,14 @@ if (args.Contains("--verify-dota-cosmetics"))
     return;
 }
 
+// Self-check that launcher-level presence never counts as a live game session
+// for the Dota GC, and that the online / in_game levels transition correctly.
+if (args.Contains("--verify-presence"))
+{
+    Environment.ExitCode = SteamApiStateService.RunPresenceSelfCheck(Console.WriteLine) ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()

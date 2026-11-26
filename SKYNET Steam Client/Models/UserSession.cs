@@ -11,6 +11,24 @@ public enum SessionStatus
     ServerUnavailable
 }
 
+/// <summary>Launcher-level presence, like the Steam client's offline / online / in-game.</summary>
+public enum PresenceLevel
+{
+    Offline,
+    Online,
+    InGame
+}
+
+/// <summary>Outcome of a session keep-alive call.</summary>
+public enum HeartbeatResult
+{
+    Ok,
+    /// <summary>Token rejected (server restarted or token expired): re-resolve the session.</summary>
+    Unauthorized,
+    /// <summary>Network or server error: keep the token and retry on the next tick.</summary>
+    Unavailable
+}
+
 /// <summary>The logged-in user's public profile, as shown in the dashboard header.</summary>
 public sealed class WebUser
 {
@@ -20,6 +38,11 @@ public sealed class WebUser
     public string? AvatarUrl { get; set; }
     public byte[]? AvatarPng { get; set; }
     public bool Online { get; set; }
+    public PresenceLevel Level { get; set; }
+    /// <summary>AppId of the game being played (0 when not in a game).</summary>
+    public uint AppId { get; set; }
+    /// <summary>Rich-presence text such as "In lobby" (empty when none).</summary>
+    public string PresenceDetail { get; set; } = "";
     public bool IsAdmin { get; set; }
 }
 
