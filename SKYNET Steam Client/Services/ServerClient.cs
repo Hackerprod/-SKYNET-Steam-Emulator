@@ -23,6 +23,14 @@ public sealed class ServerClient
     };
 
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(8) };
+
+    // Long-poll requests are held open by the server for up to the requested wait, so
+    // they get their own client with no global timeout (each call sets its own deadline).
+    private readonly HttpClient _pollHttp = new() { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+
+    // Avatars rarely change and the Users list is refreshed on every presence event.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<uint, (byte[]? Png, DateTime FetchedUtc)> _avatarCache = new();
+    private static readonly TimeSpan AvatarCacheTtl = TimeSpan.FromMinutes(5);
     private string _baseUrl = "http://127.0.0.1:27080/";
 
     public void Configure(string baseUrl)
@@ -136,21 +144,46 @@ public sealed class ServerClient
         }
     }
 
-    /// <summary>Keep-alive for the launcher session: refreshes presence and token expiry.</summary>
-    public async Task<HeartbeatResult> HeartbeatAsync(string? token)
+    /// <summary>
+    /// One long-poll on the server's event stream (the same GET /api/events the emulator
+    /// uses). The server holds the request until an event arrives or <paramref name="waitMs"/>
+    /// elapses, so a pending poll is both the launcher's keep-alive (every authenticated call
+    /// refreshes the session) and the push channel for friend / presence changes.
+    /// A null <paramref name="cursor"/> is the first poll: it only learns the current cursor.
+    /// </summary>
+    public async Task<EventPollResult> PollEventsAsync(string? token, string? cursor, int waitMs, System.Threading.CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(token)) return HeartbeatResult.Unauthorized;
+        if (string.IsNullOrWhiteSpace(token)) return new EventPollResult { Status = HeartbeatResult.Unauthorized };
         try
         {
-            using var req = new HttpRequestMessage(HttpMethod.Get, _baseUrl + "api/users/me");
+            var url = _baseUrl + "api/events?since=" + Uri.EscapeDataString(cursor ?? "") + "&waitMs=" + Math.Max(0, waitMs);
+            using var linked = System.Threading.CancellationTokenSource.CreateLinkedTokenSource(ct);
+            linked.CancelAfter(Math.Max(0, waitMs) + 10000);
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
             req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            using var resp = await _http.SendAsync(req).ConfigureAwait(false);
-            if (resp.StatusCode == HttpStatusCode.Unauthorized) return HeartbeatResult.Unauthorized;
-            return resp.IsSuccessStatusCode ? HeartbeatResult.Ok : HeartbeatResult.Unavailable;
+            using var resp = await _pollHttp.SendAsync(req, linked.Token).ConfigureAwait(false);
+            if (resp.StatusCode == HttpStatusCode.Unauthorized) return new EventPollResult { Status = HeartbeatResult.Unauthorized };
+            if (!resp.IsSuccessStatusCode) return new EventPollResult { Status = HeartbeatResult.Unavailable };
+
+            var envelope = await resp.Content.ReadFromJsonAsync<EventEnvelopeDto>(Json, linked.Token).ConfigureAwait(false);
+            // The server answers an unknown/expired token with 200 and an EMPTY cursor; a
+            // live session always gets a non-empty one.
+            if (envelope == null || string.IsNullOrEmpty(envelope.Cursor))
+                return new EventPollResult { Status = HeartbeatResult.Unauthorized };
+
+            var changed = envelope.Events != null && envelope.Events.Any(ev =>
+                ev.Type != null &&
+                (ev.Type.StartsWith("persona", StringComparison.OrdinalIgnoreCase) ||
+                 ev.Type.StartsWith("friend", StringComparison.OrdinalIgnoreCase)));
+            return new EventPollResult { Status = HeartbeatResult.Ok, Cursor = envelope.Cursor, PresenceChanged = changed };
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
         }
         catch
         {
-            return HeartbeatResult.Unavailable;
+            return new EventPollResult { Status = HeartbeatResult.Unavailable };
         }
     }
 
@@ -239,11 +272,16 @@ public sealed class ServerClient
 
     public async Task<byte[]?> FetchAvatarAsync(uint accountId)
     {
+        if (_avatarCache.TryGetValue(accountId, out var cached) && DateTime.UtcNow - cached.FetchedUtc < AvatarCacheTtl)
+            return cached.Png;
+
         try
         {
             using var resp = await _http.GetAsync(_baseUrl + $"Images/AvatarCache/{accountId}.jpg").ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode) return null;
-            return await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var png = await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            _avatarCache[accountId] = (png, DateTime.UtcNow);
+            return png;
         }
         catch
         {
@@ -295,6 +333,17 @@ public sealed class ServerClient
         public string? RefreshToken { get; set; }
         public ApiUserDto? User { get; set; }
         public bool IsAdmin { get; set; }
+    }
+
+    private sealed class EventEnvelopeDto
+    {
+        public string? Cursor { get; set; }
+        public List<EventDto>? Events { get; set; }
+    }
+
+    private sealed class EventDto
+    {
+        public string? Type { get; set; }
     }
 
     private sealed class ApiUserDto

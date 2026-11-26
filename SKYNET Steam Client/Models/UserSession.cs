@@ -25,7 +25,7 @@ public enum HeartbeatResult
     Ok,
     /// <summary>Token rejected (server restarted or token expired): re-resolve the session.</summary>
     Unauthorized,
-    /// <summary>Network or server error: keep the token and retry on the next tick.</summary>
+    /// <summary>Network or server error: keep the token and retry shortly.</summary>
     Unavailable
 }
 
@@ -58,4 +58,16 @@ public sealed class SessionResult
     public static SessionResult NotLoggedIn() => new() { Status = SessionStatus.NotLoggedIn };
     public static SessionResult Ok(WebUser user, string? token) =>
         new() { Status = SessionStatus.Authenticated, User = user, AccessToken = token };
+}
+
+/// <summary>Outcome of one long-poll on the server's event stream.</summary>
+public sealed class EventPollResult
+{
+    public HeartbeatResult Status { get; set; }
+
+    /// <summary>Cursor to pass to the next poll (events at or before it were delivered).</summary>
+    public string? Cursor { get; set; }
+
+    /// <summary>True when a friend / presence event arrived, so the Users list is worth refreshing.</summary>
+    public bool PresenceChanged { get; set; }
 }

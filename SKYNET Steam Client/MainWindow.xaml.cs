@@ -21,8 +21,13 @@ public partial class MainWindow : Window
     private string _search = "";
     private SessionResult? _session;
     private bool _loadingSortUi;
-    private readonly DispatcherTimer _presenceTimer = new() { Interval = TimeSpan.FromSeconds(30) };
-    private bool _presenceBusy;
+    private readonly System.Threading.CancellationTokenSource _presenceCts = new();
+
+    // How long the server may hold one event poll. Must stay well under the server's
+    // presence timeout (90s by default): every poll refreshes the launcher session.
+    private const int PresencePollWaitMs = 20000;
+    private static readonly TimeSpan UsersRefreshInterval = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan UsersRefreshMinGap = TimeSpan.FromSeconds(2);
 
     public MainWindow()
     {
@@ -36,44 +41,88 @@ public partial class MainWindow : Window
 
         InitSortUi();
         LoadGames();
-        _presenceTimer.Tick += async (_, _) => await PresenceTickAsync();
         Loaded += async (_, _) =>
         {
             await RefreshSessionAsync();
             // Keeps running while hidden to tray, like the Steam client.
-            _presenceTimer.Start();
+            _ = PresenceLoopAsync(_presenceCts.Token);
         };
     }
 
     /// <summary>
-    /// Presence heartbeat: refreshes the launcher session on the server (so we keep showing
-    /// ONLINE) and re-resolves it when the token is gone (server restart, expiry, not logged in).
+    /// Presence channel: a continuous long-poll on the server's event stream. A pending poll
+    /// keeps the launcher session alive (so we keep showing ONLINE) and delivers friend /
+    /// presence changes as they happen, instead of waiting for a timer. When the token is
+    /// gone (server restart, expiry, not logged in) the session is re-resolved and the
+    /// stream restarts from the server's current cursor.
     /// </summary>
-    private async Task PresenceTickAsync()
+    private async Task PresenceLoopAsync(System.Threading.CancellationToken ct)
     {
-        if (_presenceBusy) return;
-        _presenceBusy = true;
-        try
-        {
-            var token = App.Server.CurrentToken;
-            if (string.IsNullOrEmpty(token) || _session?.Status != SessionStatus.Authenticated)
-            {
-                // No server discovery on timer-driven refreshes: it blocks while the server is down.
-                await RefreshSessionAsync(discover: false);
-            }
-            else
-            {
-                var beat = await App.Server.HeartbeatAsync(token);
-                // A refresh started elsewhere may already have replaced the token.
-                if (beat == HeartbeatResult.Unauthorized && token == App.Server.CurrentToken)
-                    await RefreshSessionAsync(discover: false);
-            }
+        string? cursor = null;
+        var lastUsersRefresh = DateTime.MinValue;
 
-            if (UsersView.Visibility == Visibility.Visible && _session?.Status == SessionStatus.Authenticated)
-                await LoadUsersAsync();
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                var token = App.Server.CurrentToken;
+                if (string.IsNullOrEmpty(token) || _session?.Status != SessionStatus.Authenticated)
+                {
+                    // No server discovery on background refreshes: it blocks while the server is down.
+                    await RefreshSessionAsync(discover: false);
+                    cursor = null;
+                    token = App.Server.CurrentToken;
+                    if (string.IsNullOrEmpty(token) || _session?.Status != SessionStatus.Authenticated)
+                    {
+                        await Task.Delay(5000, ct);
+                        continue;
+                    }
+                }
+
+                var first = cursor == null;
+                var poll = await App.Server.PollEventsAsync(token, cursor, first ? 0 : PresencePollWaitMs, ct);
+
+                if (poll.Status == HeartbeatResult.Unauthorized)
+                {
+                    // A refresh started elsewhere may already have replaced the token.
+                    if (token == App.Server.CurrentToken)
+                        await RefreshSessionAsync(discover: false);
+                    cursor = null;
+                    await Task.Delay(1000, ct);
+                    continue;
+                }
+
+                if (poll.Status == HeartbeatResult.Unavailable)
+                {
+                    await Task.Delay(5000, ct);
+                    continue;
+                }
+
+                cursor = poll.Cursor;
+
+                // Friend / presence events refresh the list right away. Non-friend users
+                // produce no events, so an open Users view also refreshes on a slow timer.
+                if (UsersView.Visibility == Visibility.Visible && _session?.Status == SessionStatus.Authenticated)
+                {
+                    var sinceRefresh = DateTime.UtcNow - lastUsersRefresh;
+                    var due = !first && poll.PresenceChanged && sinceRefresh >= UsersRefreshMinGap;
+                    if (due || sinceRefresh >= UsersRefreshInterval)
+                    {
+                        lastUsersRefresh = DateTime.UtcNow;
+                        await LoadUsersAsync();
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch
+            {
+                // Retry shortly; the loop never dies while the launcher is open.
+                try { await Task.Delay(5000, ct); } catch (OperationCanceledException) { break; }
+            }
         }
-        catch { /* retry on the next tick */ }
-        finally { _presenceBusy = false; }
     }
 
     private string? ResolveGameName(uint appId) =>
@@ -396,7 +445,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
-        _presenceTimer.Stop();
+        _presenceCts.Cancel();
         base.OnClosed(e);
     }
 
