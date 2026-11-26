@@ -123,6 +123,11 @@ public partial class MainWindow : Window
             users = await App.Server.GetUsersAsync(_session?.AccessToken);
         }
 
+        // Like the web Users page, list everyone except the signed-in user.
+        var selfSteamId = _session?.User?.SteamId ?? 0;
+        if (selfSteamId != 0)
+            users = users.Where(u => u.SteamId != selfSteamId).ToList();
+
         UsersItems.ItemsSource = users.Select(u => new UserItemVm(u, ResolveGameName)).ToList();
         UsersCount.Text = users.Count == 1 ? "1 user" : $"{users.Count} users";
         UsersEmpty.Visibility = users.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
