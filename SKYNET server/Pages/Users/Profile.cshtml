@@ -11,6 +11,8 @@
 }
 
 <div class="space-y-6">
+@* One antiforgery token for the buttons FriendActions.js draws (CallHelper.js sends it as a header). *@
+@Html.AntiForgeryToken()
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
     var isError = Model.StatusMessage.StartsWith("Could not") || Model.StatusMessage.StartsWith("Invalid");
@@ -46,7 +48,7 @@
                             <i class="fas fa-gamepad text-[8px]"></i> App @user.AppId
                         </span>
                     }
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-skynet-muted">
+                    <span data-friend-status="@user.SteamId" class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-skynet-muted">
                         @(relationship switch { 2 => "Request received", 3 => "Friend", 4 => "Request sent", _ => isSelf ? "Your profile" : "Not connected" })
                     </span>
                 </div>
@@ -54,29 +56,8 @@
 
             @if (!isSelf)
             {
-                <div class="flex gap-2 shrink-0">
-                    @if (relationship == 0)
-                    {
-                        <form method="post" asp-page-handler="Request" OnComplete="onProfileRelation">
-                            <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all"><i class="fas fa-user-plus mr-2"></i>Add Friend</button>
-                        </form>
-                    }
-                    else if (relationship == 2)
-                    {
-                        <form method="post" asp-page-handler="Accept" OnComplete="onProfileRelation">
-                            <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all"><i class="fas fa-user-check mr-2"></i>Accept</button>
-                        </form>
-                    }
-                    @if (relationship == 2 || relationship == 3 || relationship == 4)
-                    {
-                        <form method="post" asp-page-handler="Remove" OnComplete="onProfileRelation">
-                            <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg border border-red-500/30 px-5 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all"><i class="fas fa-user-minus mr-2"></i>Remove</button>
-                        </form>
-                    }
-                </div>
+                <div class="flex gap-2 shrink-0" data-friend-actions data-variant="profile" data-field="SteamId"
+                     data-url="@Url.Page("/Users/Profile", new { steamId = user.SteamId })" data-steam-id="@user.SteamId" data-rel="@relationship"></div>
             }
         </div>
     </section>
@@ -145,35 +126,6 @@
     </section>
 </div>
 
-<script>
-    function onProfileRelation(data, form) {
-        if (data && data.success) {
-            showToast(data.message, 'success');
-            var container = form.parentElement;
-            var steamId = form.querySelector('input[name="SteamId"]').value;
-            var action = form.getAttribute('asp-page-handler') || '';
-            var pageUrl = window.location.pathname;
-            if (action === 'Request') {
-                container.innerHTML =
-                    '<form method="post" action="' + pageUrl + '?handler=Remove"><input type="hidden" name="SteamId" value="' + steamId + '" />' +
-                    '<button class="rounded-lg border border-red-500/30 px-5 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all"><i class="fas fa-user-minus mr-2"></i>Remove</button></form>';
-            } else if (action === 'Accept') {
-                container.innerHTML =
-                    '<form method="post" action="' + pageUrl + '?handler=Remove"><input type="hidden" name="SteamId" value="' + steamId + '" />' +
-                    '<button class="rounded-lg border border-red-500/30 px-5 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all"><i class="fas fa-user-minus mr-2"></i>Remove</button></form>';
-            } else if (action === 'Remove') {
-                container.innerHTML =
-                    '<form method="post" action="' + pageUrl + '?handler=Request"><input type="hidden" name="SteamId" value="' + steamId + '" />' +
-                    '<button class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all"><i class="fas fa-user-plus mr-2"></i>Add Friend</button></form>';
-            }
-            var badges = document.querySelectorAll('.flex-wrap span:last-child');
-            if (badges.length > 0) {
-                var statusBadge = badges[0];
-                var labels = { Request: 'Request sent', Accept: 'Friend', Remove: 'Not connected' };
-                statusBadge.textContent = labels[action] || statusBadge.textContent;
-            }
-        } else {
-            showToast(data && data.message ? data.message : 'Action failed.', 'error');
-        }
-    }
-</script>
+@section Scripts {
+    <script src="~/js/FriendActions.js" asp-append-version="true"></script>
+}

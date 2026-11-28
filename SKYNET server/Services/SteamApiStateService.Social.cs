@@ -201,6 +201,90 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    /// <summary>Result of a web friend action: the viewer's resulting relationship comes from the server so the UI never guesses.</summary>
+    public sealed record WebFriendActionResult(bool Success, int? Relationship, string Message, int Status);
+
+    public WebFriendActionResult WebFriendAction(string token, ulong targetSteamId, string action)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return new WebFriendActionResult(false, null, "Session expired. Sign in again.", 401);
+            }
+
+            return WebFriendActionLocked(session!.SteamId, targetSteamId, action);
+        }
+    }
+
+    // Relationship of the viewer towards every other user, for the cheap UI poll (null = no valid session).
+    public Dictionary<string, int>? GetWebRelationships(string token)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, int>();
+            foreach (var steamId in _state.Users.Keys)
+            {
+                if (steamId != session!.SteamId)
+                {
+                    result[steamId.ToString()] = GetRelationshipLocked(session.SteamId, steamId);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    // Runs one web action and reports the relationship AFTER it, plus a message that matches what really happened
+    // (a no-op or a refusal is never reported as success).
+    private WebFriendActionResult WebFriendActionLocked(ulong viewerSteamId, ulong targetSteamId, string action)
+    {
+        if (viewerSteamId == targetSteamId || !_state.Users.ContainsKey(targetSteamId))
+        {
+            return new WebFriendActionResult(false, null, "User not found.", 404);
+        }
+
+        var before = GetRelationshipLocked(viewerSteamId, targetSteamId);
+        bool ok;
+        string message;
+        string failure;
+        switch (action)
+        {
+            case "request":
+                failure = before == FriendRelationshipFriend ? "You are already friends."
+                    : before == FriendRelationshipRequestInitiator ? "A request was already sent."
+                    : "Could not send the request.";
+                ok = before != FriendRelationshipFriend && before != FriendRelationshipRequestInitiator &&
+                     SendFriendRequestLocked(viewerSteamId, targetSteamId);
+                // A crossing request is accepted by the server, so the result can be a friendship.
+                message = before == FriendRelationshipRequestRecipient ? "Request accepted." : "Request sent.";
+                break;
+            case "accept":
+                var pending = FindPendingRequestLocked(targetSteamId, viewerSteamId);
+                failure = "There is no pending request from this user.";
+                ok = pending != null && AcceptFriendRequestLocked(pending);
+                message = "Request accepted.";
+                break;
+            case "remove":
+                failure = "There is nothing to remove.";
+                ok = RemoveFriendOrRequestLocked(viewerSteamId, targetSteamId);
+                message = before == FriendRelationshipFriend ? "Friend removed."
+                    : before == FriendRelationshipRequestInitiator ? "Request cancelled."
+                    : "Request declined.";
+                break;
+            default:
+                return new WebFriendActionResult(false, null, "Unknown action.", 400);
+        }
+
+        var after = GetRelationshipLocked(viewerSteamId, targetSteamId);
+        return new WebFriendActionResult(ok, after, ok ? message : failure, ok ? 200 : 409);
+    }
+
     private bool SendFriendRequestLocked(ulong fromSteamId, ulong targetSteamId)
     {
         if (fromSteamId == targetSteamId || !_state.Users.ContainsKey(fromSteamId) || !_state.Users.ContainsKey(targetSteamId))
@@ -313,10 +397,31 @@ public sealed partial class SteamApiStateService
 
         if (_state.FriendLinks.TryGetValue(steamId, out var friendLinks))
         {
-            foreach (var friendSteamId in friendLinks.Where(_state.Users.ContainsKey))
+            foreach (var friendSteamId in friendLinks.Where(id => id != steamId && _state.Users.ContainsKey(id)))
             {
                 result[friendSteamId] = CloneUserForViewerLocked(_state.Users[friendSteamId], steamId);
             }
+        }
+
+        // Pending requests in both directions are part of the list too (with their explicit relationship 2/4).
+        // Leaving them out made the client's snapshot demote every pending entry to None on each refresh.
+        // A confirmed friend already in the result wins.
+        foreach (var request in _state.FriendRequests)
+        {
+            if (!IsPending(request))
+            {
+                continue;
+            }
+
+            var other = request.FromSteamId == steamId ? request.ToSteamId
+                : request.ToSteamId == steamId ? request.FromSteamId
+                : 0UL;
+            if (other == 0 || other == steamId || result.ContainsKey(other) || !_state.Users.TryGetValue(other, out var otherUser))
+            {
+                continue;
+            }
+
+            result[other] = CloneUserForViewerLocked(otherUser, steamId);
         }
 
         return result.Values.OrderBy(user => user.PersonaName).ToList();
@@ -439,6 +544,8 @@ public sealed partial class SteamApiStateService
 
         var gameOnline = IsUserOnlineLocked(relatedSteamId) ? 1 : 0;
         var online = IsUserVisiblyOnlineLocked(relatedSteamId) ? 1 : 0;
+        _logger.LogInformation("friends: enqueue {Type} to={Recipient} about={Related} rel={Relationship} seq={Sequence}",
+            type, recipientSteamId, relatedSteamId, relationship, _nextEventSequence);
         EnqueueEvent(recipientSteamId, new ApiEvent
         {
             Type = type,

@@ -45,6 +45,10 @@ jobs:
         working-directory: SKYNET server
         run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-identity
 
+      - name: Verify friend lists and events
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-friends
+
   client:
     name: Build SKYNET Steam Client
     runs-on: windows-latest

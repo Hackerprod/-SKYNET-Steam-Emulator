@@ -62,6 +62,14 @@ if (args.Contains("--verify-identity"))
     return;
 }
 
+// Self-check for the friend lists/events the server hands out: pending requests in both
+// directions with an explicit relationship, one event per side, and the delete-user cleanup.
+if (args.Contains("--verify-friends"))
+{
+    Environment.ExitCode = SteamApiStateService.RunFriendsSelfCheck(Console.WriteLine) ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()

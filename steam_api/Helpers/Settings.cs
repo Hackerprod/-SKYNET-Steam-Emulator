@@ -157,6 +157,17 @@ namespace SKYNET.Helper
                 SteamEmulator.MusicLibraryRoot = ResolveConfiguredPath(
                     GetString("Music", "LibraryRoot", string.Empty));
 
+                // Optional friends diagnostics ([FR] log lines, default true) and the one notification escape hatch
+                // (relationship callbacks also carry Name|Status, default false). Values must be true / false (GetBool only
+                // parses those); FriendOutgoingAsFriend=false reports a real relationship 4 as 4 instead of 3.
+                // Read once: a game restart applies a change.
+                FriendActions.Trace = GetBool("Log Settings", "FriendsTrace", true);
+                FriendActions.NotifyExtra = GetBool("Network Settings", "FriendNotifyExtra", false);
+                FriendActions.OutgoingAsFriend = GetBool("Network Settings", "FriendOutgoingAsFriend", true);
+                // Developer interface tracer (string key, empty = off): full path of skynet-iface-hook.exe, loaded in-process. The launcher
+                // rewrites this ini on every launch, so the environment variable SKYNET_IFACE_TRACER (read by IfaceTracerHost) is the supported way.
+                IfaceTracerHost.ExePath = GetString("Debug", "IfaceTracer", string.Empty).Trim();
+
                 foreach (var item in IniParser["Network Settings"].Settings)
                 {
                     switch (item.Key)

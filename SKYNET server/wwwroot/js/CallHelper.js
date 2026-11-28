@@ -80,6 +80,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             } catch (error) {
                 console.error("Error sending form:", error);
+                // Tell the page instead of failing silently (e.g. an antiforgery 400 is not JSON).
+                const failed = window[form.getAttribute("OnComplete")];
+                if (typeof failed === "function") {
+                    failed({ success: false, message: "Request failed. Reload the page and try again." }, form);
+                }
             } finally {
                 // Restore the submission state
                 isSubmitting = false;

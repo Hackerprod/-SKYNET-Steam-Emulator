@@ -27,6 +27,8 @@ namespace SKYNET.Managers
         private static readonly ConcurrentDictionary<ulong, DateTime> MissingUserProfiles = new ConcurrentDictionary<ulong, DateTime>();
         private static readonly ConcurrentDictionary<ulong, byte> PendingUserProfileRefreshes = new ConcurrentDictionary<ulong, byte>();
         private static int FriendsRefreshQueued;
+        // One api/friends fetch + apply at a time (see the lock order in FriendActions.cs).
+        private static readonly SemaphoreSlim SnapshotGate = new SemaphoreSlim(1, 1);
         private static int SelfRefreshQueued;
         private static int SessionHandshakeRunning;
         private static readonly ConcurrentDictionary<string, string> PendingPresence = new ConcurrentDictionary<string, string>();
@@ -159,7 +161,8 @@ namespace SKYNET.Managers
                     {
                         SteamEmulator.Write("APIClient", "Server session connected");
                         RefreshSelf(true);
-                        RefreshFriends(true);
+                        FetchSnapshot(SnapshotKind.Handshake);
+                        FriendActions.Init();
                         SteamEmulator.SteamUser?.OnServerSessionConnected();
                     }
                 }
@@ -340,6 +343,64 @@ namespace SKYNET.Managers
             return true;
         }
 
+        internal enum SnapshotKind { Periodic, Forced, Handshake }
+
+        // Fetches api/friends (confirmed friends + pending requests) and applies it as one atomic snapshot. Worker
+        // threads only. Periodic never blocks (another fetch is already running); Forced/Handshake wait for the gate
+        // and always issue their own request, so a resync can never be satisfied by a fetch that started earlier.
+        internal static bool FetchSnapshot(SnapshotKind kind)
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            // First: while a fetch is in flight or there is no token yet, the 5 s back-off already throttles
+            // QueueFriendsRefresh, so a polled GetFriendCount cannot spawn a worker thread per call.
+            StateCache.NoteRefreshAttempt();
+
+            if (!EnsureSession())
+            {
+                return false;
+            }
+
+            if (kind == SnapshotKind.Periodic)
+            {
+                if (!SnapshotGate.Wait(0))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                SnapshotGate.Wait();
+            }
+
+            try
+            {
+                var ticket = StateCache.BeginFetch();   // BEFORE the request
+                var list = Send<List<ApiUser>>(HttpMethod.Get, "api/friends");
+                if (list == null)
+                {
+                    return false;
+                }
+
+                var diffs = StateCache.ApplyFriends(list, ticket, kind.ToString().ToLowerInvariant());
+                if (diffs == null)
+                {
+                    return false;
+                }
+
+                StateCache.Emit(diffs);   // inside the gate: allowed, AddCallback is a leaf
+                return true;
+            }
+            finally
+            {
+                SnapshotGate.Release();
+            }
+        }
+
+        // Compatibility wrapper, worker threads only.
         public static bool RefreshFriends(bool force = false)
         {
             if (!IsEnabled)
@@ -352,19 +413,7 @@ namespace SKYNET.Managers
                 return true;
             }
 
-            if (!EnsureSession())
-            {
-                return false;
-            }
-
-            var friends = Send<List<ApiUser>>(HttpMethod.Get, "api/friends");
-            if (friends == null)
-            {
-                return false;
-            }
-
-            StateCache.ApplyFriends(friends);
-            return true;
+            return FetchSnapshot(force ? SnapshotKind.Forced : SnapshotKind.Periodic);
         }
 
         public static void QueueSelfRefresh(bool force = false)
@@ -428,10 +477,8 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    if (RefreshFriends(force))
-                    {
-                        ReportCachedFriendsChanged();
-                    }
+                    // The diffs are emitted inside FetchSnapshot.
+                    FetchSnapshot(force ? SnapshotKind.Forced : SnapshotKind.Periodic);
                 }
                 finally
                 {
@@ -443,7 +490,8 @@ namespace SKYNET.Managers
             }
         }
 
-        public static bool QueueUserProfileRefresh(ulong steamId, bool refreshFriends = false)
+        // force: fetch even when an entry is cached (a nameless placeholder created by a friend dialog).
+        public static bool QueueUserProfileRefresh(ulong steamId, bool refreshFriends = false, bool force = false)
         {
             if (!IsEnabled || steamId == 0 || steamId == ulong.MaxValue)
             {
@@ -456,7 +504,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            if (StateCache.TryGetFriend(steamId, out _))
+            if (!force && StateCache.TryGetFriend(steamId, out _))
             {
                 return false;
             }
@@ -475,19 +523,12 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    if (RefreshUserProfile(steamId) && SteamEmulator.SteamFriends != null)
-                    {
-                        SteamEmulator.SteamFriends.ReportUserChanged(
-                            steamId,
-                            EPersonaChange.k_EPersonaChangeName |
-                            EPersonaChange.k_EPersonaChangeAvatar |
-                            EPersonaChange.k_EPersonaChangeRelationshipChanged |
-                            EPersonaChange.k_EPersonaChangeGamePlayed);
-                    }
+                    // RefreshUserProfile emits the diff-based callback itself.
+                    RefreshUserProfile(steamId);
 
-                    if (refreshFriends)
+                    if (refreshFriends && StateCache.NeedsFriendsRefresh(RefreshWindow))
                     {
-                        RefreshFriends();
+                        FetchSnapshot(SnapshotKind.Periodic);
                     }
                 }
                 finally
@@ -531,6 +572,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
+            var ticket = StateCache.BeginFetch();   // BEFORE the request
             HttpStatusCode? statusCode;
             var user = Send<ApiUser>(HttpMethod.Get, $"api/users/{steamId}", null, out statusCode);
             if (user == null)
@@ -544,63 +586,49 @@ namespace SKYNET.Managers
             }
 
             MissingUserProfiles.TryRemove(steamId, out _);
-            StateCache.UpsertUser(user);
+            StateCache.Emit(StateCache.ApplyProfile(user, ticket));
             return true;
         }
 
-        public static bool SendFriendRequest(ulong steamId)
+        // One friend action POST (executor thread). The old SendFriendRequest/AcceptFriendRequest/RemoveFriendOrRequest
+        // helpers and their blanket RefreshFriends(true) are gone: the cache is settled by FriendActions/StateCache.
+        internal static Outcome PostFriendAction(FriendKind kind, ulong steamId)
         {
             if (!IsEnabled)
             {
-                return false;
+                return Outcome.Failed;
             }
 
-            EnsureSession();
-            var ok = Send<VoidDto>(HttpMethod.Post, "api/friends/request", new FriendActionRequestDto
+            string path;
+            object body = null;
+            switch (kind)
             {
-                SteamId = steamId
-            }) != null;
-
-            if (ok)
-            {
-                RefreshFriends(true);
+                case FriendKind.Add:
+                    path = "api/friends/request";
+                    body = new FriendActionRequestDto { SteamId = steamId };
+                    break;
+                case FriendKind.Accept:
+                    path = $"api/friends/{steamId}/accept";
+                    break;
+                default:   // Remove / Ignore
+                    path = $"api/friends/{steamId}/remove";
+                    break;
             }
 
-            return ok;
-        }
-
-        public static bool AcceptFriendRequest(ulong steamId)
-        {
-            if (!IsEnabled)
+            HttpStatusCode? status;
+            var response = Send<VoidDto>(HttpMethod.Post, path, body, out status, retryOnUnauthorized: true, quietStatusCode: HttpStatusCode.BadRequest);
+            if (response != null)
             {
-                return false;
+                return Outcome.Ok;
             }
 
-            EnsureSession();
-            var ok = Send<VoidDto>(HttpMethod.Post, $"api/friends/{steamId}/accept") != null;
-            if (ok)
+            // 400 on a remove means there was nothing to remove (already gone): the goal state is reached.
+            if (status == HttpStatusCode.BadRequest && (kind == FriendKind.Remove || kind == FriendKind.Ignore))
             {
-                RefreshFriends(true);
+                return Outcome.OkAlreadyGone;
             }
 
-            return ok;
-        }
-
-        public static bool RemoveFriendOrRequest(ulong steamId)
-        {
-            if (!IsEnabled)
-            {
-                return false;
-            }
-
-            EnsureSession();
-            var ok = Send<VoidDto>(HttpMethod.Post, $"api/friends/{steamId}/remove") != null;
-            if (ok)
-            {
-                RefreshFriends(true);
-            }
-
-            return ok;
+            return Outcome.Failed;   // transport error, timeout, 401 after retry, 5xx, 400 on add/accept
         }
 
         public static bool RefreshCurrentStats(bool force = false)
@@ -1970,15 +1998,41 @@ namespace SKYNET.Managers
 
         public static ApiEventEnvelope PollEvents(int waitMs = 0)
         {
+            return PollEvents(waitMs, out _);
+        }
+
+        // initialBatch: the cursor we sent was empty, i.e. this is the server's full replay of the retained log (every
+        // launch). The flag comes from the very cursor that was sent, so a reset in between cannot desynchronise them.
+        public static ApiEventEnvelope PollEvents(int waitMs, out bool initialBatch)
+        {
+            initialBatch = false;
             if (!IsEnabled)
             {
                 return null;
             }
 
+            // The identity generation is captured BEFORE the cursor is read: a reset after this point makes the
+            // response (and its cursor) stale, a reset before it is already reflected in the cursor we send.
+            var gen = StateCache.IdentityGen;
             EnsureSession();
-            var cursor = Uri.EscapeDataString(StateCache.GetEventCursor());
+            var sent = StateCache.GetEventCursor();
+            initialBatch = sent.Length == 0;
+            var cursor = Uri.EscapeDataString(sent);
             var envelope = Send<ApiEventEnvelope>(HttpMethod.Get, $"api/events?since={cursor}&waitMs={Math.Max(0, waitMs)}");
-            if (envelope != null && !string.IsNullOrWhiteSpace(envelope.Cursor))
+            if (envelope == null)
+            {
+                return null;
+            }
+
+            if (gen != StateCache.IdentityGen)
+            {
+                // Dropped batch: the old cursor must not be written back over the reset one.
+                FriendActions.Fr("poll-dropped identity-change");
+                initialBatch = false;
+                return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(envelope.Cursor))
             {
                 StateCache.SetEventCursor(envelope.Cursor);
             }
@@ -2436,24 +2490,6 @@ namespace SKYNET.Managers
                 Body = body,
                 Headers = response.Headers
             };
-        }
-
-        private static void ReportCachedFriendsChanged()
-        {
-            if (SteamEmulator.SteamFriends == null)
-            {
-                return;
-            }
-
-            foreach (var friend in StateCache.GetFriends())
-            {
-                SteamEmulator.SteamFriends.ReportUserChanged(
-                    friend.SteamID,
-                    EPersonaChange.k_EPersonaChangeName |
-                    EPersonaChange.k_EPersonaChangeAvatar |
-                    EPersonaChange.k_EPersonaChangeRelationshipChanged |
-                    EPersonaChange.k_EPersonaChangeGamePlayed);
-            }
         }
 
         private static bool IsSessionEndpoint(string path)

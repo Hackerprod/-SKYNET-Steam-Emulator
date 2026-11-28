@@ -2,6 +2,8 @@
 @model SKYNET_server.Pages.Users.IndexModel
 
 <div class="space-y-6">
+@* One antiforgery token for the buttons FriendActions.js draws (CallHelper.js sends it as a header). *@
+@Html.AntiForgeryToken()
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
     var isError = Model.StatusMessage.StartsWith("Could not") || Model.StatusMessage.StartsWith("Invalid");
@@ -30,9 +32,6 @@
         @foreach (var user in Model.Users)
         {
             var isOnline = user.PersonaState != 0;
-            var isFriend = user.FriendRelationship == 3;
-            var isIncoming = user.FriendRelationship == 2;
-            var isOutgoing = user.FriendRelationship == 4;
 
             string statusDotColor = isOnline ? "bg-green-500" : "bg-gray-500";
             string statusText = isOnline ? "Online" : "Offline";
@@ -46,39 +45,9 @@
                     <a asp-page="/Users/Profile" asp-route-steamId="@user.SteamId" class="font-bold truncate block hover:text-skynet-accent transition">@user.PersonaName</a>
                     <p class="text-[10px] text-skynet-muted uppercase tracking-widest">@statusText</p>
                 </div>
-                @if (isFriend)
-                {
-                    <form method="post" asp-page-handler="Remove" OnComplete="onUsersRelation">
-                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                        <button type="submit" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">
-                            <i class="fas fa-user-minus text-xs"></i>
-                        </button>
-                    </form>
-                }
-                else if (isIncoming)
-                {
-                    <form method="post" asp-page-handler="Accept" OnComplete="onUsersRelation">
-                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                        <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Accept request">
-                            <i class="fas fa-user-check text-xs"></i>
-                        </button>
-                    </form>
-                }
-                else if (isOutgoing)
-                {
-                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center" title="Request sent">
-                        <i class="fas fa-clock text-xs"></i>
-                    </div>
-                }
-                else
-                {
-                    <form method="post" asp-page-handler="Request" OnComplete="onUsersRelation">
-                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                        <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Add friend">
-                            <i class="fas fa-user-plus text-xs"></i>
-                        </button>
-                    </form>
-                }
+                @* Buttons are drawn by FriendActions.js from data-rel (same code for first render, actions and poll). *@
+                <div class="flex gap-2 shrink-0" data-friend-actions data-variant="card" data-field="TargetSteamId"
+                     data-url="@Url.Page("/Users/Index")" data-steam-id="@user.SteamId" data-rel="@user.FriendRelationship"></div>
             </article>
         }
     </div>
@@ -93,33 +62,8 @@
             card.style.display = !t || name.indexOf(t) >= 0 ? '' : 'none';
         });
     }
-    function onUsersRelation(data, form) {
-        if (data && data.success) {
-            showToast(data.message, 'success');
-            var article = form.closest('article[data-user]');
-            if (!article) return;
-            var targetId = form.querySelector('input[name="TargetSteamId"]');
-            if (!targetId) return;
-            var steamId = targetId.value;
-            var action = form.getAttribute('asp-page-handler') || '';
-            var pageUrl = window.location.pathname;
-            if (action === 'Request') {
-                form.outerHTML =
-                    '<div class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center" title="Request sent">' +
-                    '<i class="fas fa-clock text-xs"></i></div>';
-            } else if (action === 'Accept') {
-                form.outerHTML =
-                    '<form method="post" action="' + pageUrl + '?handler=Remove"><input type="hidden" name="TargetSteamId" value="' + steamId + '" />' +
-                    '<button type="submit" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">' +
-                    '<i class="fas fa-user-minus text-xs"></i></button></form>';
-            } else if (action === 'Remove') {
-                form.outerHTML =
-                    '<form method="post" action="' + pageUrl + '?handler=Request"><input type="hidden" name="TargetSteamId" value="' + steamId + '" />' +
-                    '<button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Add friend">' +
-                    '<i class="fas fa-user-plus text-xs"></i></button></form>';
-            }
-        } else {
-            showToast(data && data.message ? data.message : 'Action failed.', 'error');
-        }
-    }
 </script>
+
+@section Scripts {
+    <script src="~/js/FriendActions.js" asp-append-version="true"></script>
+}

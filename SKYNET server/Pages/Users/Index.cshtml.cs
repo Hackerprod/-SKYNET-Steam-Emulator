@@ -30,25 +30,24 @@ public class IndexModel : PageModel
         return LoadPage();
     }
 
-    public IActionResult OnPostRequest()
-    {
-        return AjaxResult(
-            _state.SendFriendRequest(GetToken(), TargetSteamId),
-            "Request sent.");
-    }
+    public IActionResult OnPostRequest() => Act("request");
 
-    public IActionResult OnPostAccept()
-    {
-        return AjaxResult(
-            _state.AcceptFriendRequestFrom(GetToken(), TargetSteamId),
-            "Request accepted.");
-    }
+    public IActionResult OnPostAccept() => Act("accept");
 
-    public IActionResult OnPostRemove()
+    // Cancel (own pending), decline (incoming pending) and remove (friend) all end here; the server decides which it was.
+    public IActionResult OnPostRemove() => Act("remove");
+
+    // Read-only: the viewer's relationship to every user, so the cards follow changes made in game or by the other user.
+    public IActionResult OnGetState()
     {
-        return AjaxResult(
-            _state.RemoveFriendOrRequest(GetToken(), TargetSteamId),
-            "Relationship updated.");
+        Response.Headers["Cache-Control"] = "no-store";
+        var relationships = _state.GetWebRelationships(GetToken());
+        if (relationships == null)
+        {
+            return new JsonResult(new { success = false, message = "Session expired. Sign in again." }) { StatusCode = 401 };
+        }
+
+        return new JsonResult(new { success = true, relationships });
     }
 
     private IActionResult LoadPage()
@@ -69,11 +68,19 @@ public class IndexModel : PageModel
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
 
-    private IActionResult AjaxResult(bool success, string message)
+    private IActionResult Act(string action)
     {
+        var result = _state.WebFriendAction(GetToken(), TargetSteamId, action);
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return new JsonResult(new { success, message });
-        StatusMessage = message;
+        {
+            // relationship = what the viewer really has now; the page renders its buttons from it.
+            return new JsonResult(new { success = result.Success, message = result.Message, relationship = result.Relationship })
+            {
+                StatusCode = result.Status
+            };
+        }
+
+        StatusMessage = result.Success ? result.Message : "Could not update the relationship. " + result.Message;
         return RedirectToPage();
     }
 }

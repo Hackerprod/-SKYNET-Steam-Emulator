@@ -13,6 +13,10 @@ namespace SKYNET.Managers
     {
         private static int Started;
 
+        // True once RunFrame got past the game-server / dedicated-role / disabled guards and started the pump.
+        // FriendActions uses it to keep its own threads out of those roles.
+        internal static bool HasStarted => Volatile.Read(ref Started) == 1;
+
         public static void RunFrame(bool gameServer)
         {
             if (gameServer || IsDedicatedProcess || !APIClient.IsEnabled)
@@ -39,6 +43,10 @@ namespace SKYNET.Managers
                 Name = "SKYNET event pump"
             };
             thread.Start();
+
+            // Friend action executor and resync worker: same role guards as the pump (Started is set above).
+            FriendActions.Init();
+            IfaceTracerHost.Init();   // developer tracer, off unless ini [Debug] IfaceTracer is set
         }
 
         private static void PumpLoop()
@@ -53,12 +61,22 @@ namespace SKYNET.Managers
                         continue;
                     }
 
-                    var envelope = APIClient.PollEvents(1000);
+                    var envelope = APIClient.PollEvents(1000, out var initialBatch);
+                    // An invalid-session poll answers with an empty cursor and stays "initial": no resync until the cursor is real.
+                    if (envelope != null && initialBatch && !string.IsNullOrWhiteSpace(envelope.Cursor))
+                    {
+                        // First successful poll after launch (or identity change): the server replays its whole retained log,
+                        // which would resurrect relationships long gone. Social events are skipped and one forced snapshot
+                        // (api/friends) provides the truth instead.
+                        FriendActions.Fr($"replay-batch n={envelope.Events?.Count ?? 0} -> resync");
+                        FriendResync.RequestResync(StateCache.NextStamp());
+                    }
+
                     if (envelope?.Events != null)
                     {
                         foreach (var serverEvent in envelope.Events)
                         {
-                            ApplyEvent(serverEvent);
+                            ApplyEvent(serverEvent, initialBatch);
                         }
                     }
                 }
@@ -69,7 +87,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ApplyEvent(APIClient.ApiEvent serverEvent)
+        private static void ApplyEvent(APIClient.ApiEvent serverEvent, bool initialBatch)
         {
             if (serverEvent == null || string.IsNullOrWhiteSpace(serverEvent.Type))
             {
@@ -83,13 +101,15 @@ namespace SKYNET.Managers
                 case "friend_request_received":
                 case "friend_request_sent":
                 case "friend_presence_changed":
-                    StateCache.UpsertFriendFromEvent(serverEvent);
-                    EmitPersonaStateChange(serverEvent);
-                    break;
-
                 case "friend_removed":
-                    StateCache.RemoveFriend(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId));
-                    EmitPersonaStateChange(serverEvent);
+                    if (initialBatch)
+                    {
+                        FriendActions.Fr($"event type={serverEvent.Type} id={serverEvent.SteamId} result=replay-skipped");
+                        break;
+                    }
+
+                    // Cache first (arbitrated against local actions and snapshots), then the diff-based callback.
+                    StateCache.Emit(StateCache.ApplySocialEvent(serverEvent));
                     break;
 
                 case "stats_updated":
@@ -154,28 +174,6 @@ namespace SKYNET.Managers
 
                     EmitGameServerChangeRequested(serverEvent);
                     break;
-            }
-        }
-
-        private static void EmitPersonaStateChange(APIClient.ApiEvent serverEvent)
-        {
-            var steamId = serverEvent.SteamId != 0
-                ? serverEvent.SteamId
-                : (ulong)new CSteamID(serverEvent.AccountId);
-
-            var callback = new PersonaStateChange_t
-            {
-                m_ulSteamID = steamId,
-                m_nChangeFlags = serverEvent.ChangeFlags != 0
-                    ? serverEvent.ChangeFlags
-                    : (int)EPersonaChange.k_EPersonaChangeName
-            };
-
-            CallbackManager.AddCallback(callback);
-
-            if ((callback.m_nChangeFlags & (int)EPersonaChange.k_EPersonaChangeAvatar) != 0)
-            {
-                ThreadPool.QueueUserWorkItem(_ => APIClient.RefreshAvatar(steamId));
             }
         }
 

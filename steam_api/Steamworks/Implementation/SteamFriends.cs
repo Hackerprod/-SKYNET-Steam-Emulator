@@ -122,7 +122,8 @@ namespace SKYNET.Steamworks.Implementation
         public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
         {
             Write($"ActivateGameOverlayToUser (GroupID = {friendsGroupID}, SteamID = {(CSteamID)steamID})");
-            switch ((friendsGroupID ?? string.Empty).ToLowerInvariant())
+            var dialog = (friendsGroupID ?? string.Empty).ToLowerInvariant();
+            switch (dialog)
             {
                 case "steamid":
                     OverlayManager.ShowUser("profile", steamID);
@@ -139,27 +140,29 @@ namespace SKYNET.Steamworks.Implementation
                 case "achievements":
                     OverlayManager.ShowUser("achievements", steamID);
                     break;
+                // The four friend dialogs act at once and never open the profile overlay: the game's own profile page
+                // is what changes (cache update + PersonaStateChange), see FriendActions.
                 case "friendadd":
-                    WorkQueue.Enqueue("Send friend request", () => APIClient.SendFriendRequest(steamID),
-                        "friends:request:" + steamID);
-                    OverlayManager.ShowUser("profile", steamID);
+                    FriendActions.Run(FriendKind.Add, steamID);
                     break;
                 case "friendremove":
-                    WorkQueue.Enqueue("Remove friend or request", () => APIClient.RemoveFriendOrRequest(steamID),
-                        "friends:remove:" + steamID);
-                    OverlayManager.ShowUser("profile", steamID);
+                    FriendActions.Run(FriendKind.Remove, steamID);
                     break;
                 case "friendrequestaccept":
-                    WorkQueue.Enqueue("Accept friend request", () => APIClient.AcceptFriendRequest(steamID),
-                        "friends:accept:" + steamID);
-                    OverlayManager.ShowUser("profile", steamID);
+                    FriendActions.Run(FriendKind.Accept, steamID);
                     break;
                 case "friendrequestignore":
-                    WorkQueue.Enqueue("Ignore friend request", () => APIClient.RemoveFriendOrRequest(steamID),
-                        "friends:ignore:" + steamID);
-                    OverlayManager.ShowUser("profile", steamID);
+                    FriendActions.Run(FriendKind.Ignore, steamID);
                     break;
                 default:
+                    // An unrecognised friend* dialog must not fall back to the profile overlay either: log it so the
+                    // string can be mapped, and do nothing.
+                    if (dialog.StartsWith("friend", StringComparison.Ordinal))
+                    {
+                        FriendActions.Fr($"UNKNOWN friend dialog '{dialog}' id={steamID} R={(StateCache.TryGetFriend(steamID, out var known) ? known.FriendRelationship : 0)}");
+                        break;
+                    }
+
                     OverlayManager.ShowUser("profile", steamID);
                     break;
             }
@@ -413,7 +416,7 @@ namespace SKYNET.Steamworks.Implementation
                     Result = Friends.Count;
                 });
             }
-            Write($"GetFriendCount {Result}");
+            Write($"GetFriendCount (FriendFlags = 0x{iFriendFlags:X}) = {Result}");
             return Result;
         }
 
@@ -563,8 +566,44 @@ namespace SKYNET.Steamworks.Implementation
                         : (EFriendRelationship)friend.FriendRelationship;
                 }
             });
-            Write($"GetFriendRelationship (SteamID = {steamIDFriend}) = {Result}");
+            var real = Result;
+            Result = MapReportedRelationship(steamIDFriend, real);
+            Write(real == Result
+                ? $"GetFriendRelationship (SteamID = {steamIDFriend}) = {Result}"
+                : $"GetFriendRelationship (SteamID = {steamIDFriend}) = {Result} (real {real})");
             return (int)Result;
+        }
+
+        // ids currently reported as Friend while the real relationship is RequestInitiator (log once per state change)
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<ulong, byte> ReportedAsFriend =
+            new System.Collections.Concurrent.ConcurrentDictionary<ulong, byte>();
+
+        // Every GetFriendRelationship entry point (all interface versions, CSteamworks and SteamAPI_ exports) ends here.
+        // Dota's profile header shows the Remove-friend icon only for relationship 3 and the Add icon for everything
+        // else, including 4, so after "Add" the user would never get the cancel-request icon real Steam shows. For an
+        // outgoing pending request (4) we therefore report 3 to the game; the cache, the server, the enumerations
+        // (MatchesFriendFlags / GetFriendCount / GetFriendByIndex / HasFriend) keep the real 4, and the Remove icon
+        // ("friendremove") is planned from the real 4 by FriendActions as a cancel. Known side effects: the Send message
+        // icon appears, and Dota treats the invitee as a friend wherever it reads the relationship (e.g. rich presence
+        // status). Ini [Network Settings] FriendOutgoingAsFriend=false reports the true value.
+        private static EFriendRelationship MapReportedRelationship(ulong id, EFriendRelationship real)
+        {
+            if (real == EFriendRelationship.k_EFriendRelationshipRequestInitiator && FriendActions.OutgoingAsFriend)
+            {
+                if (ReportedAsFriend.TryAdd(id, 0))
+                {
+                    FriendActions.Fr($"relationship id={id} real=4 reported=3 (outgoing request shown as friend)");
+                }
+
+                return EFriendRelationship.k_EFriendRelationshipFriend;
+            }
+
+            if (!ReportedAsFriend.IsEmpty)
+            {
+                ReportedAsFriend.TryRemove(id, out _);
+            }
+
+            return real;
         }
 
         public string GetFriendRichPresence(ulong steamIDFriend, string pchKey)
@@ -1055,14 +1094,18 @@ namespace SKYNET.Steamworks.Implementation
                 return true;
             }
 
+            // Steamworks semantics: FriendshipRequested (0x02) = users who sent an invite TO us (relationship 2,
+            // RequestRecipient); RequestingFriendship (0x80) = users WE invited (relationship 4, RequestInitiator).
+            // Dota enumerates with 0x6 (friends + incoming requests), so an invitee (relationship 4) is not listed
+            // there nor reported by HasFriend(id, flags), as in real Steam; GetFriendRelationship still reports 4.
             if ((friendFlags & (int)EFriendFlags.k_EFriendFlagFriendshipRequested) != 0 &&
-                relationship == EFriendRelationship.k_EFriendRelationshipRequestInitiator)
+                relationship == EFriendRelationship.k_EFriendRelationshipRequestRecipient)
             {
                 return true;
             }
 
             if ((friendFlags & (int)EFriendFlags.k_EFriendFlagRequestingFriendship) != 0 &&
-                relationship == EFriendRelationship.k_EFriendRelationshipRequestRecipient)
+                relationship == EFriendRelationship.k_EFriendRelationshipRequestInitiator)
             {
                 return true;
             }

@@ -29,26 +29,12 @@ public class ProfileModel : PageModel
         return LoadPage();
     }
 
-    public IActionResult OnPostRequest()
-    {
-        return AjaxResult(
-            _state.SendFriendRequest(GetToken(), SteamId),
-            "Request sent.");
-    }
+    public IActionResult OnPostRequest() => Act("request");
 
-    public IActionResult OnPostAccept()
-    {
-        return AjaxResult(
-            _state.AcceptFriendRequestFrom(GetToken(), SteamId),
-            "Request accepted.");
-    }
+    public IActionResult OnPostAccept() => Act("accept");
 
-    public IActionResult OnPostRemove()
-    {
-        return AjaxResult(
-            _state.RemoveFriendOrRequest(GetToken(), SteamId),
-            "Relationship updated.");
-    }
+    // Cancel (own pending), decline (incoming pending) and remove (friend) all end here; the server decides which it was.
+    public IActionResult OnPostRemove() => Act("remove");
 
     private IActionResult LoadPage()
     {
@@ -65,11 +51,19 @@ public class ProfileModel : PageModel
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
 
-    private IActionResult AjaxResult(bool success, string message)
+    private IActionResult Act(string action)
     {
+        var result = _state.WebFriendAction(GetToken(), SteamId, action);
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return new JsonResult(new { success, message });
-        StatusMessage = message;
+        {
+            // relationship = what the viewer really has now; the page renders its buttons from it.
+            return new JsonResult(new { success = result.Success, message = result.Message, relationship = result.Relationship })
+            {
+                StatusCode = result.Status
+            };
+        }
+
+        StatusMessage = result.Success ? result.Message : "Could not update the relationship. " + result.Message;
         return RedirectToPage(new { steamId = SteamId });
     }
 }

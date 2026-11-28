@@ -111,6 +111,8 @@
     <Compile Include="Managers\Inventory\InventoryManager.cs" />
     <Compile Include="Managers\EventPump.cs" />
     <Compile Include="Managers\HtmlSurfaceHost.cs" />
+    <Compile Include="Managers\FriendActions.cs" />
+    <Compile Include="Managers\IfaceTracerHost.cs" />
     <Compile Include="Managers\StateCache.cs" />
     <Compile Include="Managers\WorkQueue.cs" />
     <Compile Include="Managers\WorkshopManager.cs" />

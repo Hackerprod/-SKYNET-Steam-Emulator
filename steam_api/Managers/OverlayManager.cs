@@ -700,7 +700,9 @@ namespace SKYNET.Managers
 
         private static List<OverlayUser> BuildPeopleList()
         {
+            // None entries (removed friends, looked-up strangers) stay in the cache for their names; they are not people here.
             var users = StateCache.GetFriends()
+                .Where(f => f.FriendRelationship != (int)EFriendRelationship.k_EFriendRelationshipNone || f.HasFriend)
                 .Select(ToOverlayUser)
                 .Where(u => u != null)
                 .OrderByDescending(u => u.PersonaState != 0)
@@ -761,7 +763,10 @@ namespace SKYNET.Managers
         private static List<OverlaySummaryItem> BuildHomeSummary()
         {
             var steamId = GetCurrentSteamId();
-            var friends = StateCache.GetFriends();
+            // Only confirmed friends count; pending requests and cached strangers are not friends.
+            var friends = StateCache.GetFriends()
+                .Where(f => f.FriendRelationship == (int)EFriendRelationship.k_EFriendRelationshipFriend || f.HasFriend)
+                .ToList();
             var stats = BuildStats(steamId);
             var achievements = BuildAchievements(steamId);
             var currentPlayers = StateCache.GetCurrentPlayers();

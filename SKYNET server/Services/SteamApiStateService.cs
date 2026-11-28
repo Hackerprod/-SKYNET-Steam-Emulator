@@ -56,7 +56,10 @@ public sealed partial class SteamApiStateService
     private static readonly DateTime _serverStartTime = DateTime.UtcNow;
 
     private ApiState _state = new();
-    private long _nextEventSequence = 1;
+    internal static long InitialEventSequence() => DateTime.UtcNow.Ticks;
+    // Seeded from the clock (not 1) so that after a restart the first sequence is above any cursor a still-running client
+    // holds; events are memory-only, so nothing older exists. Cursors travel as strings.
+    private long _nextEventSequence = InitialEventSequence();
     private uint _nextTicketHandle = 1000;
     private ulong _nextLobbyId = 90000000000000000;
     private ulong _nextFileShareHandle = 70000000000000000;

@@ -469,33 +469,70 @@ public sealed partial class SteamApiStateService
                 }
             }
 
-            _state.Users.Remove(steamId);
-            _state.FriendLinks.Remove(steamId);
-            foreach (var links in _state.FriendLinks.Values)
-            {
-                links.Remove(steamId);
-            }
-            _state.Stats.Remove(steamId);
-            _state.Avatars.Remove(steamId);
-            _state.DotaEquipment.Remove(steamId);
-
-            if (account != null)
-            {
-                _state.WebAccounts.Remove(account.Username);
-            }
-
-            var pendingRequests = _state.FriendRequests
-                .Where(r => r.FromSteamId == steamId || r.ToSteamId == steamId && r.Status == "pending")
-                .ToList();
-            foreach (var req in pendingRequests)
-            {
-                req.Status = "cancelled";
-                req.RespondedAt = DateTime.UtcNow;
-            }
-
-            SaveState();
+            AdminDeleteUserLocked(steamId);
             return true;
         }
+    }
+
+    // The deletion itself (caller holds _sync and has done the admin checks); split out so --verify-friends can run it.
+    private void AdminDeleteUserLocked(ulong steamId)
+    {
+        var account = _state.WebAccounts.Values.FirstOrDefault(a => a.SteamId == steamId);
+
+        // The counterparts must hear about it. The event is built from the record captured here, because
+        // EnqueueRelationshipEventLocked drops events whose related user no longer exists.
+        _state.Users.TryGetValue(steamId, out var deletedUser);
+        var counterparts = new HashSet<ulong>();
+        if (_state.FriendLinks.TryGetValue(steamId, out var deletedLinks))
+        {
+            counterparts.UnionWith(deletedLinks);
+        }
+        foreach (var req in _state.FriendRequests.Where(r => IsPending(r) && (r.FromSteamId == steamId || r.ToSteamId == steamId)))
+        {
+            counterparts.Add(req.FromSteamId == steamId ? req.ToSteamId : req.FromSteamId);
+        }
+        counterparts.Remove(steamId);
+
+        // Only PENDING requests (either direction) are cancelled; accepted/declined history keeps its status.
+        foreach (var req in _state.FriendRequests.Where(r => IsPending(r) && (r.FromSteamId == steamId || r.ToSteamId == steamId)).ToList())
+        {
+            req.Status = "cancelled";
+            req.RespondedAt = DateTime.UtcNow;
+        }
+
+        _state.Users.Remove(steamId);
+        _state.FriendLinks.Remove(steamId);
+        foreach (var links in _state.FriendLinks.Values)
+        {
+            links.Remove(steamId);
+        }
+        _state.Stats.Remove(steamId);
+        _state.Avatars.Remove(steamId);
+        _state.DotaEquipment.Remove(steamId);
+
+        if (account != null)
+        {
+            _state.WebAccounts.Remove(account.Username);
+        }
+
+        if (deletedUser != null)
+        {
+            foreach (var counterpart in counterparts.Where(_state.Users.ContainsKey))
+            {
+                EnqueueEvent(counterpart, new ApiEvent
+                {
+                    Type = "friend_removed",
+                    SteamId = deletedUser.SteamId,
+                    AccountId = deletedUser.AccountId,
+                    PersonaName = deletedUser.PersonaName,
+                    ChangeFlags = PersonaChangeRelationship,
+                    FriendRelationship = FriendRelationshipNone,
+                    RequestId = string.Empty
+                });
+            }
+        }
+
+        SaveState();
     }
 
     public bool AdminSetAdmin(string token, ulong steamId, bool makeAdmin)
