@@ -17,6 +17,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>SKYNET.Gc</RootNamespace>
     <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <!-- Only the .NET 10 runtime may be installed on a dev machine; the net8 CLI must still start there. -->
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
@@ -38,6 +40,8 @@
     <PackageReference Include="System.Management" Version="8.0.0" />
     <ProjectReference Include="..\..\SKYNET server\SKYNET server.csproj" />
     <Compile Remove="Capture\GcHookEntryPoint.cs;Capture\HookMain.cs;Capture\CaptureCommand.cs" />
+    <!-- Builds (and restores) the tracer payload; it is not referenced as a library, only copied to hook\ below. -->
+    <ProjectReference Include="..\SkynetIfaceHook\SkynetIfaceHook.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" SetTargetFramework="TargetFramework=net472" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
@@ -51,6 +55,12 @@
       <HookFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-gc-hook.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\skynet-gc-hook.exe.config;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*.dll;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyHook*Svc.exe;$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\EasyLoad*.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(HookFiles)" DestinationFolder="$(OutDir)hook" />
+    <ItemGroup>
+      <IfaceHookFiles Include="$(MSBuildProjectDirectory)\..\SkynetIfaceHook\bin\$(Configuration)\net472\skynet-iface-hook.exe;$(MSBuildProjectDirectory)\..\SkynetIfaceHook\bin\$(Configuration)\net472\skynet-iface-hook.exe.config" />
+      <IfaceSpecFiles Include="$(MSBuildProjectDirectory)\..\SkynetIfaceHook\bin\$(Configuration)\net472\meta\*.txt" />
+    </ItemGroup>
+    <Copy SourceFiles="@(IfaceHookFiles)" DestinationFolder="$(OutDir)hook" />
+    <Copy SourceFiles="@(IfaceSpecFiles)" DestinationFolder="$(OutDir)hook\meta" />
 </Target>
 </Project>
 

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    skynet-mcp: stdio MCP server for AI agents. Exposes the interface tracer and the skynet-gc GC tools
+    (capture, analyze, decode, ui) as compact tools. It holds no logic of its own: every tool shells out to
+    skynet-gc.exe (path in SKYNET_GC_EXE), so a person using the CLI gets the same behaviour.
+    Hosting comes from the ASP.NET Core shared framework (Microsoft.Extensions.Hosting), like SKYNET server.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>skynet-mcp</AssemblyName>
+    <RootNamespace>SKYNET.Mcp</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <!-- Only the .NET 10 runtime may be installed on a dev machine. -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
+  </ItemGroup>
+</Project>

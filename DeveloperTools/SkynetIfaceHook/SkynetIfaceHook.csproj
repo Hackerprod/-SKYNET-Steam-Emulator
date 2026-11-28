@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The interface tracer payload (net472): skynet-iface-hook.exe is both the injector (start / attach)
+    and the assembly injected into dota2.exe (IfaceEntryPoint). Separate from SkynetGc so that
+    EasyHook finds exactly one IEntryPoint per assembly. `skynet-gc iface ...` runs it from hook\;
+    building SkynetGc builds this project and copies the output there.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>skynet-iface-hook</AssemblyName>
+    <RootNamespace>SKYNET.Iface</RootNamespace>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyHook" Version="2.7.7097" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SkynetGc\DotaLocator.cs" Link="DotaLocator.cs" />
+    <!-- The committed vtable specs (any interface/version) are the single source of slot order and signatures (read at run time). -->
+    <None Include="..\InterfaceLayoutCheck\header-spec\*.txt" Link="meta\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -4,7 +4,8 @@ Tools for developing and validating SKYNET. None of them ships with the server o
 
 | Folder | Kind | Use it to |
 |--------|------|-----------|
-| [`SkynetGc`](SkynetGc/README.md) | .NET CLI | Record the real Dota GC flow, analyze it, decode GC bodies, drive the game window. |
+| [`SkynetGc`](SkynetGc/README.md) | .NET CLI | Record the real Dota GC flow, analyze it, decode GC bodies, drive the game window, trace calls of any Steam interface (`iface`). |
+| [`SkynetMcp`](SkynetMcp/README.md) | MCP server | Expose the `SkynetGc` tools to AI agents over stdio. |
 | [`InterfaceLayoutCheck`](InterfaceLayoutCheck/README.md) | .NET checker | Verify the Steamworks interface vtables of `steam_api` (slot order, native pointers). |
 | [`InterfaceLayoutGen`](InterfaceLayoutGen/README.md) | Python generator | Derive the vtable specs from Valve's real headers (feeds `InterfaceLayoutCheck`). |
 | [`CallbackLayoutCheck`](CallbackLayoutCheck/README.md) | .NET checker + Python | Verify callback and struct layouts (ids, sizes, field offsets) of `steam_api` against the SDK headers. |
