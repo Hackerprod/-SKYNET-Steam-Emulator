@@ -117,6 +117,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectDedicatedAttachFlow(plugin, context, friendContext, serverContext, queuedMessages, write);
         ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectConnectedPlayersFlow(plugin, context, serverContext, queuedMessages, write);
+        ok &= ExpectHelloAfterInvitedLobbyGoneFlow(plugin, context, friendContext, queuedMessages, write);
         ok &= ExpectResponse(plugin, context, 7026, 7546, 1, write);
         ok &= ExpectResponse(plugin, context, 7072, 7087, 1, write);
         ok &= ExpectResponse(plugin, context, 7078, 7079, 1, write);
@@ -382,6 +383,31 @@ public static class GcScriptSelfCheck
             $"serverLobbyMembers={serverLobby?.AllMembers.Count}, serverStaticMembers={serverStaticLobby?.AllMembers.Count}, " +
             $"serverStaticSteamId={serverStaticMember?.SteamId}, plus={serverStaticMember?.IsPlusSubscriber}, " +
             $"result={result?.Eresult}, ok={ok}");
+        return ok;
+    }
+
+    // Regression: a player invited to a lobby that was then destroyed must still be able to say hello to the GC. The
+    // GC re-sends pending invitations at every hello; the stale one used to make the script fail (map on a null lobby),
+    // which dropped the player's whole GC session start.
+    private static bool ExpectHelloAfterInvitedLobbyGoneFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext leaderContext,
+        GameCoordinatorContext inviteeContext,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        Action<string> write)
+    {
+        plugin.Exchange(leaderContext, RequestFor(leaderContext, 7040));
+        var ok = ExpectCreateLobbyFlow(plugin, leaderContext, write);
+        plugin.Exchange(leaderContext, Request(4512, Serialize(new CMsgInviteToLobby { SteamId = inviteeContext.SteamId })));
+        plugin.Exchange(leaderContext, RequestFor(leaderContext, 7040));
+        queuedMessages.Clear();
+
+        var hello = plugin.Exchange(inviteeContext, RequestFor(inviteeContext, 4006, Serialize(new CMsgClientHello())));
+        var staleInvite = queuedMessages.Any(message =>
+            message.SteamId == inviteeContext.SteamId && message.Message.MessageType == 24
+            && Deserialize<CMsgSOCacheSubscribed>(message.Message.PayloadBase64).Objects.Any(item => item.TypeId == 2013));
+        ok &= hello.Handled && hello.Messages.Any(message => message.MessageType == 4004) && !staleInvite;
+        write($"hello after invited lobby gone -> handled={hello.Handled}, messages={hello.Messages.Count}, staleInvite={staleInvite}, ok={ok}");
         return ok;
     }
 

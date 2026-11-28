@@ -1368,6 +1368,12 @@ function destroyLobby(lobby: LobbyState, ctx: GcContextBase | undefined, reason:
     }
 
     store.lobbies.delete(lobby.lobbyId);
+    // An invitation to a lobby that no longer exists is a ghost: players would keep receiving it at every GC hello.
+    const staleInvites = Array.from(store.invites.values()).filter((invite) => invite.lobbyId === lobby.lobbyId);
+    for (let i = 0; i < staleInvites.length; i++) {
+        store.invites.delete(staleInvites[i].inviteId);
+    }
+
     if (ctx !== undefined) {
         ctx.services.lobby.removeSnapshot(lobby.lobbyId);
     }
@@ -2068,28 +2074,42 @@ function buildInviteUnsubscribed(lobbyId: bigint): CMsgSOCacheUnsubscribed {
 
 function buildInviteObject(invite: LobbyInviteState): CSODOTALobbyInvite {
     const lobby = store.lobbies.get(invite.lobbyId) ?? null;
+    // Explicit checks, not `lobby?.members.map(...)`: the script runtime does not short-circuit that whole chain and
+    // calls map on null when the lobby is gone.
+    const members: { name: string; steamId: bigint }[] = [];
+    if (lobby !== null) {
+        for (let i = 0; i < lobby.members.length; i++) {
+            members.push({ name: lobby.members[i].personaName, steamId: lobby.members[i].steamId });
+        }
+    }
+
     return {
         groupId: invite.lobbyId,
         senderId: invite.senderSteamId,
         senderName: invite.senderName,
         inviteGid: invite.inviteId,
-        customGameId: lobby?.customGameId ?? 0n,
-        customGameCrc: lobby?.customGameCrc ?? 0n,
-        customGameTimestamp: lobby?.customGameTimestamp ?? 0,
-        members:
-            lobby?.members.map((member) => ({
-                name: member.personaName,
-                steamId: member.steamId
-            })) ?? []
+        customGameId: lobby !== null ? lobby.customGameId : 0n,
+        customGameCrc: lobby !== null ? lobby.customGameCrc : 0n,
+        customGameTimestamp: lobby !== null ? lobby.customGameTimestamp : 0,
+        members
     };
 }
 
 function emitCurrentLobbyInvites(ctx: GcContextBase): void {
-    store.invites.forEach((invite) => {
-        if (invite.targetSteamId === ctx.steamId) {
-            sendInvite(ctx, invite);
+    const pending = Array.from(store.invites.values());
+    for (let i = 0; i < pending.length; i++) {
+        const invite = pending[i];
+        if (invite.targetSteamId !== ctx.steamId) {
+            continue;
         }
-    });
+
+        if (!store.lobbies.has(invite.lobbyId)) {
+            store.invites.delete(invite.inviteId);
+            continue;
+        }
+
+        sendInvite(ctx, invite);
+    }
 }
 
 function takeInvite(lobbyId: bigint, targetSteamId: bigint): LobbyInviteState | null {
