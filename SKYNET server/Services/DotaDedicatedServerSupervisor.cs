@@ -14,8 +14,10 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
     private readonly object _sync = new();
     private readonly ILogger<DotaDedicatedServerSupervisor> _logger;
     private readonly GameServerSettingsService _settings;
-    private readonly string _executablePath;
-    private readonly string _workingDirectory;
+    private readonly Func<string> _dotaPath;
+    private readonly string _contentRoot;
+    private string _executablePath = string.Empty;
+    private string _workingDirectory = string.Empty;
     private readonly string _payloadDllPath;
     private readonly string _diagnosticsDirectory;
     private readonly int _tvPortOffset;
@@ -26,19 +28,16 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
     public DotaDedicatedServerSupervisor(
         IHostEnvironment environment,
         IConfiguration configuration,
+        IServiceProvider services,
         GameServerSettingsService settings,
         ILogger<DotaDedicatedServerSupervisor> logger)
     {
         _logger = logger;
         _settings = settings;
-        _executablePath = ResolvePath(
-            configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:ExecutablePath"),
-            environment.ContentRootPath,
-            Path.Combine("..", "..", "Steam", "steamapps", "common", "dota 2 beta", "game", "bin", "win64", "dota2.exe"));
-        _workingDirectory = ResolvePath(
-            configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:WorkingDirectory"),
-            environment.ContentRootPath,
-            Path.GetDirectoryName(_executablePath) ?? environment.ContentRootPath);
+        _contentRoot = environment.ContentRootPath;
+        // The Dota folder is a single setting owned by the state service (saved in the admin page, detected from Steam
+        // the first time); it is read at each launch so a change takes effect without restarting.
+        _dotaPath = () => services.GetService<SteamApiStateService>()?.GetConfiguredDotaPath() ?? string.Empty;
         _payloadDllPath = ResolvePath(
             configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:PayloadDllPath"),
             environment.ContentRootPath,
@@ -59,6 +58,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         // Read the live settings once per launch so an admin edit takes effect on
         // the next dedicated server without a restart.
         var settings = _settings.Current;
+        ResolveGamePaths();
 
         lock (_sync)
         {
@@ -75,7 +75,9 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
 
             if (!File.Exists(_executablePath))
             {
-                return DedicatedLaunchResult.Failed($"Dota dedicated executable was not found at '{_executablePath}'.");
+                return DedicatedLaunchResult.Failed(string.IsNullOrEmpty(_executablePath)
+                    ? "The Dota 2 folder is not configured. Set it in the admin page."
+                    : $"Dota dedicated executable was not found at '{_executablePath}'.");
             }
 
             if (!Directory.Exists(_workingDirectory))
@@ -402,6 +404,17 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         {
             _logger.LogWarning(ex, "Could not stop dedicated Dota process for lobby {LobbyId}", reservation.LobbyId);
         }
+    }
+
+    private void ResolveGamePaths()
+    {
+        var dotaPath = _dotaPath();
+        _executablePath = string.IsNullOrWhiteSpace(dotaPath)
+            ? string.Empty
+            : Path.GetFullPath(Path.Combine(dotaPath, "game", "bin", "win64", "dota2.exe"));
+        _workingDirectory = string.IsNullOrEmpty(_executablePath)
+            ? _contentRoot
+            : Path.GetDirectoryName(_executablePath) ?? _contentRoot;
     }
 
     private static string ResolvePath(string? configured, string contentRoot, string fallback)

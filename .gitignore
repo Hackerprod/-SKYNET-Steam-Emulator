@@ -421,3 +421,5 @@ FodyWeavers.xsd
 .temp
 .atl
 runtime
+# Built emulator DLLs used as the injection payload (generated, not tracked)
+SKYNET Steam Client/payload/

@@ -85,12 +85,13 @@ public sealed partial class SteamApiStateService
             }
         }
 
-        if (string.IsNullOrWhiteSpace(request.DotaPath))
+        var requestedPath = string.IsNullOrWhiteSpace(request.DotaPath) ? GetConfiguredDotaPath() : request.DotaPath;
+        if (string.IsNullOrWhiteSpace(requestedPath))
         {
-            return new ApiDotaItemImportResult { Success = false, Message = "Enter the Dota 2 folder path first." };
+            return new ApiDotaItemImportResult { Success = false, Message = "Dota 2 was not found automatically. Enter the Dota 2 folder path." };
         }
 
-        var importPath = ResolveDotaContentPath(request.DotaPath);
+        var importPath = ResolveDotaContentPath(requestedPath);
         try
         {
             var pakPath = ResolvePakPath(importPath);
@@ -520,7 +521,7 @@ public sealed partial class SteamApiStateService
                 return new ApiDotaClientVersionResult { Message = "Not authorized." };
             }
 
-            dotaPath = _state.DotaCosmetics.DotaPath;
+            dotaPath = GetConfiguredDotaPathLocked();
         }
 
         if (!DotaSteamInfReader.TryReadClientVersion(dotaPath, out var clientVersion, out var steamInfPath, out var error))
@@ -587,12 +588,12 @@ public sealed partial class SteamApiStateService
         uint stored;
         lock (_sync)
         {
-            if (string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
+            dotaPath = GetConfiguredDotaPathLocked();
+            if (string.IsNullOrWhiteSpace(dotaPath))
             {
                 return;
             }
 
-            dotaPath = _state.DotaCosmetics.DotaPath;
             stored = _state.DotaCosmetics.ClientVersion;
         }
 
@@ -1043,13 +1044,13 @@ public sealed partial class SteamApiStateService
 
         try
         {
-            // No Dota folder configured yet (it is set by the first catalog import): nothing to load.
-            if (string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
+            var dotaPath = GetConfiguredDotaPathLocked();
+            if (string.IsNullOrWhiteSpace(dotaPath))
             {
                 return;
             }
 
-            var pakPath = ResolvePakPath(ResolveDotaContentPath(_state.DotaCosmetics.DotaPath));
+            var pakPath = ResolvePakPath(ResolveDotaContentPath(dotaPath));
             var heroesText = ReadHeroesText(pakPath);
             _state.DotaHeroSlots = DotaItemsGameParser.ParseHeroSlots(heroesText);
         }
@@ -1057,6 +1058,43 @@ public sealed partial class SteamApiStateService
         {
             _state.DotaHeroSlots = new Dictionary<string, Dictionary<string, uint>>(StringComparer.OrdinalIgnoreCase);
         }
+    }
+
+    /// <summary>
+    /// The one place that says where Dota 2 is installed. It is the folder saved in the admin page; the catalog import,
+    /// the hero slots and the dedicated server launcher all read it from here. When nothing was saved yet it is detected
+    /// once from Steam's registry entries and library folders and then stored, so later runs just use the saved value
+    /// (and changing it in the admin page changes it for everything).
+    /// </summary>
+    public string GetConfiguredDotaPath()
+    {
+        lock (_sync)
+        {
+            return GetConfiguredDotaPathLocked();
+        }
+    }
+
+    private bool _dotaPathDetectionTried;
+
+    private string GetConfiguredDotaPathLocked()
+    {
+        if (string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath) && !_dotaPathDetectionTried)
+        {
+            _dotaPathDetectionTried = true;
+            var detected = DotaInstallDetector.Detect();
+            if (!string.IsNullOrWhiteSpace(detected))
+            {
+                _state.DotaCosmetics.DotaPath = detected;
+                _logger.LogInformation("Detected the Dota 2 folder from Steam: {Path}", detected);
+                RequestStateFlush();
+            }
+            else
+            {
+                _logger.LogWarning("Dota 2 was not found in the Steam libraries; set the Dota folder in the admin page.");
+            }
+        }
+
+        return _state.DotaCosmetics.DotaPath ?? string.Empty;
     }
 
     private static string ResolveDotaContentPath(string requestedPath)
@@ -1111,6 +1149,16 @@ public sealed partial class SteamApiStateService
 
     public static bool RunDotaCosmeticParserSelfCheck(Action<string>? write = null)
     {
+        // Steam-based detection of the Dota folder: informational (a CI machine has no Dota), but a detected folder must
+        // really contain the game executable.
+        var detectedDota = DotaInstallDetector.Detect();
+        write?.Invoke($"dota folder detection -> {(detectedDota ?? "not found")}");
+        if (detectedDota != null && !File.Exists(Path.Combine(detectedDota, "game", "bin", "win64", "dota2.exe")))
+        {
+            write?.Invoke("dota folder detection returned a folder without dota2.exe");
+            return false;
+        }
+
         var heroIds = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
         {
             ["npc_dota_hero_phantom_assassin"] = 44
