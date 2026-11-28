@@ -210,6 +210,7 @@ public class SteamEmulator
             }
             catch { /* best effort */ }
 
+            InstallCrashLogging();
             Write("Initializing Steam emulator");
             Write($"Process PID={Process.GetCurrentProcess().Id} Role={Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE") ?? "client"} CommandLine={Environment.CommandLine}");
             Write($"Networking security mode: {(SecureNetworking ? "secure SDR certificate" : "insecure LAN (no SDR certificate)")}");
@@ -418,6 +419,30 @@ public class SteamEmulator
             Write($"Creating pipe {HSteamPipe}");
         }
         return HSteamPipe;
+    }
+
+    private static int crashLoggingInstalled;
+
+    // The game is killed by any exception that escapes our code on a thread we do
+    // not control, and by then the log has nothing about why. Record the managed
+    // stack before the process goes down.
+    private static void InstallCrashLogging()
+    {
+        if (System.Threading.Interlocked.Exchange(ref crashLoggingInstalled, 1) == 1)
+        {
+            return;
+        }
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            try
+            {
+                Write("CRASH", $"Unhandled exception (terminating={args.IsTerminating}); last game callback: {SKYNET.Managers.CallbackManager.LastInvocation} | {args.ExceptionObject}");
+            }
+            catch
+            {
+            }
+        };
     }
 
     private static void Write(object msg)

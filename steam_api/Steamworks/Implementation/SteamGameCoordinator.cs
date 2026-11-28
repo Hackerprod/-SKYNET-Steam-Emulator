@@ -297,6 +297,12 @@ namespace SKYNET.Steamworks.Implementation
                 }
             }
             Write($"RetrieveMessage (MsgType = {GetGCMsg(punMsgType)}, MsgSize = {pcubMsgSize}) = {result}");
+            if (result != EGCResults.k_EGCResultNoMessage)
+            {
+                // Same file as the callback trace: the last line before a crash says which GC message the game was handling.
+                SKYNET.Managers.CallbackManager.TraceInvocation($"RetrieveMessage type={GetGCMsg(punMsgType)} size={pcubMsgSize} result={result}");
+            }
+
             return result;
         }
 

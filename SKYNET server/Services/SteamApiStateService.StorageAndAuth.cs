@@ -304,16 +304,14 @@ public sealed partial class SteamApiStateService
             var server = request.Server ?? new ApiGameServer();
             var publicIp = ResolveGameServerPublicIp(server.IP, remoteIp);
             server.IP = publicIp;
-            var serverId = server.SteamId != 0
-                ? server.SteamId
-                : CreateGameServerSteamId(request.Anonymous);
+            var serverId = ResolveGameServerSteamIdLocked(server, request.Anonymous);
             server.SteamId = serverId;
             server.LoggedOn = request.Server?.LoggedOn == true;
             var secure = NormalizeGameServerSecurity(server);
 
             _state.GameServers[serverId] = server;
             _gameServerLeases[serverId] = DateTime.UtcNow;
-            _dotaDedicatedServers.ObserveRegistration(serverId, server);
+            _dotaDedicatedServers?.ObserveRegistration(serverId, server);
             SaveState();
             return new ApiGameServerResult { Success = true, PublicIP = publicIp, Secure = secure, SteamId = serverId };
         }
@@ -324,6 +322,7 @@ public sealed partial class SteamApiStateService
 
     public bool LogOffGameServer(ulong steamId)
     {
+        steamId = SteamIdAllocator.CanonicalGameServerSteamId(steamId);
         if (steamId == 0)
         {
             return false;
@@ -353,12 +352,23 @@ public sealed partial class SteamApiStateService
         {
             var publicIp = ResolveGameServerPublicIp(server.IP, remoteIp);
             server.IP = publicIp;
-            var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
+            server.SteamId = SteamIdAllocator.CanonicalGameServerSteamId(server.SteamId);
+            // A state update is not a way to register: the server must already be known,
+            // by its ID or, when it sends none, by the endpoint it registered from.
+            var serverId = server.SteamId != 0 ? server.SteamId : FindRegisteredGameServerByEndpointLocked(server.IP, server.Port);
+            if (serverId == 0 ||
+                !_state.GameServers.TryGetValue(serverId, out var registered) ||
+                !IsGameServerLeaseLiveLocked(serverId) ||
+                !IsSameGameServerEndpoint(registered, server))
+            {
+                return false;
+            }
+
             server.SteamId = serverId;
             NormalizeGameServerSecurity(server);
             _state.GameServers[serverId] = server;
             _gameServerLeases[serverId] = DateTime.UtcNow;
-            _dotaDedicatedServers.ObserveRegistration(serverId, server);
+            _dotaDedicatedServers?.ObserveRegistration(serverId, server);
             SaveState();
             return true;
         }
@@ -485,6 +495,8 @@ public sealed partial class SteamApiStateService
             return false;
         }
 
+        server.SteamId = SteamIdAllocator.CanonicalGameServerSteamId(server.SteamId);
+
         lock (_sync)
         {
             if (!_state.GameServers.TryGetValue(server.SteamId, out var registered))
@@ -496,25 +508,73 @@ public sealed partial class SteamApiStateService
             NormalizeGameServerSecurity(server);
             _state.GameServers[server.SteamId] = server;
             _gameServerLeases[server.SteamId] = DateTime.UtcNow;
-            _dotaDedicatedServers.ObserveRegistration(server.SteamId, server);
+            _dotaDedicatedServers?.ObserveRegistration(server.SteamId, server);
             return true;
         }
     }
 
-    private ulong CreateGameServerSteamId(bool anonymous)
+    // A game server arrives with its own SteamID (the emulator makes one before it registers and the
+    // game already uses it), so it is kept as long as it is a real GameServer/AnonGameServer ID and no
+    // other live server holds it from a different endpoint. Only otherwise does the server assign one.
+    private ulong ResolveGameServerSteamIdLocked(ApiGameServer server, bool anonymous)
     {
-        const ulong publicUniverse = 1UL << 56;
-        var accountType = (anonymous ? 4UL : 3UL) << 52;
-
-        while (true)
+        var proposed = SteamIdAllocator.CanonicalGameServerSteamId(server.SteamId);
+        if (SteamIdAllocator.IsGameServerSteamId(proposed) && !IsGameServerSteamIdTakenLocked(proposed, server))
         {
-            var accountId = (uint)RandomNumberGenerator.GetInt32(1, int.MaxValue);
-            var steamId = publicUniverse | accountType | accountId;
-            if (!_state.GameServers.ContainsKey(steamId))
+            return proposed;
+        }
+
+        return CreateGameServerSteamId(anonymous);
+    }
+
+    // "Same server" = same SteamID from the same endpoint (dedicated servers share an IP, so the
+    // port is part of the identity). The same ID from another endpoint while the first is still live
+    // is a real collision.
+    private bool IsGameServerSteamIdTakenLocked(ulong steamId, ApiGameServer server)
+    {
+        if (!_state.GameServers.TryGetValue(steamId, out var registered) || !IsGameServerLeaseLiveLocked(steamId))
+        {
+            return false;
+        }
+
+        return !IsSameGameServerEndpoint(registered, server);
+    }
+
+    // A registration counts as live while its lease has not expired. Entries restored after a restart have
+    // no lease until the first heartbeat, so they do not block anything.
+    private bool IsGameServerLeaseLiveLocked(ulong steamId) =>
+        _gameServerLeases.TryGetValue(steamId, out var leaseAt) && DateTime.UtcNow - leaseAt <= _gameServerLeaseTimeout;
+
+    private static bool IsSameGameServerEndpoint(ApiGameServer registered, ApiGameServer server) =>
+        registered.IP == server.IP && (registered.Port == server.Port || registered.Port == 0);
+
+    private ulong FindRegisteredGameServerByEndpointLocked(uint ip, int port)
+    {
+        if (port <= 0)
+        {
+            return 0;
+        }
+
+        foreach (var pair in _state.GameServers)
+        {
+            if (pair.Value.IP == ip && pair.Value.Port == port)
             {
-                return steamId;
+                return pair.Key;
             }
         }
+
+        return 0;
+    }
+
+    // Fallback assignment, one counter per type over the IDs already in use (registered servers and
+    // servers reserved for a dedicated lobby), so it can never hand out one of those again.
+    private ulong CreateGameServerSteamId(bool anonymous)
+    {
+        var inUse = _state.GameServers.Keys
+            .Concat(_dotaDedicatedServers?.GetReservedGameServerSteamIds() ?? Array.Empty<ulong>())
+            .Where(id => SteamIdAllocator.IsGameServerSteamId(id) && SteamIdAllocator.IsAnonymousGameServer(id) == anonymous)
+            .Select(id => (uint)id);
+        return SteamIdAllocator.GameServerSteamId(SteamIdAllocator.Next(inUse), anonymous);
     }
 
     public ApiP2PSendResult SendP2P(string token, ApiP2PPacketSend request)
@@ -702,7 +762,7 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            steamId = requestedSteamId != 0 ? requestedSteamId : session!.SteamId;
+            steamId = SteamIdAllocator.CanonicalGameServerSteamId(requestedSteamId != 0 ? requestedSteamId : session!.SteamId);
             _state.Users.TryGetValue(steamId, out var user);
             appId = requestedAppId != 0 ? requestedAppId : user?.AppId ?? 0;
             return true;
@@ -735,7 +795,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            var contextSteamId = request.SteamId != 0 ? request.SteamId : session!.SteamId;
+            var contextSteamId = SteamIdAllocator.CanonicalGameServerSteamId(request.SteamId != 0 ? request.SteamId : session!.SteamId);
             _state.Users.TryGetValue(contextSteamId, out var user);
             _state.Users.TryGetValue(session!.SteamId, out var sessionUser);
             var appId = request.AppId != 0 ? request.AppId : user?.AppId ?? 0;
@@ -761,7 +821,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            var contextSteamId = request.SteamId != 0 ? request.SteamId : session!.SteamId;
+            var contextSteamId = SteamIdAllocator.CanonicalGameServerSteamId(request.SteamId != 0 ? request.SteamId : session!.SteamId);
             _state.Users.TryGetValue(contextSteamId, out var user);
             _state.Users.TryGetValue(session!.SteamId, out var sessionUser);
             var appId = request.AppId != 0 ? request.AppId : user?.AppId ?? sessionUser?.AppId ?? 0;

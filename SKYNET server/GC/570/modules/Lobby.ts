@@ -359,7 +359,7 @@ export class Lobby {
             }
 
             refreshLobby(lobby, ctx.clock.now());
-            subscribeToLobbyObjectOnly(ctx, ctx.steamId, lobby);
+            subscribeToLobby(ctx, ctx.steamId, lobby);
             ctx.reply({ result: JOIN_SUCCESS });
             // The joiner receives the full lobby in SOCacheSubscribed and the
             // join result; existing members receive the lobby mutation as
@@ -472,9 +472,12 @@ export class Lobby {
         member.coachTeam = TEAM_NONE;
         member.lastSeen = ctx.clock.now();
         refreshLobby(lobby, ctx.clock.now());
+        // The client sent this as a job and keeps it waiting for the reply. Answer it first: the lobby update that
+        // follows rewrites the objects the waiting job still points at, and when the job resumed after that the
+        // game called a destroyed object (pure virtual call) and closed.
+        ctx.reply({ eresult: SUCCESS });
         broadcastLobby(ctx, lobby, 0n, false);
         publishLobby(ctx.services.lobby, lobby);
-        ctx.reply({ eresult: SUCCESS });
         return true;
     }
 
@@ -861,17 +864,57 @@ export class Lobby {
     }
 
     tick(): void {
+        const ctx = gc.createRawContext(0);
         const nowSeconds = Math.floor(new Date().getTime() / 1000);
         const expired: LobbyState[] = [];
+        const abandoned: LobbyState[] = [];
+        const departed: Array<{ lobby: LobbyState; member: LobbyMemberState }> = [];
         store.lobbies.forEach((lobby) => {
             const timeout = lobby.state === LOBBY_SERVER_SETUP ? SERVER_SETUP_TIMEOUT_SECONDS : LOBBY_TIMEOUT_SECONDS;
             if (nowSeconds - lobby.updatedAt > timeout) {
                 expired.push(lobby);
+                return;
+            }
+
+            // The GC never sees a client disconnect, so a lobby whose game went away
+            // (closed, crashed, or lost the server) would otherwise stay in the public
+            // list until the hour-long timeout. Only the lobby screen is covered: a
+            // running match is kept alive by its dedicated server.
+            if (lobby.state !== LOBBY_UI) {
+                return;
+            }
+
+            if (!ctx.services.party.userOnline(lobby.leaderSteamId)) {
+                abandoned.push(lobby);
+                return;
+            }
+
+            for (let i = 0; i < lobby.members.length; i++) {
+                const member = lobby.members[i];
+                if (member.steamId !== lobby.leaderSteamId && !ctx.services.party.userOnline(member.steamId)) {
+                    departed.push({ lobby, member });
+                }
             }
         });
 
         for (let i = 0; i < expired.length; i++) {
             destroyLobby(expired[i], undefined, "timeout");
+        }
+
+        for (let i = 0; i < abandoned.length; i++) {
+            destroyLobby(abandoned[i], ctx, "host offline");
+        }
+
+        for (let i = 0; i < departed.length; i++) {
+            const { lobby, member } = departed[i];
+            if (store.lobbies.get(lobby.lobbyId) !== lobby) {
+                continue;
+            }
+
+            removeLobbyMember(ctx, lobby, member, false);
+            refreshLobby(lobby, ctx.clock.now());
+            broadcastLobby(ctx, lobby, member.steamId, false);
+            publishLobby(ctx.services.lobby, lobby);
         }
     }
 }
@@ -1093,7 +1136,7 @@ function joinLobbyState(ctx: RawMessageContext, lobby: LobbyState, passKey: stri
     }
 
     refreshLobby(lobby, ctx.clock.now());
-    subscribeToLobbyObjectOnly(ctx, ctx.steamId, lobby);
+    subscribeToLobby(ctx, ctx.steamId, lobby);
     broadcastLobby(ctx, lobby, ctx.steamId, false);
     publishLobby(ctx.services.lobby, lobby);
     return true;
@@ -1385,7 +1428,7 @@ function attachServer(ctx: RawMessageContext, lobby: LobbyState, markRun: boolea
     // with NETWORK_DISCONNECT_REJECT_NOLOBBY despite the lobby/GC assignment
     // otherwise working. The server already gets the complete state via the
     // subscribe below, so it doesn't need the separate broadcast too.
-    sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));
+    sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby, false));
     broadcastLobby(ctx, lobby, 0n, false);
     publishLobby(ctx.services.lobby, lobby);
 }
@@ -1421,13 +1464,20 @@ function buildConnectString(services: DotaLobbyService, lobby: LobbyState): stri
     const endpoints: string[] = [];
     for (let i = 0; i < ips.length; i++) {
         const ip = ips[i].trim();
-        if (ip !== "" && endpoints.indexOf(ip + ":" + lobby.serverPort) < 0) {
+        if (ip !== "") {
             endpoints.push(ip + ":" + lobby.serverPort);
         }
     }
 
     if (endpoints.length === 0) {
         endpoints.push(fallback + ":" + lobby.serverPort);
+    }
+
+    // The game reads "public private" (the original GC's GetConnect always sends both, and so does the real one,
+    // seq114 of the capture), so with a single address, or two equal ones, the second entry repeats the first.
+    // Removing the duplicate left the game with a connect string it does not use.
+    if (endpoints.length === 1) {
+        endpoints.push(endpoints[0]);
     }
 
     return endpoints.join(" ");
@@ -1553,10 +1603,10 @@ function ensureMatchId(lobby: LobbyState): bigint {
     return lobby.matchId;
 }
 
-function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMsgSOCacheSubscribed {
+function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState, remoteMember: boolean): CMsgSOCacheSubscribed {
     return {
         objects: [
-            subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))]),
+            subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby, remoteMember))]),
             // Practice lobby caches include an empty lobby-invite SO bucket.
             // Dota uses the same type id for pending lobby invites targeted
             // at owner type 4, so both flows must stay on 2013.
@@ -1578,19 +1628,6 @@ function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMs
     };
 }
 
-function buildLobbyObjectOnlySubscribed(ctx: GcContextBase, lobby: LobbyState): CMsgSOCacheSubscribed {
-    // Joining an existing practice lobby follows the legacy GC wire flow:
-    // the joining client receives a cache subscription containing only the
-    // mutable lobby object (2004), then a single-object create for the same
-    // object. Static lobby/server buckets are sent when the lobby is created,
-    // but not during join; sending them here makes this client build unstable.
-    return {
-        objects: [subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))])],
-        version: lobby.version,
-        ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobby.lobbyId }
-    };
-}
-
 function buildLobbySoCacheUnsubscribed(lobby: LobbyState): CMsgSOCacheUnsubscribed {
     return buildLobbySoCacheUnsubscribedForId(lobby.lobbyId);
 }
@@ -1601,14 +1638,51 @@ function buildLobbySoCacheUnsubscribedForId(lobbyId: bigint): CMsgSOCacheUnsubsc
     };
 }
 
-function buildLobbyMultipleObjects(ctx: GcContextBase, lobby: LobbyState): CMsgSOMultipleObjects {
-    // Existing lobby members are notified like the legacy GC: UpdateMultiple
-    // carries only CSODOTALobby (2004). Member names and server-static data are
-    // part of the create-time SO cache, not the join-time update.
+function buildLobbyMultipleObjects(
+    ctx: GcContextBase,
+    lobby: LobbyState,
+    fullCache: boolean,
+    remoteMember: boolean = false
+): CMsgSOMultipleObjects {
+    if (fullCache) {
+        // A client subscribed to the lobby holds all five lobby objects, and they index each other by
+        // member: the lobby (2004), the static lobby with the member names (2014), the server lobby (2015)
+        // and the server static lobby (2016) must list the same members. The real GC resends the whole set
+        // on every lobby update (captured from a real client: same order, no service id); updating only 2004
+        // leaves the other objects one member short after a join and the game reads past them and crashes.
+        return {
+            objectsModified: [
+                {
+                    typeId: LOBBY_INVITE_OBJECT_TYPE_ID,
+                    objectData: ctx.encode(Proto.CSODOTALobbyInvite, buildLobbyInviteObject())
+                },
+                {
+                    typeId: LOBBY_SERVER_STATIC_OBJECT_TYPE_ID,
+                    objectData: ctx.encode(Proto.CSODOTAServerStaticLobby, buildServerStaticLobbyObject(lobby))
+                },
+                {
+                    typeId: LOBBY_OBJECT_TYPE_ID,
+                    objectData: ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby, remoteMember))
+                },
+                {
+                    typeId: LOBBY_SERVER_OBJECT_TYPE_ID,
+                    objectData: ctx.encode(Proto.CSODOTAServerLobby, buildServerLobbyObject(lobby))
+                },
+                {
+                    typeId: LOBBY_STATIC_OBJECT_TYPE_ID,
+                    objectData: ctx.encode(Proto.CSODOTAStaticLobby, buildStaticLobbyObject(lobby))
+                }
+            ],
+            version: lobby.version,
+            ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobby.lobbyId }
+        };
+    }
+
+    // The dedicated server is subscribed to the mutable lobby object only.
     const objectsModified: CMsgSOMultipleObjects_SingleObject[] = [
         {
             typeId: LOBBY_OBJECT_TYPE_ID,
-            objectData: ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))
+            objectData: ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby, remoteMember))
         }
     ];
 
@@ -1620,26 +1694,79 @@ function buildLobbyMultipleObjects(ctx: GcContextBase, lobby: LobbyState): CMsgS
     };
 }
 
-function buildLobbyObject(lobby: LobbyState): CSODOTALobby {
+// The real GC leaves a lobby field out while it has its default value (a practice lobby in the menu has no
+// connect string, server, team details, pass key, custom game data, ...); only what is set goes on the wire.
+// We used to send all of them explicitly (empty team details included) and a joined client crashes on the
+// first lobby update that carries them.
+function lobbyHasTeamDetails(details: CLobbyTeamDetails[]): boolean {
+    return details.some(
+        (detail) =>
+            detail.teamName !== "" ||
+            detail.teamTag !== "" ||
+            detail.teamId !== 0 ||
+            detail.teamLogo !== 0n ||
+            detail.teamBaseLogo !== 0n ||
+            detail.teamBannerLogo !== 0n ||
+            detail.teamComplete ||
+            detail.teamLogoUrl !== "" ||
+            detail.teamAbbreviation !== ""
+    );
+}
+
+// HOW A PLAYER WHO IS NOT THE HOST CONNECTS TO A LOCAL GAME (verified on two PCs, Dota 10982, LAN/ZeroTier)
+//
+// The host is a client that also runs the game server, so its lobby says "local": lan=true, server_region=0, and it
+// connects to its own server by itself. Every OTHER member must see an ordinary remote server instead: lan=false and
+// server_region=1. The original GC did exactly this (ServersHandler.Update serialises the lobby twice once the server
+// is available and sends the second copy to everybody except the leader).
+//
+// With that, once the lobby reaches RUN the joiner's client logs
+//     [Networking] Connect string '10.0.0.1:27015 10.0.0.1:27015' has multiple addresses. We are a player, so we will try direct connect
+//     Remote Connect (10.0.0.1:27015)  ->  Opened Steam Net Connection ... UDP ...  ->  Connected to '10.0.0.1:27015'
+// i.e. it connects by UDP straight to the host's address in `connect`. It needs BOTH halves: this per-recipient lan /
+// region, and a `connect` of two entries "public private" (see buildConnectString).
+//
+// Without it (lan=true for everyone) the client ignores `connect` and does "Remote Connect ([G:1:<server id>])",
+// a P2P connection by SteamID that times out after 10 s ("Timed out attempting to connect", reason 5003): the
+// emulator does not relay the P2P signalling to a game-server identity. A lobby without server_id is no alternative
+// either (the game then dials [I:0:0] / 0.0.0.0).
+//
+// The variant only applies in state RUN (that is when the original GC sends it) and only to members who are not the
+// leader; the leader, the dedicated server and the lobby list keep lan / region as stored.
+function isRemoteMember(lobby: LobbyState, steamId: bigint): boolean {
+    return lobby.lan && lobby.state === LOBBY_RUN && steamId !== lobby.leaderSteamId;
+}
+
+function buildLobbyObject(lobby: LobbyState, remoteMember: boolean = false): CSODOTALobby {
     return {
+        ...(lobby.connect !== "" ? { connect: lobby.connect } : {}),
+        ...(lobby.serverSteamId !== 0n ? { serverId: lobby.serverSteamId } : {}),
+        ...(lobbyHasTeamDetails(lobby.teamDetails) ? { teamDetails: lobby.teamDetails } : {}),
+        ...(lobby.gameState !== 0 ? { gameState: lobby.gameState } : {}),
+        ...(lobby.numSpectators !== 0 ? { numSpectators: lobby.numSpectators } : {}),
+        ...(lobby.matchId !== 0n ? { matchId: lobby.matchId } : {}),
+        ...(lobby.passKey !== "" ? { passKey: lobby.passKey } : {}),
+        ...(lobby.customGameMode !== "" ? { customGameMode: lobby.customGameMode } : {}),
+        ...(lobby.customMapName !== "" ? { customMapName: lobby.customMapName } : {}),
+        ...(lobby.customDifficulty !== 0 ? { customDifficulty: lobby.customDifficulty } : {}),
+        ...(lobby.customGameId !== 0n ? { customGameId: lobby.customGameId } : {}),
+        ...(lobby.customMinPlayers !== 0 ? { customMinPlayers: lobby.customMinPlayers } : {}),
+        ...(lobby.customMaxPlayers !== 0 ? { customMaxPlayers: lobby.customMaxPlayers } : {}),
+        ...(lobby.customGameCrc !== 0n ? { customGameCrc: lobby.customGameCrc } : {}),
+        ...(lobby.customGameTimestamp !== 0 ? { customGameTimestamp: lobby.customGameTimestamp } : {}),
+        ...(lobby.customGamePenalties ? { customGamePenalties: lobby.customGamePenalties } : {}),
+        ...(lobby.gameStartTime !== 0 ? { gameStartTime: lobby.gameStartTime } : {}),
         lobbyId: lobby.lobbyId,
         gameMode: lobby.gameMode,
         state: lobby.state,
-        connect: lobby.connect,
-        serverId: lobby.serverSteamId,
         leaderId: lobby.leaderSteamId,
         lobbyType: 1,
         allowCheats: lobby.allowCheats,
         fillWithBots: lobby.fillWithBots,
         gameName: lobby.gameName,
-        teamDetails: lobby.teamDetails,
-        serverRegion: lobby.serverRegion,
-        gameState: lobby.gameState,
-        numSpectators: lobby.numSpectators,
+        serverRegion: remoteMember ? 1 : lobby.serverRegion,
         cmPick: lobby.cmPick,
-        matchId: lobby.matchId,
         allowSpectating: lobby.allowSpectating,
-        passKey: lobby.passKey,
         leagueid: lobby.leagueId,
         penaltyLevelRadiant: 0,
         penaltyLevelDire: 0,
@@ -1648,20 +1775,10 @@ function buildLobbyObject(lobby: LobbyState): CSODOTALobby {
         direSeriesWins: lobby.direSeriesWins,
         allchat: lobby.allchat,
         dotaTvDelay: lobby.dotaTvDelay,
-        customGameMode: lobby.customGameMode,
-        customMapName: lobby.customMapName,
-        customDifficulty: lobby.customDifficulty,
-        lan: lobby.lan,
+        lan: remoteMember ? false : lobby.lan,
         extraMessages: [{ id: LOBBY_EXTRA_MESSAGE_ID, contents: LOBBY_EXTRA_MESSAGE_CONTENTS }],
-        customGameId: lobby.customGameId,
-        customMinPlayers: lobby.customMinPlayers,
-        customMaxPlayers: lobby.customMaxPlayers,
         visibility: lobby.visibility,
-        customGameCrc: lobby.customGameCrc,
-        customGameTimestamp: lobby.customGameTimestamp,
         previousMatchOverride: 0n,
-        customGamePenalties: lobby.customGamePenalties,
-        gameStartTime: lobby.gameStartTime,
         pauseSetting: lobby.pauseSetting,
         botDifficultyRadiant: lobby.botDifficultyRadiant,
         botDifficultyDire: lobby.botDifficultyDire,
@@ -1685,9 +1802,9 @@ function buildLobbyMembers(lobby: LobbyState): CSODOTALobbyMember[] {
         const member = lobby.members[i];
         members.push({
             id: member.steamId,
-            heroId: member.heroId,
+            ...(member.heroId !== 0 ? { heroId: member.heroId } : {}),
             team: member.team,
-            slot: member.slot,
+            ...(member.slot !== 0 ? { slot: member.slot } : {}),
             leaverStatus: member.leaverStatus,
             coachTeam: member.coachTeam === TEAM_NONE ? undefined : member.coachTeam
         });
@@ -1743,9 +1860,12 @@ function memberIndices(count: number): number[] {
 }
 
 function broadcastLobby(ctx: GcContextBase, lobby: LobbyState, exceptSteamId: bigint, includeServer: boolean): void {
-    const payload = buildLobbyMultipleObjects(ctx, lobby);
+    // The dedicated server only holds the lobby object itself; every member holds the full set.
+    const serverPayload = buildLobbyMultipleObjects(ctx, lobby, false);
+    const memberPayload = buildLobbyMultipleObjects(ctx, lobby, true);
+    const remotePayload = buildLobbyMultipleObjects(ctx, lobby, true, true);
     if (includeServer && lobby.serverSteamId !== 0n && lobby.serverSteamId !== exceptSteamId) {
-        sendTo(ctx, lobby.serverSteamId, Msg.SOCacheUpdated, payload);
+        sendTo(ctx, lobby.serverSteamId, Msg.SOCacheUpdated, serverPayload);
     }
 
     for (let i = 0; i < lobby.members.length; i++) {
@@ -1756,17 +1876,13 @@ function broadcastLobby(ctx: GcContextBase, lobby: LobbyState, exceptSteamId: bi
         // callers exclude only the acting client via exceptSteamId when the
         // acting client already received the state through subscribe/reply.
         if (steamId !== exceptSteamId) {
-            sendTo(ctx, steamId, Msg.SOCacheUpdated, payload);
+            sendTo(ctx, steamId, Msg.SOCacheUpdated, isRemoteMember(lobby, steamId) ? remotePayload : memberPayload);
         }
     }
 }
 
 function subscribeToLobby(ctx: GcContextBase, steamId: bigint, lobby: LobbyState): void {
-    sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));
-}
-
-function subscribeToLobbyObjectOnly(ctx: GcContextBase, steamId: bigint, lobby: LobbyState): void {
-    sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbyObjectOnlySubscribed(ctx, lobby));
+    sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby, isRemoteMember(lobby, steamId)));
 }
 
 type LobbyOutboundMessage =

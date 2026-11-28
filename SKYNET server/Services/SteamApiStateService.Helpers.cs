@@ -79,31 +79,49 @@ public sealed partial class SteamApiStateService
         return TryGetSession(token, out var session) && _state.Users.TryGetValue(session!.SteamId, out user!);
     }
 
-    private ApiUser EnsureUser(ulong steamId, uint accountId, uint appId, string personaName)
+    // Updates a user that already exists; never creates one. A SteamID that only
+    // arrives from a client names a user, it does not bring one into being.
+    private ApiUser? GetOrUpdateUserLocked(ulong steamId, uint appId, string personaName)
     {
         if (!_state.Users.TryGetValue(steamId, out var user))
         {
-            user = new ApiUser
-            {
-                SteamId = steamId,
-                AccountId = accountId != 0 ? accountId : SteamIdToAccountId(steamId),
-                AppId = appId,
-                PersonaName = string.IsNullOrWhiteSpace(personaName) ? $"User{SteamIdToAccountId(steamId)}" : personaName,
-                HasFriend = false,
-                PersonaState = 1,
-                PlayerLevel = 1
-            };
-            _state.Users[steamId] = user;
-        }
-        else
-        {
-            user.AppId = appId != 0 ? appId : user.AppId;
-            if (!string.IsNullOrWhiteSpace(personaName))
-            {
-                user.PersonaName = personaName;
-            }
+            return null;
         }
 
+        user.AppId = appId != 0 ? appId : user.AppId;
+        if (!string.IsNullOrWhiteSpace(personaName))
+        {
+            user.PersonaName = personaName;
+        }
+
+        SeedUserDefaultsLocked(steamId);
+        SaveState();
+        return user;
+    }
+
+    // Creates a user for a SteamID the server itself owns: one it just allocated
+    // (CreateIndividualUserLocked) or the one of an existing web account whose
+    // ApiUser went missing.
+    private ApiUser CreateUserLocked(ulong steamId, uint accountId, uint appId, string personaName)
+    {
+        var user = new ApiUser
+        {
+            SteamId = steamId,
+            AccountId = accountId != 0 ? accountId : SteamIdToAccountId(steamId),
+            AppId = appId,
+            PersonaName = string.IsNullOrWhiteSpace(personaName) ? $"User{SteamIdToAccountId(steamId)}" : personaName,
+            HasFriend = false,
+            PersonaState = 1,
+            PlayerLevel = 1
+        };
+        _state.Users[steamId] = user;
+        SeedUserDefaultsLocked(steamId);
+        SaveState();
+        return user;
+    }
+
+    private void SeedUserDefaultsLocked(ulong steamId)
+    {
         if (!_state.Stats.ContainsKey(steamId))
         {
             _state.Stats[steamId] = new ApiStatsEnvelope
@@ -119,9 +137,6 @@ public sealed partial class SteamApiStateService
         {
             _state.FriendLinks[steamId] = new HashSet<ulong>();
         }
-
-        SaveState();
-        return user;
     }
 
     private DotaStatsAccountIdentity? ResolveDotaStatsIdentity(uint accountId)
@@ -266,7 +281,8 @@ public sealed partial class SteamApiStateService
         }
 
         _gameCoordinatorTrace.Record("push", message.AppId, recipientSteamId, message.MessageType,
-            GameCoordinatorTraceService.EstimatePayloadSize(message.PayloadBase64));
+            GameCoordinatorTraceService.EstimatePayloadSize(message.PayloadBase64),
+            payloadBase64: message.PayloadBase64, targetJobId: message.TargetJobId, protobuf: message.Protobuf);
     }
 
     private void EnqueueGameServerChangeRequestedEvent(ulong recipientSteamId, string server, string password)

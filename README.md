@@ -134,6 +134,15 @@ Durable server data is split by ownership:
 - `SKYNET server/Data/steam.db` owns generic Steam/server state: users, web accounts, sessions, friends, avatars, Steam stats/achievements, remote storage, app/server state, and other data that is not tied to a specific game coordinator.
 - `SKYNET server/Data/dota.db` owns Dota/app 570 state: lobbies, game servers, Dota profiles/presence, cosmetics/items/equipment, matches, parties, guilds, reports, and GC-specific support tables.
 
+### IDs and identity
+
+The server is the only authority over IDs; a client never decides the ID of something that gets created.
+
+- **Accounts** (web registration and the initial admin) are numbered "highest account ID + 1", starting at `1000`, inside `1000`-`2147483647`. Anything outside that range (data from before this rule) is ignored when numbering and is logged at startup. Deleting the account with the highest ID frees that ID for the next registration, and `dota.db` is not purged on delete, so the new account would inherit that ID's Dota data (known limitation).
+- **Sessions** never create users. With `UseActiveWebUser = true` (the default) the user is the one logged in on the web from the caller's IP. Without it, the client can only name a user that already exists: an unknown ID gets `401`, and an identity already used by another live client instance gets `409`. `FallbackAccountId` therefore only identifies an account that is registered on the server.
+- **Game servers** arrive with their own SteamID and keep it while it is a real `GameServer`/`AnonGameServer` ID and no other live server holds it from a different endpoint (IP + port). Otherwise the server assigns one, with an independent counter per type starting at `1000`.
+- Run `--verify-identity` to check all of this (it also runs in CI).
+
 `app.db`, `SteamDB.db`, `dedicated-server.db`, and older `skynet-dota-*.db` files are legacy migration inputs only. They should not be reintroduced as active runtime databases.
 
 ### `SKYNET Steam Client`

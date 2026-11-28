@@ -54,6 +54,14 @@ if (args.Contains("--verify-presence"))
     return;
 }
 
+// Self-check for the ID rules: only the server creates IDs (accounts from 1000, highest + 1,
+// per-type counters for game servers), and nothing a client sends creates a user.
+if (args.Contains("--verify-identity"))
+{
+    Environment.ExitCode = SteamApiStateService.RunIdentitySelfCheck(Console.WriteLine) ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()
@@ -182,8 +190,18 @@ var api = app.MapGroup("/api");
 
 api.MapPost("/auth/steam/session", (HttpRequest request, ApiSessionRequest payload, SteamApiStateService state) =>
 {
-    var session = state.StartSession(payload, SteamApiStateService.GetClientIp(request));
-    return session == null ? Results.Unauthorized() : Results.Ok(session);
+    var session = state.StartSession(payload, SteamApiStateService.GetClientIp(request), out var failure);
+    if (session != null)
+    {
+        return Results.Ok(session);
+    }
+
+    return failure switch
+    {
+        SessionFailure.IdentityInUse => Results.Conflict(new { error = "Another client instance is already using this identity." }),
+        SessionFailure.UnknownIdentity => Results.Json(new { error = "Unknown user. Register the account on the server first." }, statusCode: StatusCodes.Status401Unauthorized),
+        _ => Results.Unauthorized()
+    };
 });
 
 api.MapGet("/users/me", (HttpRequest request, SteamApiStateService state) =>

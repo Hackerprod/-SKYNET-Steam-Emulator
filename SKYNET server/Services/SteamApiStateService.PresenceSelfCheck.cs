@@ -37,6 +37,13 @@ public sealed partial class SteamApiStateService
         const ulong steamId = 76561197960287930UL;
         const uint gameAppId = 570;
 
+        // Sessions only name users that already exist (the server is the one that creates them).
+        lock (service._sync)
+        {
+            service.CreateUserLocked(steamId, SteamIdToAccountId(steamId), 0, "Alice");
+            service.CreateUserLocked(76561197960287931UL, SteamIdToAccountId(76561197960287931UL), 0, "Bob");
+        }
+
         ApiSessionRequest Request(string role, string instance, uint appId = 0) => new()
         {
             SteamId = steamId,
@@ -50,7 +57,7 @@ public sealed partial class SteamApiStateService
         {
             lock (service._sync)
             {
-                return service.CreateSessionLocked(request, null, out _)!;
+                return service.CreateSessionLocked(request, null, out _, out _)!;
             }
         }
 
@@ -143,6 +150,29 @@ public sealed partial class SteamApiStateService
             }
 
             Check(service.GetPresenceLevelLocked(steamId) == "offline", "stale launcher session => offline");
+        }
+
+        // The GC tick calls IsOnlineDotaUser while it holds the script lock, and a GC exchange can hold the state lock while
+        // it waits for that script lock: IsOnlineDotaUser must never block on the state lock (it deadlocked the server).
+        {
+            using var held = new ManualResetEventSlim(false);
+            using var release = new ManualResetEventSlim(false);
+            var holder = new Thread(() =>
+            {
+                lock (service._sync)
+                {
+                    held.Set();
+                    release.Wait(5000);
+                }
+            });
+            holder.Start();
+            held.Wait(5000);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            var busyAnswer = service.IsOnlineDotaUser(steamId);
+            clock.Stop();
+            release.Set();
+            holder.Join();
+            Check(clock.ElapsedMilliseconds < 1000 && busyAnswer, "IsOnlineDotaUser never blocks on a busy state lock (reports online)");
         }
 
         write(failures == 0 ? "Presence self-check passed." : $"Presence self-check FAILED ({failures}).");

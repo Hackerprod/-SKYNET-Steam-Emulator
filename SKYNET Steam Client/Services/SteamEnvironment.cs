@@ -110,7 +110,7 @@ internal static class SteamEnvironment
             return null;
 
         var fromEnvironment = Environment.GetEnvironmentVariable(SteamPathVariable);
-        if (!string.IsNullOrWhiteSpace(fromEnvironment) && Directory.Exists(fromEnvironment))
+        if (HasUsableSteamSignatures(fromEnvironment))
             return fromEnvironment;
 
         var candidates = new[]
@@ -123,11 +123,33 @@ internal static class SteamEnvironment
 
         foreach (var candidate in candidates)
         {
-            if (!string.IsNullOrWhiteSpace(candidate) && Directory.Exists(candidate))
+            if (HasUsableSteamSignatures(candidate))
                 return candidate!;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// A directory only counts as a Steam install when it holds a non-empty steam.signatures: that file is
+    /// what the game's trusted-launch check reads (see the post-mortem above), so a folder that merely exists
+    /// is not enough. A partial Steam folder (bin, logs, a few DLLs, no manifest) used to be taken for the real
+    /// one, the standalone fallback never kicked in and every join to a remote server showed the VAC popup.
+    /// </summary>
+    private static bool HasUsableSteamSignatures(string? directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            return false;
+
+        try
+        {
+            var manifest = new FileInfo(Path.Combine(directory, StandaloneManifestName));
+            return manifest.Exists && manifest.Length > 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>

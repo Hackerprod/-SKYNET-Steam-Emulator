@@ -213,6 +213,17 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         }
     }
 
+    public IReadOnlyList<ulong> GetReservedGameServerSteamIds()
+    {
+        lock (_sync)
+        {
+            return _reservations.Values
+                .Where(reservation => reservation.IsLive && reservation.GameServerSteamId != 0)
+                .Select(reservation => reservation.GameServerSteamId)
+                .ToArray();
+        }
+    }
+
     public bool HasReservationForPort(uint reportedPort)
     {
         if (reportedPort == 0)

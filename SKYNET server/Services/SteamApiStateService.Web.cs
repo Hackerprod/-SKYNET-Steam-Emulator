@@ -9,7 +9,6 @@ public sealed partial class SteamApiStateService
 
     private const string DefaultAdminUsername = "Hackerprod";
     private const string DefaultAdminPassword = "Steam2026";
-    private const uint DefaultAdminAccountId = 9931;
     private const uint WebAccountAppId = 0;
     private const int PasswordIterations = 100_000;
     private static readonly TimeSpan WebSessionLifetime = TimeSpan.FromHours(12);
@@ -27,7 +26,7 @@ public sealed partial class SteamApiStateService
 
             if (!_state.Users.TryGetValue(account.SteamId, out var existingUser))
             {
-                existingUser = EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), WebAccountAppId, account.Username);
+                existingUser = CreateUserLocked(account.SteamId, SteamIdToAccountId(account.SteamId), WebAccountAppId, account.Username);
             }
             else if (!string.Equals(existingUser.PersonaName, account.Username, StringComparison.Ordinal))
             {
@@ -63,10 +62,9 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            var accountId = AllocateAccountIdLocked();
-            var steamId = ToSteamId(accountId);
             var initialPersonaName = username.Trim();
-            var user = EnsureUser(steamId, accountId, WebAccountAppId, initialPersonaName);
+            var user = CreateIndividualUserLocked(initialPersonaName, WebAccountAppId);
+            var steamId = user.SteamId;
 
             // Bootstrap recovery: if the database currently has no admin account (fresh
             // install, reset, migration, or the last admin being lost), the next person
@@ -449,6 +447,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    // Known limitation, same "highest + 1" rule as the original SKYNET GC server: deleting the user with the
+    // highest account ID frees that ID for the next registration, and dota.db is not purged here, so the new
+    // account would inherit that ID's Dota data (stats, party, guild). Delete the Dota rows too if that matters.
     public bool AdminDeleteUser(string token, ulong steamId)
     {
         lock (_sync)
@@ -547,9 +548,8 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            var accountId = AllocateAccountIdLocked();
-            var steamId = ToSteamId(accountId);
-            var user = EnsureUser(steamId, accountId, WebAccountAppId, personaName.Trim());
+            var user = CreateIndividualUserLocked(personaName.Trim(), WebAccountAppId);
+            var steamId = user.SteamId;
             var account = new ApiWebAccount
             {
                 Username = username.Trim(),
@@ -575,8 +575,8 @@ public sealed partial class SteamApiStateService
                 return;
             }
 
-            var steamId = ToSteamId(DefaultAdminAccountId);
-            var user = EnsureUser(steamId, DefaultAdminAccountId, WebAccountAppId, DefaultAdminUsername);
+            var user = CreateIndividualUserLocked(DefaultAdminUsername, WebAccountAppId);
+            var steamId = user.SteamId;
             user.HasFriend = false;
             _state.WebAccounts[NormalizeUsername(DefaultAdminUsername)] = new ApiWebAccount
             {
@@ -774,10 +774,27 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private uint AllocateAccountIdLocked()
+    // The one place a user is born. The ID comes from SteamIdAllocator (highest + 1,
+    // starting at 1000); nothing a client sends ever decides it.
+    private ApiUser CreateIndividualUserLocked(string personaName, uint appId)
     {
-        var max = _state.Users.Values.Select(u => u.AccountId).DefaultIfEmpty(100_000U).Max();
-        return Math.Max(max + 1U, 100_000U);
+        var accountId = AllocateAccountIdLocked();
+        return CreateUserLocked(SteamIdAllocator.IndividualSteamId(accountId), accountId, appId, personaName);
+    }
+
+    private uint AllocateAccountIdLocked() =>
+        SteamIdAllocator.Next(_state.Users.Values.Select(u => u.AccountId));
+
+    // Users that predate the allocation rule can hold an ID outside the valid range.
+    // They keep working but are ignored when numbering new accounts; say so at startup.
+    private void WarnAboutInvalidAccountIds()
+    {
+        foreach (var user in _state.Users.Values.Where(u => !SteamIdAllocator.IsValidAccountId(u.AccountId)).ToArray())
+        {
+            _logger.LogWarning(
+                "User '{PersonaName}' has account ID {AccountId}, outside the valid range {First}-{Max}; it is ignored when numbering new accounts. Delete and register it again to get a valid ID.",
+                user.PersonaName, user.AccountId, SteamIdAllocator.FirstAccountId, SteamIdAllocator.MaxAccountId);
+        }
     }
 
     private ApiWebAccountView CloneWebAccountView(ApiWebAccount account)

@@ -114,7 +114,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectLobbyJoinFlow(plugin, context, friendContext, queuedMessages, write);
         ok &= ExpectApplyTeamFlow(plugin, context, friendContext, queuedMessages, write);
         ok &= ExpectLaunchFlow(plugin, context, friendContext, queuedMessages, write);
-        ok &= ExpectDedicatedAttachFlow(plugin, serverContext, queuedMessages, write);
+        ok &= ExpectDedicatedAttachFlow(plugin, context, friendContext, serverContext, queuedMessages, write);
         ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectConnectedPlayersFlow(plugin, context, serverContext, queuedMessages, write);
         ok &= ExpectResponse(plugin, context, 7026, 7546, 1, write);
@@ -359,7 +359,7 @@ public static class GcScriptSelfCheck
             && subscribedLobby?.AllowSpectating == false
             && subscribedLobby?.LobbyId > 9007199254740991UL
             && subscribedLobby.SeriesType == 0
-            && subscribedLobby.TeamDetails.Count == 2
+            && subscribedLobby.TeamDetails.Count == 0
             && extraMessage?.Id == 8821
             && extraMessage.Contents.SequenceEqual(new byte[] { 8, 0 })
             && staticLobby?.AllMembers.Count == 1
@@ -654,10 +654,9 @@ public static class GcScriptSelfCheck
             && response.Messages[1].MessageType == 7113
             && subscribed?.OwnerSoid?.Type == 3
             && subscribed.OwnerSoid.Id == entry.Id
-            && subscribeTypes.SequenceEqual([2004])
+            && subscribeTypes.SequenceEqual([2004, 2013, 2014, 2015, 2016])
             && joinResponse?.Result == DOTAJoinLobbyResult.DotaJoinResultSuccess
-            && leaderUpdate?.ObjectsModifieds.Count == 1
-            && leaderUpdate.ObjectsModifieds[0].TypeId == 2004
+            && IsFullLobbyUpdate(leaderUpdate, 2)
             && lobby?.AllMembers.Count == 2
             && lobby.AllMembers.Any(member => member.Id == leaderContext.SteamId)
             && lobby.AllMembers.Any(member => member.Id == friendContext.SteamId)
@@ -665,10 +664,44 @@ public static class GcScriptSelfCheck
         write(
             $"lobby join flow -> handled={response.Handled}, messages={response.Messages.Count}, " +
             $"subscribeTypes=[{string.Join(",", subscribeTypes)}], " +
-            $"leaderUpdateType={leaderUpdate?.ObjectsModifieds.FirstOrDefault()?.TypeId}, " +
+            $"leaderUpdateTypes=[{string.Join(",", leaderUpdate?.ObjectsModifieds.Select(item => item.TypeId) ?? Array.Empty<int>())}], " +
             $"members={lobby?.AllMembers.Count}, leaderUpdate={leaderUpdateMessage.Message != null}, result={joinResponse?.Result}, ok={ok}");
-        plugin.Exchange(friendContext, RequestFor(friendContext, 7040));
+        // The friend takes a slot: a player left in the pool is dropped when the game is launched.
+        plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7047,
+                Serialize(new CMsgPracticeLobbySetTeamSlot { Team = DotaGcTeam.DotaGcTeamBadGuys, Slot = 1 })));
         return ok;
+    }
+
+    // The leader created the lobby, so it holds all five lobby objects and the real GC resends the whole set on
+    // every update. They index each other by member: updating only 2004 after a join leaves the others one
+    // member short and the game reads out of range.
+    private static bool IsFullLobbyUpdate(CMsgSOMultipleObjects? update, int? expectedMembers = null)
+    {
+        if (update == null || update.ObjectsModifieds.Count != 5)
+        {
+            return false;
+        }
+
+        if (!update.ObjectsModifieds.Select(item => item.TypeId).SequenceEqual([2013, 2016, 2004, 2015, 2014]))
+        {
+            return false;
+        }
+
+        byte[]? Payload(int typeId) => update.ObjectsModifieds.First(item => item.TypeId == typeId).ObjectData;
+        var lobby = DeserializeBytes<CSODOTALobby>(Payload(2004) ?? Array.Empty<byte>());
+        var staticLobby = DeserializeBytes<CSODOTAStaticLobby>(Payload(2014) ?? Array.Empty<byte>());
+        var serverLobby = DeserializeBytes<CSODOTAServerLobby>(Payload(2015) ?? Array.Empty<byte>());
+        var serverStatic = DeserializeBytes<CSODOTAServerStaticLobby>(Payload(2016) ?? Array.Empty<byte>());
+        var members = expectedMembers ?? lobby.AllMembers.Count;
+        return members > 0
+            && lobby.AllMembers.Count == members
+            && staticLobby.AllMembers.Count == members
+            && serverLobby.AllMembers.Count == members
+            && serverStatic.AllMembers.Count == members;
     }
 
     private static bool ExpectApplyTeamFlow(
@@ -688,12 +721,11 @@ public static class GcScriptSelfCheck
             && response.Messages.Count == 2
             && response.Messages[0].MessageType == 26
             && response.Messages[1].MessageType == 2579
-            && update?.ObjectsModifieds.Count == 1
-            && update.ObjectsModifieds[0].TypeId == 2004
+            && IsFullLobbyUpdate(update)
             && result?.Eresult == 1;
         write(
             $"apply team flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
-            $"updateType={update?.ObjectsModifieds.FirstOrDefault()?.TypeId}, result={result?.Eresult}, ok={ok}");
+            $"updateTypes=[{string.Join(",", update?.ObjectsModifieds.Select(item => item.TypeId) ?? Array.Empty<int>())}], result={result?.Eresult}, ok={ok}");
         return ok;
     }
 
@@ -718,18 +750,19 @@ public static class GcScriptSelfCheck
             && response.Messages.Count == 2
             && response.Messages[0].MessageType == 26
             && response.Messages[1].MessageType == 2579
-            && update?.ObjectsModifieds.Count == 1
-            && update.ObjectsModifieds[0].TypeId == 2004
+            && IsFullLobbyUpdate(update)
             && result?.Eresult == 1
             && resultMessage?.TargetJobId == sourceJobId;
         write(
             $"launch flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
-            $"updateType={update?.ObjectsModifieds.FirstOrDefault()?.TypeId}, result={result?.Eresult}, ok={ok}");
+            $"updateTypes=[{string.Join(",", update?.ObjectsModifieds.Select(item => item.TypeId) ?? Array.Empty<int>())}], result={result?.Eresult}, ok={ok}");
         return ok;
     }
 
     private static bool ExpectDedicatedAttachFlow(
         GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext leaderContext,
+        GameCoordinatorContext friendContext,
         GameCoordinatorContext serverContext,
         List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
         Action<string> write)
@@ -751,6 +784,28 @@ public static class GcScriptSelfCheck
         var realtimeStats = realtimeStatsMessage == null
             ? null
             : Deserialize<CMsgGCToServerRealtimeStatsStartStop>(realtimeStatsMessage.PayloadBase64);
+        CSODOTALobby? LobbyFor(ulong steamId)
+        {
+            foreach (var queued in Enumerable.Reverse(queuedMessages))
+            {
+                if (queued.SteamId != steamId || queued.Message.MessageType != 26)
+                {
+                    continue;
+                }
+
+                var update = Deserialize<CMsgSOMultipleObjects>(queued.Message.PayloadBase64);
+                var lobbyObject = update.ObjectsModifieds.FirstOrDefault(item => item.TypeId == 2004);
+                if (lobbyObject != null)
+                {
+                    return DeserializeBytes<CSODOTALobby>(lobbyObject.ObjectData);
+                }
+            }
+
+            return null;
+        }
+
+        var leaderLobby = LobbyFor(leaderContext.SteamId);
+        var friendLobby = LobbyFor(friendContext.SteamId);
         var serverItems = ServerEconItems(infoResponse.Messages, queuedMessages, serverContext.SteamId);
         var serverOwnerCaches = ServerOwnerGameCaches(infoResponse.Messages, queuedMessages, serverContext.SteamId);
         var serverHeroItem = serverItems.FirstOrDefault(item => item.DefIndex == 1001);
@@ -759,10 +814,11 @@ public static class GcScriptSelfCheck
         var ok = infoResponse.Handled
             && availableResponse.Handled
             && realtimeStats?.Delayed == true
-            && serverOwnerCaches.Length == 1
+            // One owner cache and two items (hero + global) for each player in the lobby: the leader and the friend.
+            && serverOwnerCaches.Length == 2
             && serverOwnerCaches[0].ServiceId == 0
             && (serverOwnerCaches[0].ServiceLists?.Contains(1u) ?? false)
-            && serverItems.Length == 2
+            && serverItems.Length == 4
             && serverHeroItem != null
             && serverHeroItem.EquippedStates.Count == 1
             && serverHeroItem.EquippedStates[0].NewClass == 1
@@ -775,12 +831,19 @@ public static class GcScriptSelfCheck
             && lobby.state == CSODOTALobby.State.Run
             && lobby.ServerId == serverContext.SteamId
             && lobby.Connect == "97.120.234.36:27015 192.168.212.252:27015"
+            // The host (leader) keeps the local view; every other player gets lan=false / server_region=1, like the
+            // original GC, so that it connects to the address in Connect.
+            && leaderLobby != null && leaderLobby.Lan && leaderLobby.ServerRegion == 0
+            && friendLobby != null && !friendLobby.Lan && friendLobby.ServerRegion == 1
+            && friendLobby.Connect == leaderLobby.Connect && friendLobby.ServerId == leaderLobby.ServerId
             && lobby.GameStartTime > 0
             && radiant?.TeamId == 7733573
             && !radiant.TeamComplete;
         write(
             $"dedicated attach flow -> infoHandled={infoResponse.Handled}, availableHandled={availableResponse.Handled}, " +
             $"queued={queuedMessages.Count}, state={lobby?.state}, connect={lobby?.Connect}, " +
+            $"leaderMembers={leaderLobby?.AllMembers.Count}, leaderLan={leaderLobby?.Lan}/{leaderLobby?.ServerRegion}, friendLan={friendLobby?.Lan}/{friendLobby?.ServerRegion}, " +
+            $"recipients=[{string.Join(",", queuedMessages.Select(q => $"{q.SteamId}:{q.Message.MessageType}"))}] leader={leaderContext.SteamId} friend={friendContext.SteamId}, " +
             $"serverOwnerCaches={serverOwnerCaches.Length}, serverItems={serverItems.Length}, " +
             $"heroClass={serverHeroItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
             $"heroSlot={serverHeroItem?.EquippedStates.FirstOrDefault()?.NewSlot}, " +

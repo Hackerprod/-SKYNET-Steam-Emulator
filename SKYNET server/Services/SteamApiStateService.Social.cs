@@ -17,7 +17,7 @@ public sealed partial class SteamApiStateService
             {
                 if (!_state.Users.ContainsKey(account.SteamId))
                 {
-                    EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), WebAccountAppId, account.Username);
+                    CreateUserLocked(account.SteamId, SteamIdToAccountId(account.SteamId), WebAccountAppId, account.Username);
                 }
             }
 

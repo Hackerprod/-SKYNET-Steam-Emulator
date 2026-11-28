@@ -5,11 +5,14 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public ApiSessionResult? StartSession(ApiSessionRequest request, string? clientIp)
+    public ApiSessionResult? StartSession(ApiSessionRequest request, string? clientIp) =>
+        StartSession(request, clientIp, out _);
+
+    public ApiSessionResult? StartSession(ApiSessionRequest request, string? clientIp, out SessionFailure failure)
     {
         lock (_sync)
         {
-            var session = CreateSessionLocked(request, clientIp, out var user);
+            var session = CreateSessionLocked(request, clientIp, out var user, out failure);
             if (session == null)
             {
                 return null;
@@ -31,22 +34,45 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    // Registers a new session; returns null when the active web user cannot be resolved.
-    private ApiSession? CreateSessionLocked(ApiSessionRequest request, string? clientIp, out ApiUser user)
+    // Registers a new session; returns null (and says why) when the user cannot be resolved.
+    // A session never creates a user: the server is the only authority over who exists.
+    private ApiSession? CreateSessionLocked(ApiSessionRequest request, string? clientIp, out ApiUser user, out SessionFailure failure)
     {
         user = null!;
+        failure = SessionFailure.None;
         ExpireStaleSessionsLocked();
         var clientInstanceId = NormalizeClientInstanceId(request.ClientInstanceId, request.SteamId, request.AccountId);
         var processRole = NormalizeProcessRole(request.ProcessRole);
         var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserForIpLocked(clientIp) : null;
         if (request.UseActiveWebUser && activeWebUser == null)
         {
+            failure = SessionFailure.NoWebUser;
             return null;
         }
 
-        var requestedSteamId = activeWebUser?.SteamId
-            ?? (request.SteamId != 0 ? request.SteamId : ToSteamId(request.AccountId != 0 ? request.AccountId : NextAvailableAccountIdLocked()));
-        var steamId = activeWebUser != null ? requestedSteamId : ResolveSessionSteamIdLocked(requestedSteamId, clientInstanceId);
+        ulong steamId;
+        if (activeWebUser != null)
+        {
+            steamId = activeWebUser.SteamId;
+        }
+        else
+        {
+            // Without a web login the client can only name a user that is already
+            // registered; an ID it made up (e.g. from its ini) creates nothing.
+            steamId = request.SteamId != 0 ? request.SteamId : (request.AccountId != 0 ? ToSteamId(request.AccountId) : 0);
+            if (steamId == 0 || !_state.Users.ContainsKey(steamId))
+            {
+                failure = SessionFailure.UnknownIdentity;
+                return null;
+            }
+
+            if (IsSessionIdentityInUseLocked(steamId, clientInstanceId))
+            {
+                failure = SessionFailure.IdentityInUse;
+                return null;
+            }
+        }
+
         var launcherLevel = IsLauncherLevelRole(processRole);
         if (processRole == ProcessRoleLauncher)
         {
@@ -64,9 +90,9 @@ public sealed partial class SteamApiStateService
         }
 
         // Launcher/probe sessions pass appId 0 so they never overwrite user.AppId.
-        user = activeWebUser != null
-            ? EnsureUser(steamId, activeWebUser.AccountId, launcherLevel ? 0 : (request.AppId != 0 ? request.AppId : activeWebUser.AppId), activeWebUser.PersonaName)
-            : EnsureUser(steamId, SteamIdToAccountId(steamId), launcherLevel ? 0 : request.AppId, request.PersonaName);
+        user = (activeWebUser != null
+            ? GetOrUpdateUserLocked(steamId, launcherLevel ? 0 : (request.AppId != 0 ? request.AppId : activeWebUser.AppId), activeWebUser.PersonaName)
+            : GetOrUpdateUserLocked(steamId, launcherLevel ? 0 : request.AppId, request.PersonaName))!;
         var changedUser = false;
         if (activeWebUser != null && !string.Equals(user.PersonaName, activeWebUser.PersonaName, StringComparison.Ordinal))
         {
@@ -205,11 +231,24 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    // Called by the Dota GC script, including from its tick, which runs while it holds the script lock. Another
+    // thread (a GC exchange) can hold the state lock while it waits for that script lock, so blocking here for the
+    // state lock is a deadlock (it froze the whole server). When the state is busy report "online": the callers
+    // only use this to clean up after users who left, and they ask again on their next tick.
     private bool IsOnlineDotaUser(ulong steamId)
     {
-        lock (_sync)
+        if (!Monitor.TryEnter(_sync, 0))
+        {
+            return true;
+        }
+
+        try
         {
             return IsUserOnlineLocked(steamId);
+        }
+        finally
+        {
+            Monitor.Exit(_sync);
         }
     }
 
@@ -653,19 +692,17 @@ public sealed partial class SteamApiStateService
             string.Equals(queuedEvent.RecipientClientInstanceId, session.ClientInstanceId, StringComparison.Ordinal);
     }
 
-    private ulong ResolveSessionSteamIdLocked(ulong requestedSteamId, string clientInstanceId)
+    // Another live client instance already holds this identity (two installs sharing one
+    // ini identity). The second is refused rather than being given a made-up user.
+    private bool IsSessionIdentityInUseLocked(ulong steamId, string clientInstanceId)
     {
-        var activeCollision = _sessions.Values.Any(session =>
-            session.SteamId == requestedSteamId &&
+        var liveSince = DateTime.UtcNow - _presenceTimeout;
+        return _sessions.Values.Any(session =>
+            session.SteamId == steamId &&
+            !session.WebSession &&
+            session.LastSeenUtc >= liveSince &&
             !string.IsNullOrWhiteSpace(session.ClientInstanceId) &&
             !string.Equals(session.ClientInstanceId, clientInstanceId, StringComparison.Ordinal));
-
-        if (!activeCollision)
-        {
-            return requestedSteamId;
-        }
-
-        return ToSteamId(NextAvailableAccountIdLocked());
     }
 
     // Resolves the web-logged-in user bound to the calling machine's IP. Each PC
@@ -709,14 +746,12 @@ public sealed partial class SteamApiStateService
         return user;
     }
 
-    private uint NextAvailableAccountIdLocked()
-    {
-        uint candidate = (uint)(100000 + _state.Users.Count + _sessions.Count);
-        while (candidate == 0 || _state.Users.ContainsKey(ToSteamId(candidate)) || _sessions.Values.Any(session => session.SteamId == ToSteamId(candidate)))
-        {
-            candidate++;
-        }
+}
 
-        return candidate;
-    }
+public enum SessionFailure
+{
+    None,
+    NoWebUser,
+    UnknownIdentity,
+    IdentityInUse
 }

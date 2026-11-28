@@ -109,6 +109,7 @@ public sealed partial class SteamApiStateService
         _inventoryDropCooldowns = _state.InventoryDropCooldowns;
         _nextInventoryItemId = _state.Inventory.Keys.ToArray().DefaultIfEmpty(0UL).Max();
         NormalizeState();
+        WarnAboutInvalidAccountIds();
         SyncDotaClientVersionWithSteamInf();
         StartBackgroundFlusher();
         RequestStateFlush();

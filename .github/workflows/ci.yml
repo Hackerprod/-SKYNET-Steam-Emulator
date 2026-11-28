@@ -37,6 +37,14 @@ jobs:
         working-directory: SKYNET server
         run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-dota-cosmetics
 
+      - name: Verify launcher presence
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-presence
+
+      - name: Verify ID allocation
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-identity
+
   client:
     name: Build SKYNET Steam Client
     runs-on: windows-latest

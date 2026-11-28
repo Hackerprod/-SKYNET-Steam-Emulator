@@ -40,6 +40,7 @@ namespace SKYNET.Managers
             bool replayConnectionState = false;
             lock (Gate)
             {
+                UnregisteredWhileDelivering.Remove(callback.Pointer);
                 if (callback.CallbackType == CallbackType.SteamAPICallCompleted)
                 {
                     AddUnique(CompletedCallbacks, callback);
@@ -83,6 +84,7 @@ namespace SKYNET.Managers
 
             lock (Gate)
             {
+                UnregisteredWhileDelivering.Remove(callback.Pointer);
                 var record = FindRecord(callback.SteamAPICall);
                 if (record == null)
                 {
@@ -350,6 +352,11 @@ namespace SKYNET.Managers
 
             lock (Gate)
             {
+                if (delivering && callback.Pointer != IntPtr.Zero)
+                {
+                    UnregisteredWhileDelivering.Add(callback.Pointer);
+                }
+
                 var record = FindRecord(apiCall);
                 if (record == null)
                 {
@@ -375,6 +382,11 @@ namespace SKYNET.Managers
 
             lock (Gate)
             {
+                if (delivering && callback.Pointer != IntPtr.Zero)
+                {
+                    UnregisteredWhileDelivering.Add(callback.Pointer);
+                }
+
                 bool removed = RemoveByPointer(CompletedCallbacks, callback.Pointer);
 
                 foreach (var callbacks in RegisteredCallbacks.Values)
@@ -597,13 +609,91 @@ namespace SKYNET.Managers
             }
         }
 
+        // What the game was last handed, for the crash handler: a native fault in
+        // the game's own callback code kills the process without a managed trace.
+        public static volatile string LastInvocation = "none";
+
+        // The list of callbacks to deliver is built before any of them runs. Delivering one can make the game destroy
+        // other callback objects (a lobby update rebuilds panels, each panel's callbacks unregister in its destructor)
+        // that are still in the list, and calling a destroyed callback object is a pure virtual call that closes the
+        // game. The real Steam client modifies its list while dispatching, so an unregistered callback is never called.
+        private static readonly HashSet<IntPtr> UnregisteredWhileDelivering = new HashSet<IntPtr>();
+        private static bool delivering;
+
+        // Written to disk BEFORE the callback runs: when the game dies inside its own handler this file's last
+        // line is the callback that killed it (the minidump keeps stale copies and cannot tell which was last).
+        private static readonly object TraceGate = new object();
+        private static string tracePath;
+
+        public static void TraceInvocation(string line)
+        {
+            try
+            {
+                lock (TraceGate)
+                {
+                    if (tracePath == null)
+                    {
+                        var dir = System.IO.Path.Combine(Common.GetPath(), "SKYNET");
+                        System.IO.Directory.CreateDirectory(dir);
+                        tracePath = System.IO.Path.Combine(dir, "callback_trace.log");
+                        System.IO.File.WriteAllText(tracePath, "");
+                    }
+
+                    System.IO.File.AppendAllText(tracePath, DateTime.Now.ToString("HH:mm:ss.fff") + " " + line + Environment.NewLine);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static bool WasUnregisteredWhileDelivering(IntPtr pointer)
+        {
+            lock (Gate)
+            {
+                return UnregisteredWhileDelivering.Contains(pointer);
+            }
+        }
+
         private static void InvokeCallbacks(List<CallbackInvocation> invocations)
+        {
+            lock (Gate)
+            {
+                UnregisteredWhileDelivering.Clear();
+                delivering = true;
+            }
+
+            try
+            {
+                DeliverInvocations(invocations);
+            }
+            finally
+            {
+                lock (Gate)
+                {
+                    delivering = false;
+                    UnregisteredWhileDelivering.Clear();
+                }
+            }
+        }
+
+        private static void DeliverInvocations(List<CallbackInvocation> invocations)
         {
             foreach (var invocation in invocations)
             {
+                if (WasUnregisteredWhileDelivering(invocation.Callback.Pointer))
+                {
+                    TraceInvocation($"STALE-SKIP callback={(int)invocation.Callback.CallbackType} ptr=0x{invocation.Callback.Pointer.ToInt64():X} (unregistered while delivering)");
+                    continue;
+                }
+
                 IntPtr buffer = IntPtr.Zero;
                 try
                 {
+                    var head = invocation.Payload.Length > 48 ? invocation.Payload.Take(48).ToArray() : invocation.Payload;
+                    LastInvocation = $"callback={(int)invocation.Callback.CallbackType} ptr=0x{invocation.Callback.Pointer.ToInt64():X} " +
+                        $"callResult={invocation.IsCallResult} size={invocation.Payload.Length} head={BitConverter.ToString(head)}";
+                    TraceInvocation(LastInvocation);
                     buffer = Marshal.AllocHGlobal(invocation.Payload.Length);
                     if (invocation.Payload.Length > 0)
                     {
