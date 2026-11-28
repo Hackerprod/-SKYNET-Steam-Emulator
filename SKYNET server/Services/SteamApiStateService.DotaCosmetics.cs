@@ -26,7 +26,6 @@ public sealed partial class SteamApiStateService
         public uint Style { get; set; }
     }
 
-    private const string DefaultDotaPath = @"D:\Games\Steam\steamapps\common\dota 2 beta";
 
     public ApiDotaCosmeticOverview? GetDotaCosmeticsOverview(string token, string? search, uint? heroId, int take = 300)
     {
@@ -84,6 +83,11 @@ public sealed partial class SteamApiStateService
             {
                 return new ApiDotaItemImportResult { Success = false, Message = "Not authorized." };
             }
+        }
+
+        if (string.IsNullOrWhiteSpace(request.DotaPath))
+        {
+            return new ApiDotaItemImportResult { Success = false, Message = "Enter the Dota 2 folder path first." };
         }
 
         var importPath = ResolveDotaContentPath(request.DotaPath);
@@ -1039,10 +1043,13 @@ public sealed partial class SteamApiStateService
 
         try
         {
-            var dotaPath = string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath)
-                ? DefaultDotaPath
-                : _state.DotaCosmetics.DotaPath;
-            var pakPath = ResolvePakPath(ResolveDotaContentPath(dotaPath));
+            // No Dota folder configured yet (it is set by the first catalog import): nothing to load.
+            if (string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
+            {
+                return;
+            }
+
+            var pakPath = ResolvePakPath(ResolveDotaContentPath(_state.DotaCosmetics.DotaPath));
             var heroesText = ReadHeroesText(pakPath);
             _state.DotaHeroSlots = DotaItemsGameParser.ParseHeroSlots(heroesText);
         }
@@ -1052,10 +1059,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private static string ResolveDotaContentPath(string? requestedPath)
+    private static string ResolveDotaContentPath(string requestedPath)
     {
-        var raw = string.IsNullOrWhiteSpace(requestedPath) ? DefaultDotaPath : requestedPath.Trim().Trim('"');
-        return Path.GetFullPath(raw);
+        return Path.GetFullPath(requestedPath.Trim().Trim('"'));
     }
 
     private static string ResolvePakPath(string dotaPath)

@@ -32,7 +32,7 @@ public class IndexModel : PageModel
     public string CreatePassword { get; set; } = string.Empty;
 
     [BindProperty]
-    public string DotaPath { get; set; } = @"D:\Games\Steam\steamapps\common\dota 2 beta";
+    public string DotaPath { get; set; } = string.Empty;
 
     [BindProperty]
     public uint DotaClientVersion { get; set; }
